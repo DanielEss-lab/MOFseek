@@ -70,11 +70,24 @@ class BondCreator:
                     self.connect_within_spaces(this_space, spaces_to_compare)
 
     def get_spaces_adj_in_one_direction(self, x, y, z):
-        near_space = list(())
-        for z1 in [z + 1, z, z - 1]:
-            for y1 in [y + 1, y, y - 1]:
-                for x1 in [x + 1, x, x - 1]:
-                    near_space = near_space + self.get_bucket(z1, y1, x1)
+        # in 2D space, you only need to compare each square with 4 other squares in order for each square
+        # to be compared with all 8 adjacent (including diagonals) neighbors. For example, if you compare
+        # each square with the square to its right, you don't also need to compare each square with the square to
+        # its left. The following code makes use of that principle except in 3Dspace. These 13, their opposites,
+        # and the cube itself comprise the entire 3x3x3 region. This way, no comparison happens twice.
+        near_space = self.get_bucket(z, y, x+1) \
+                     + self.get_bucket(z, y+1, x) \
+                     + self.get_bucket(z+1, y, x) \
+                     + self.get_bucket(z, y+1, x+1) \
+                     + self.get_bucket(z+1, y, x+1) \
+                     + self.get_bucket(z+1, y+1, x) \
+                     + self.get_bucket(z+1, y+1, x+1) \
+                     + self.get_bucket(z-1, y, x+1) \
+                     + self.get_bucket(z-1, y+1, x+1) \
+                     + self.get_bucket(z-1, y+1, x) \
+                     + self.get_bucket(z, y+1, x-1) \
+                     + self.get_bucket(z+1, y-1, x+1) \
+                     + self.get_bucket(z+1, y+1, x-1)
         return near_space
 
     def connect_within_space(self, space):
@@ -86,8 +99,6 @@ class BondCreator:
     def connect_within_spaces(self, space_a, space_b):
         for atom_a in space_a:
             for atom_b in space_b:
-                if atom_a == atom_b or atom_b in atom_a.bondedAtoms:
-                    break
                 self.compare_for_bond(atom_a, atom_b)
 
     def compare_for_bond(self, atom_a, atom_b):
