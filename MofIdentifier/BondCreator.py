@@ -1,5 +1,4 @@
 from math import ceil, floor, sqrt
-from typing import cast
 
 from CovalentRadiusLookup import CovalentRadiusLookup
 
@@ -35,22 +34,22 @@ class BondCreator:
         bucket_belongs_to_unit_cell = True
         dx, dy, dz = 0, 0, 0
         if 0 <= z < self.num_z_buckets:
-            plane = cast(list[list[list]], self.cellSpace[z])
+            plane = self.cellSpace[z]
         else:
             bucket_belongs_to_unit_cell = False
-            plane = cast(list[list[list]], self.cellSpace[z % self.num_z_buckets])
+            plane = self.cellSpace[z % self.num_z_buckets]
             dz = self.length_c * (1 if z > 0 else -1)
         if 0 <= y < self.num_y_buckets:
-            row = cast(list[list], plane[y])
+            row = plane[y]
         else:
             bucket_belongs_to_unit_cell = False
-            row = cast(list[list], plane[y % self.num_y_buckets])
+            row = plane[y % self.num_y_buckets]
             dy = self.length_b * (1 if y > 0 else -1)
         if 0 <= x < self.num_x_buckets:
-            bucket = cast(list, row[x])
+            bucket = row[x]
         else:
             bucket_belongs_to_unit_cell = False
-            bucket = cast(list, row[x % self.num_x_buckets])
+            bucket = row[x % self.num_x_buckets]
             dx = self.length_a * (1 if x > 0 else -1)
 
         if bucket_belongs_to_unit_cell:
@@ -66,10 +65,11 @@ class BondCreator:
             for y in range(self.num_y_buckets):
                 for x in range(self.num_x_buckets):
                     this_space = self.cellSpace[z][y][x]
-                    near_space = self.get_space_around(x, y, z)
-                    self.connect_within_spaces(this_space, near_space)
+                    spaces_to_compare = self.get_spaces_adj_in_one_direction(x, y, z)
+                    self.connect_within_space(this_space)
+                    self.connect_within_spaces(this_space, spaces_to_compare)
 
-    def get_space_around(self, x, y, z):
+    def get_spaces_adj_in_one_direction(self, x, y, z):
         near_space = list(())
         for z1 in [z + 1, z, z - 1]:
             for y1 in [y + 1, y, y - 1]:
@@ -77,17 +77,26 @@ class BondCreator:
                     near_space = near_space + self.get_bucket(z1, y1, x1)
         return near_space
 
+    def connect_within_space(self, space):
+        for i in range(len(space)):
+            for j in range(i+1, len(space)):
+                self.compare_for_bond(space[i], space[j])
+
+
     def connect_within_spaces(self, space_a, space_b):
         for atom_a in space_a:
             for atom_b in space_b:
                 if atom_a == atom_b or atom_b in atom_a.bondedAtoms:
                     break
-                self.num_compared = self.num_compared + 1
-                dist = self.distance(atom_a, atom_b)
-                if self.is_bond_distance(dist, atom_a, atom_b):
-                    self.num_bonds = self.num_bonds + 1
-                    atom_a.bondedAtoms.append(atom_b)
-                    atom_b.bondedAtoms.append(atom_a)
+                self.compare_for_bond(atom_a, atom_b)
+
+    def compare_for_bond(self, atom_a, atom_b):
+        self.num_compared = self.num_compared + 1
+        dist = self.distance(atom_a, atom_b)
+        if self.is_bond_distance(dist, atom_a, atom_b):
+            self.num_bonds = self.num_bonds + 1
+            atom_a.bondedAtoms.append(atom_b)
+            atom_b.bondedAtoms.append(atom_a)
 
     def distance(self, a, b):
         ax, ay, az = a.x, a.y, a.z
@@ -95,4 +104,4 @@ class BondCreator:
         return sqrt((bx - ax) ** 2 + (by - ay) ** 2 + (bz - az) ** 2)
 
     def get_extra_information(self):
-        return self.num_compared, self.num_bonds
+        return self.num_bonds, self.num_compared
