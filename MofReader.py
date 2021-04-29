@@ -30,5 +30,5 @@ if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
     MOF_808 = read_mof('smod7-pos-1.cif')
     print(MOF_808)
-    print(*MOF_808.atoms, sep="\n")
+    print(*MOF_808.elementsPresent)
 

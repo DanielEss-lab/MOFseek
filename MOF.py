@@ -9,6 +9,10 @@ class MOF:
         self.angle_beta = be
         self.angle_gamma = ga
         self.atoms = atoms
+        self.elementsPresent = set()
+        for atom in atoms:
+            self.elementsPresent.add(atom.type_symbol)
+
 
     def __str__(self):
         return "{} with dimensions {}, {}, {}".format(self.label,
