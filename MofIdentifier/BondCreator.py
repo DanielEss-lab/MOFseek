@@ -95,7 +95,6 @@ class BondCreator:
             for j in range(i+1, len(space)):
                 self.compare_for_bond(space[i], space[j])
 
-
     def connect_within_spaces(self, space_a, space_b):
         for atom_a in space_a:
             for atom_b in space_b:

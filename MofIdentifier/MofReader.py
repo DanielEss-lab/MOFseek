@@ -20,9 +20,9 @@ def read_mof(filename):
     for atomData in atomDataLoop:
         atom = Atom(atomData._atom_site_label,
                     atomData._atom_site_type_symbol,
-                    float(atomData._atom_site_fract_x) * length_a,
-                    float(atomData._atom_site_fract_y) * length_b,
-                    float(atomData._atom_site_fract_z) * length_c)
+                    float(atomData._atom_site_fract_x),
+                    float(atomData._atom_site_fract_y),
+                    float(atomData._atom_site_fract_z))
         atoms.append(atom)
     return MOF(label, symmetry, length_a, length_b, length_c, angle_alpha, angle_beta, angle_gamma, atoms)
 

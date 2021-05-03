@@ -1,3 +1,7 @@
+import numpy as np
+import math
+
+
 class MOF:
     def __init__(self, label, symmetry, a, b, c, al, be, ga, atoms):
         self.label = label
@@ -11,9 +15,31 @@ class MOF:
         self.atoms = atoms
         self.elementsPresent = set()
         for atom in atoms:
+            (atom.x, atom.y, atom.z) = self.conversion_to_Cartesian(atom)
             self.elementsPresent.add(atom.type_symbol)
-
 
     def __str__(self):
         return "{} with dimensions {}, {}, {}".format(self.label,
                                                       self.length_a, self.length_b, self.length_c)
+
+    def conversion_to_Cartesian(self, atom):
+
+        alpha = np.deg2rad(self.angle_alpha)
+        beta = np.deg2rad(self.angle_beta)
+        gamma = np.deg2rad(self.angle_gamma)
+
+        value_of_trig = (np.cos(alpha) - (np.cos(beta) * np.cos(gamma))) / np.sin(gamma)
+
+        volume_of_cell = self.length_a * self.length_b * self.length_c * math.sqrt(
+            1 - (np.cos(alpha) ** 2) - (np.cos(beta) ** 2) - (np.cos(gamma) ** 2) + (2 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)))
+
+        matrix = np.array([[self.length_a, (self.length_b * np.cos(gamma)), (self.length_c * np.cos(beta))],
+                          [0, (self.length_b * np.sin(gamma)), self.length_c * value_of_trig],
+                          [0, 0, volume_of_cell / (self.length_a * self.length_b * np.sin(gamma))]])
+
+        # n2 = (np.cos(alpha) - np.cos(gamma) * np.cos(beta)) / np.sin(gamma)
+        # M = np.array([[self.length_a, 0, 0],
+        #               [self.length_b * np.cos(gamma), self.length_b * np.sin(gamma), 0],
+        #               [self.length_c * np.cos(beta), self.length_c * n2, self.length_b * np.sqrt(np.sin(beta) ** 2 - n2 ** 2)]])
+
+        return np.matmul(matrix, np.array([atom.x, atom.y, atom.z]))
