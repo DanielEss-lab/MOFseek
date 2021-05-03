@@ -6,8 +6,11 @@ from atom import Atom
 def read_mof(filename):
     cf = ReadCif(filename)
     cb = cf.first_block()
-    label = cf.block_input_order[0]
-    symmetry = cb['_symmetry_cell_setting']
+    label = filename
+    try:
+        symmetry = cb['_symmetry_cell_setting']
+    except KeyError:
+        symmetry = None
     length_a = float(cb['_cell_length_a'])
     length_b = float(cb['_cell_length_b'])
     length_c = float(cb['_cell_length_c'])
