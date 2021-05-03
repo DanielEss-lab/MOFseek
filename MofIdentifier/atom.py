@@ -15,6 +15,12 @@ class Atom:
         return "{name} at {x:.1f}, {y:.1f}, {z:.1f} bonded to {bonds}".format(name=self.label, x=self.x, y=self.y,
                                                                               z=self.z, bonds=bonds_string)
 
+    def __eq__(self, other):
+        return self.label == other.label
+
+    def __hash__(self):
+        return hash(self.label)
+
     def copy_to_relative_position(self, dx, dy, dz):
         atom = Atom(self.label, self.type_symbol, self.x + dx, self.y + dy, self.z + dz)
         atom.isInUnitCell = False
