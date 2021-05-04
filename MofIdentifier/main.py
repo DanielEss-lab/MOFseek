@@ -1,12 +1,13 @@
 import time
-import MofReader
+import CifReader
 from MofBondCreator import MofBondCreator
+
 
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
 
     before_read_time = time.time()
-    mof = MofReader.read_mof('smod7-pos-1.cif')
+    mof = CifReader.read_mof('smod7-pos-1.cif')
     between_time = time.time()
     bond_creator = MofBondCreator(mof)
     bond_creator.connect_atoms()
