@@ -1,6 +1,6 @@
 import networkx.algorithms.isomorphism as iso
 import networkx as nx
-from MofIdentifier import XyzReader, MofReader
+from MofIdentifier import XyzReader, CifReader
 from MofIdentifier.MofBondCreator import MofBondCreator
 from MofIdentifier.XyzBondCreator import XyzBondCreator
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     ligand = XyzReader.read_xyz('Benzene.xyz')
     bond_creator = XyzBondCreator()
     bond_creator.connect_atoms(ligand)
-    mof = MofReader.read_mof('smod7-pos-1.cif')
+    mof = CifReader.read_mof('smod7-pos-1.cif')
     bond_creator = MofBondCreator(mof)
     bond_creator.connect_atoms()
     contains_ligand = find_ligand_in_mof(ligand, mof)
