@@ -3,7 +3,7 @@ from math import ceil, floor, sqrt
 from CovalentRadiusLookup import CovalentRadiusLookup
 
 max_bond_length = 4
-# max_bond_length 5.2 is a worst-case scenario that probably won't occur in real mofs;
+# max_bond_length 5.2 is a worst-case scenario that probably won't occur in most real mofs;
 # a more realistic (and still cautious) value would be ~3.5
 bond_length_error_margin = 0.1
 
@@ -14,12 +14,9 @@ class BondCreator:
         self.mof = mof
         # Floor the number of buckets to overestimate the size of buckets
         # to ensure we're comparing at all viable distances
-        self.num_x_buckets = floor(mof.length_x / max_bond_length)
-        self.num_x_buckets = self.num_x_buckets if self.num_x_buckets > 0 else 1
-        self.num_y_buckets = floor(mof.length_y / max_bond_length)
-        self.num_y_buckets = self.num_y_buckets if self.num_y_buckets > 0 else 1
-        self.num_z_buckets = floor(mof.length_z / max_bond_length)
-        self.num_z_buckets = self.num_z_buckets if self.num_z_buckets > 0 else 1
+        self.num_x_buckets = floor(mof.length_x / max_bond_length) if mof.length_x > max_bond_length else 1
+        self.num_y_buckets = floor(mof.length_y / max_bond_length) if mof.length_y > max_bond_length else 1
+        self.num_z_buckets = floor(mof.length_z / max_bond_length) if mof.length_z > max_bond_length else 1
         self.cellSpace = [[[list(()) for _ in range(self.num_x_buckets)] for _ in range(self.num_y_buckets)]
                           for _ in range(self.num_z_buckets)]
         # To calculate accurate distances, and therefore to calculate the number of partitions in the 3D space,
