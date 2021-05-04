@@ -5,7 +5,7 @@ from CovalentRadiusLookup import CovalentRadiusLookup
 max_bond_length = 4
 # max_bond_length 5.2 is a worst-case scenario that probably won't occur in most real mofs;
 # a more realistic (and still cautious) value would be ~3.5
-bond_length_error_margin = 0.1
+bond_length_error_margin = 0.15
 
 
 class MofBondCreator:
@@ -31,6 +31,7 @@ class MofBondCreator:
             self.cellSpace[z_bucket][y_bucket][x_bucket].append(atom)
         self.num_compared = 0
         self.num_bonds = 0
+        self.num_bonds_across_cell_border = 0
 
     def is_bond_distance(self, d, a, b):
         rad_a = self.chart.lookup(a.type_symbol)
@@ -111,7 +112,11 @@ class MofBondCreator:
         self.num_compared = self.num_compared + 1
         dist = self.distance(atom_a, atom_b)
         if self.is_bond_distance(dist, atom_a, atom_b):
-            self.num_bonds = self.num_bonds + 1
+            self.num_bonds += 1
+            if not atom_a.isInUnitCell or not atom_b.isInUnitCell:
+                if not atom_a.isInUnitCell and not atom_b.isInUnitCell:
+                    raise Exception
+                self.num_bonds_across_cell_border += 1
             atom_a.bondedAtoms.append(atom_b)
             atom_b.bondedAtoms.append(atom_a)
 
@@ -121,4 +126,4 @@ class MofBondCreator:
         return sqrt((bx - ax) ** 2 + (by - ay) ** 2 + (bz - az) ** 2)
 
     def get_extra_information(self):
-        return self.num_bonds, self.num_compared
+        return self.num_bonds, self.num_compared, self.num_bonds_across_cell_border
