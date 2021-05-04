@@ -30,6 +30,12 @@ class Atom:
         return "{name} at {x:.1f}, {y:.1f}, {z:.1f} bonded to {bonds}".format(name=self.label, x=self.x, y=self.y,
                                                                               z=self.z, bonds=bonds_string)
 
+    def __eq__(self, other):
+        return self.label == other.label
+
+    def __hash__(self):
+        return hash(self.label)
+
     def copy_to_relative_position(self, da, db, dc, mof):
         atom = Atom.from_fractional(self.label, self.type_symbol, self.a + da, self.b + db, self.c + dc, mof)
         atom.isInUnitCell = False

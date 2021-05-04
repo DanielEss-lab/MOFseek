@@ -8,7 +8,7 @@ max_bond_length = 4
 bond_length_error_margin = 0.1
 
 
-class BondCreator:
+class MofBondCreator:
     def __init__(self, mof):
         self.chart = CovalentRadiusLookup()
         self.mof = mof
