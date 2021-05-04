@@ -3,7 +3,7 @@ from math import ceil, floor, sqrt
 from CovalentRadiusLookup import CovalentRadiusLookup
 
 max_bond_length = 4
-# max_bond_length 5.2 is a worst-case scenario that probably won't occur in real mofs;
+# max_bond_length 5.2 is a worst-case scenario that probably won't occur in most real mofs;
 # a more realistic (and still cautious) value would be ~3.5
 bond_length_error_margin = 0.1
 
@@ -11,16 +11,23 @@ bond_length_error_margin = 0.1
 class BondCreator:
     def __init__(self, mof):
         self.chart = CovalentRadiusLookup()
-        self.num_x_buckets = ceil(mof.length_a / max_bond_length)
-        self.num_y_buckets = ceil(mof.length_b / max_bond_length)
-        self.num_z_buckets = ceil(mof.length_c / max_bond_length)
-        (self.length_a, self.length_b, self.length_c) = (mof.length_a, mof.length_b, mof.length_c)
-        self.cellSpace = [[[list(()) for a in range(self.num_x_buckets)] for b in range(self.num_y_buckets)]
-                          for c in range(self.num_z_buckets)]
+        self.mof = mof
+        # Floor the number of buckets to overestimate the size of buckets
+        # to ensure we're comparing at all viable distances
+        self.num_x_buckets = floor(mof.length_x / max_bond_length) if mof.length_x > max_bond_length else 1
+        self.num_y_buckets = floor(mof.length_y / max_bond_length) if mof.length_y > max_bond_length else 1
+        self.num_z_buckets = floor(mof.length_z / max_bond_length) if mof.length_z > max_bond_length else 1
+        self.cellSpace = [[[list(()) for _ in range(self.num_x_buckets)] for _ in range(self.num_y_buckets)]
+                          for _ in range(self.num_z_buckets)]
+        # To calculate accurate distances, and therefore to calculate the number of partitions in the 3D space,
+        # we needed to use cartesian coordinates (usually x, y, and z)
+        # However, to assign atoms to buckets, and to copy buckets over to simulate atoms outside the unit cell,
+        # the math remains simpler to use fractional coordinates (usually a, b, and c). Unfortunately, we refer to the
+        # index of buckets by x y and z instead of a b and c
         for atom in mof.atoms:
-            x_bucket = floor(atom.x / max_bond_length)
-            y_bucket = floor(atom.y / max_bond_length)
-            z_bucket = floor(atom.z / max_bond_length)
+            x_bucket = floor(atom.a * self.num_x_buckets)
+            y_bucket = floor(atom.b * self.num_y_buckets)
+            z_bucket = floor(atom.c * self.num_z_buckets)
             self.cellSpace[z_bucket][y_bucket][x_bucket].append(atom)
         self.num_compared = 0
         self.num_bonds = 0
@@ -32,32 +39,32 @@ class BondCreator:
 
     def get_bucket(self, z, y, x):
         bucket_belongs_to_unit_cell = True
-        dx, dy, dz = 0, 0, 0
+        da, db, dc = 0, 0, 0
         if 0 <= z < self.num_z_buckets:
             plane = self.cellSpace[z]
         else:
             bucket_belongs_to_unit_cell = False
             plane = self.cellSpace[z % self.num_z_buckets]
-            dz = self.length_c * (1 if z > 0 else -1)
+            dc = 1 if z > 0 else -1
         if 0 <= y < self.num_y_buckets:
             row = plane[y]
         else:
             bucket_belongs_to_unit_cell = False
             row = plane[y % self.num_y_buckets]
-            dy = self.length_b * (1 if y > 0 else -1)
+            db = 1 if y > 0 else -1
         if 0 <= x < self.num_x_buckets:
             bucket = row[x]
         else:
             bucket_belongs_to_unit_cell = False
             bucket = row[x % self.num_x_buckets]
-            dx = self.length_a * (1 if x > 0 else -1)
+            da = 1 if x > 0 else -1
 
         if bucket_belongs_to_unit_cell:
             return bucket
         else:
             bucket_copy = list(())
             for atom in bucket:
-                bucket_copy.append(atom.copy_to_relative_position(dx, dy, dz))
+                bucket_copy.append(atom.copy_to_relative_position(da, db, dc, self.mof))
             return bucket_copy
 
     def connect_atoms(self):
@@ -94,7 +101,6 @@ class BondCreator:
         for i in range(len(space)):
             for j in range(i+1, len(space)):
                 self.compare_for_bond(space[i], space[j])
-
 
     def connect_within_spaces(self, space_a, space_b):
         for atom_a in space_a:
