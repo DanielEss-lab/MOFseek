@@ -1,6 +1,8 @@
 import numpy as np
 import math
 
+from MofIdentifier.atom import Atom
+
 
 class MOF:
     def __init__(self, label, symmetry, a, b, c, al, be, ga, atoms):
@@ -17,6 +19,13 @@ class MOF:
         for atom in atoms:
             (atom.x, atom.y, atom.z) = self.conversion_to_Cartesian(atom)
             self.elementsPresent.add(atom.type_symbol)
+        (self.length_x, n, n) = self.conversion_to_Cartesian(Atom('-', '-', 1, 0, 0, True))
+        (n, self.length_y, n) = self.conversion_to_Cartesian(Atom('-', '-', 0, 1, 0, True))
+        (n, n, self.length_z) = self.conversion_to_Cartesian(Atom('-', '-', 0, 0, 1, True))
+        self.offset_x = math.sqrt(b**2 - self.length_y**2)  # TODO: fix offset calculations
+        self.offset_y = math.sqrt(a**2 - self.length_x**2)
+        self.offset_z = math.sqrt(a**2 - self.length_x**2)
+        n = 0
 
     def __str__(self):
         return "{} with dimensions {}, {}, {}".format(self.label,
@@ -42,4 +51,4 @@ class MOF:
         #               [self.length_b * np.cos(gamma), self.length_b * np.sin(gamma), 0],
         #               [self.length_c * np.cos(beta), self.length_c * n2, self.length_b * np.sqrt(np.sin(beta) ** 2 - n2 ** 2)]])
 
-        return np.matmul(matrix, np.array([atom.x, atom.y, atom.z]))
+        return np.matmul(matrix, np.array([atom.a, atom.b, atom.c]))
