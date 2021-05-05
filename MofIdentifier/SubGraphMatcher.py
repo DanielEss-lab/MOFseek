@@ -3,6 +3,7 @@ import networkx as nx
 from MofIdentifier import XyzReader, CifReader
 from MofIdentifier.MofBondCreator import MofBondCreator
 from MofIdentifier.XyzBondCreator import XyzBondCreator
+import igraph
 
 
 def nodes_are_equal(a, b):
@@ -12,7 +13,14 @@ def nodes_are_equal(a, b):
     return True
 
 
-def find_ligand_in_mof(ligand, mof):
+def vertices_are_equal(g1, g2, i1, i2):
+    a_elem = g1.vs[i1]['element']
+    b_elem = g2.vs[i2]['element']
+    result = a_elem == b_elem
+    return result
+
+
+def nx_find_ligand_in_mof(ligand, mof):
     lGraph = nx.Graph()
     for atom in ligand.atoms:
         lGraph.add_node(atom, element=atom.type_symbol)
@@ -41,11 +49,39 @@ def find_ligand_in_mof(ligand, mof):
     return mof_contains_ligand
 
 
+def ig_find_ligand_in_mof(ligand, mof):
+    lGraph = igraph.Graph()
+    for atom in ligand.atoms:
+        lGraph.add_vertex(atom.label, element=atom.type_symbol)
+    for atom in ligand.atoms:
+        for bonded_atom in atom.bondedAtoms:
+            while not bonded_atom.is_in_unit_cell():
+                bonded_atom = bonded_atom.original
+                assert (bonded_atom in ligand.atoms)
+            lGraph.add_edge(atom.label, bonded_atom.label)
+    mGraph = igraph.Graph()
+    for atom in mof.atoms:
+        mGraph.add_vertex(atom.label, element=atom.type_symbol)
+    for atom in mof.atoms:
+        for bonded_atom in atom.bondedAtoms:
+            while not bonded_atom.is_in_unit_cell():
+                bonded_atom = bonded_atom.original
+                assert(bonded_atom in mof.atoms)
+            mGraph.add_edge(atom.label, bonded_atom.label)
+    mof_contains_ligand = mGraph.subisomorphic_vf2(lGraph, node_compat_fn=vertices_are_equal)
+    print(mof_contains_ligand)
+    return mof_contains_ligand
+
+
+def find_ligand_in_mof(ligand, mof):
+    return ig_find_ligand_in_mof(ligand, mof)
+
+
 if __name__ == '__main__':
     carbon = XyzReader.read_xyz('SingleCarbon.xyz')
     bond_creator = XyzBondCreator()
     bond_creator.connect_atoms(carbon)
-    iron = XyzReader.read_xyz('SingleCarbon.xyz')
+    iron = XyzReader.read_xyz('SingleIron.xyz')
     bond_creator.connect_atoms(iron)
     benzene = XyzReader.read_xyz('BenzeneBase.xyz')
     bond_creator.connect_atoms(benzene)
@@ -66,7 +102,7 @@ if __name__ == '__main__':
     print("\nCarbon in Benzene: (expected True)")
     find_ligand_in_mof(carbon, benzene)
 
-    print("\nIron in Benzene: (expected True)")
+    print("\nIron in Benzene: (expected False)")
     find_ligand_in_mof(iron, benzene)
 
     print("\nCarbon in mof: (expected True)")
