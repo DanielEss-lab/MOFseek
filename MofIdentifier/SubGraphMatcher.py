@@ -10,6 +10,7 @@ def vertices_are_equal(g1, g2, i1, i2):
 
 
 def find_ligand_in_mof(ligand, mof):
+    # before_setup_time = time.time()
     lGraph = igraph.Graph()
     for atom in ligand.atoms:
         lGraph.add_vertex(atom.label, element=atom.type_symbol)
@@ -28,16 +29,16 @@ def find_ligand_in_mof(ligand, mof):
                 bonded_atom = bonded_atom.original
                 assert (bonded_atom in mof.atoms)
             mGraph.add_edge(atom.label, bonded_atom.label)
+    # after_setup_time = time.time()
     mof_contains_ligand = mGraph.subisomorphic_vf2(lGraph, node_compat_fn=vertices_are_equal)
+    # end_time = time.time()
+    # print('time to make graphs: {}'.format(after_setup_time - before_setup_time))
+    # print('time to run VF2: {}'.format(end_time - after_setup_time))
     return mof_contains_ligand
 
 
 if __name__ == '__main__':
-    carbon = XyzReader.read_xyz('SingleCarbon.xyz')
     bond_creator = XyzBondCreator()
-    bond_creator.connect_atoms(carbon)
-    iron = XyzReader.read_xyz('SingleIron.xyz')
-    bond_creator.connect_atoms(iron)
     benzene = XyzReader.read_xyz('BenzeneBase.xyz')
     bond_creator.connect_atoms(benzene)
     solitary_benzene = XyzReader.read_xyz('Benzene.xyz')
@@ -56,3 +57,4 @@ if __name__ == '__main__':
     after_miss_time = time.time()
     print('time to find benzene: {}'.format(after_find_time - before_read_time))
     print('time to declare does not contain benzene-with-Hydrgoen: {}'.format(after_miss_time - after_find_time))
+    # Note that most of that time goes into creating the graphs, not running the algorithm (for now)
