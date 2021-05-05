@@ -8,7 +8,8 @@ from MofIdentifier.XyzBondCreator import XyzBondCreator
 def nodes_are_equal(a, b):
     a_elem = a['element']
     b_elem = b['element']
-    return a_elem == b_elem
+    result = a_elem == b_elem
+    return True
 
 
 def find_ligand_in_mof(ligand, mof):
@@ -44,6 +45,8 @@ if __name__ == '__main__':
     carbon = XyzReader.read_xyz('SingleCarbon.xyz')
     bond_creator = XyzBondCreator()
     bond_creator.connect_atoms(carbon)
+    iron = XyzReader.read_xyz('SingleCarbon.xyz')
+    bond_creator.connect_atoms(iron)
     benzene = XyzReader.read_xyz('BenzeneBase.xyz')
     bond_creator.connect_atoms(benzene)
     solitary_benzene = XyzReader.read_xyz('Benzene.xyz')
@@ -55,8 +58,16 @@ if __name__ == '__main__':
     print("\nCarbon in Carbon: (expected True)")
     find_ligand_in_mof(carbon, carbon)
 
+    print("\nCarbon in Iron: (expected False)")
+    find_ligand_in_mof(carbon, iron)
+    print("Iron in Carbon: (expected False)")
+    find_ligand_in_mof(iron, carbon)
+
     print("\nCarbon in Benzene: (expected True)")
     find_ligand_in_mof(carbon, benzene)
+
+    print("\nIron in Benzene: (expected True)")
+    find_ligand_in_mof(iron, benzene)
 
     print("\nCarbon in mof: (expected True)")
     find_ligand_in_mof(carbon, mof_808)
@@ -69,3 +80,6 @@ if __name__ == '__main__':
 
     print("\nSolitaryBenzene in mof: (expected False)")
     find_ligand_in_mof(solitary_benzene, mof_808)
+
+    print("\nBenzene in Carbon: (expected False)")
+    find_ligand_in_mof(benzene, carbon)
