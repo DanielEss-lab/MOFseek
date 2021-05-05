@@ -1,55 +1,15 @@
-import networkx.algorithms.isomorphism as iso
-import networkx as nx
+import time
 from MofIdentifier import XyzReader, CifReader
 from MofIdentifier.MofBondCreator import MofBondCreator
 from MofIdentifier.XyzBondCreator import XyzBondCreator
 import igraph
 
 
-def nodes_are_equal(a, b):
-    a_elem = a['element']
-    b_elem = b['element']
-    result = a_elem == b_elem
-    return True
-
-
 def vertices_are_equal(g1, g2, i1, i2):
-    a_elem = g1.vs[i1]['element']
-    b_elem = g2.vs[i2]['element']
-    result = a_elem == b_elem
-    return result
+    return g1.vs[i1]['element'] == g2.vs[i2]['element']
 
 
-def nx_find_ligand_in_mof(ligand, mof):
-    lGraph = nx.Graph()
-    for atom in ligand.atoms:
-        lGraph.add_node(atom, element=atom.type_symbol)
-    for atom in ligand.atoms:
-        for bonded_atom in atom.bondedAtoms:
-            while not bonded_atom.is_in_unit_cell():
-                bonded_atom = bonded_atom.original
-                assert (bonded_atom in ligand.atoms)
-            lGraph.add_edge(atom, bonded_atom)
-    mGraph = nx.Graph()
-    for atom in mof.atoms:
-        mGraph.add_node(atom, element=atom.type_symbol)
-    for atom in mof.atoms:
-        for bonded_atom in atom.bondedAtoms:
-            while not bonded_atom.is_in_unit_cell():
-                bonded_atom = bonded_atom.original
-                assert(bonded_atom in mof.atoms)
-            mGraph.add_edge(atom, bonded_atom)
-    graph_matcher = iso.GraphMatcher(mGraph, lGraph)
-    print("match without testing element:", graph_matcher.subgraph_is_isomorphic())
-    graph_matcher = iso.GraphMatcher(lGraph, mGraph, node_match=iso.categorical_node_match(['element'], [None]))
-    print("match with generated element test:", graph_matcher.subgraph_is_isomorphic())
-    graph_matcher = iso.GraphMatcher(lGraph, mGraph, node_match=nodes_are_equal)
-    print("match with hand-made element test:", graph_matcher.subgraph_is_isomorphic())
-    mof_contains_ligand = graph_matcher.subgraph_is_isomorphic()
-    return mof_contains_ligand
-
-
-def ig_find_ligand_in_mof(ligand, mof):
+def find_ligand_in_mof(ligand, mof):
     lGraph = igraph.Graph()
     for atom in ligand.atoms:
         lGraph.add_vertex(atom.label, element=atom.type_symbol)
@@ -66,15 +26,10 @@ def ig_find_ligand_in_mof(ligand, mof):
         for bonded_atom in atom.bondedAtoms:
             while not bonded_atom.is_in_unit_cell():
                 bonded_atom = bonded_atom.original
-                assert(bonded_atom in mof.atoms)
+                assert (bonded_atom in mof.atoms)
             mGraph.add_edge(atom.label, bonded_atom.label)
     mof_contains_ligand = mGraph.subisomorphic_vf2(lGraph, node_compat_fn=vertices_are_equal)
-    print(mof_contains_ligand)
     return mof_contains_ligand
-
-
-def find_ligand_in_mof(ligand, mof):
-    return ig_find_ligand_in_mof(ligand, mof)
 
 
 if __name__ == '__main__':
@@ -91,31 +46,13 @@ if __name__ == '__main__':
     bond_creator = MofBondCreator(mof_808)
     bond_creator.connect_atoms()
 
-    print("\nCarbon in Carbon: (expected True)")
-    find_ligand_in_mof(carbon, carbon)
-
-    print("\nCarbon in Iron: (expected False)")
-    find_ligand_in_mof(carbon, iron)
-    print("Iron in Carbon: (expected False)")
-    find_ligand_in_mof(iron, carbon)
-
-    print("\nCarbon in Benzene: (expected True)")
-    find_ligand_in_mof(carbon, benzene)
-
-    print("\nIron in Benzene: (expected False)")
-    find_ligand_in_mof(iron, benzene)
-
-    print("\nCarbon in mof: (expected True)")
-    find_ligand_in_mof(carbon, mof_808)
-
-    print("\nBenzene in Benzene: (expected True)")
-    find_ligand_in_mof(benzene, benzene)
-
+    before_read_time = time.time()
     print("\nBenzene in mof: (expected True)")
     find_ligand_in_mof(benzene, mof_808)
 
+    after_find_time = time.time()
     print("\nSolitaryBenzene in mof: (expected False)")
     find_ligand_in_mof(solitary_benzene, mof_808)
-
-    print("\nBenzene in Carbon: (expected False)")
-    find_ligand_in_mof(benzene, carbon)
+    after_miss_time = time.time()
+    print('time to find benzene: {}'.format(after_find_time - before_read_time))
+    print('time to declare does not contain benzene-with-Hydrgoen: {}'.format(after_miss_time - after_find_time))
