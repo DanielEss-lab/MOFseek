@@ -5,27 +5,37 @@ from MofIdentifier.MofBondCreator import MofBondCreator
 from MofIdentifier.XyzBondCreator import XyzBondCreator
 
 
+def nodes_are_equal(a, b):
+    a_elem = a['element']
+    b_elem = b['element']
+    return a_elem == b_elem
+
+
 def find_ligand_in_mof(ligand, mof):
     lGraph = nx.Graph()
     for atom in ligand.atoms:
-        lGraph.add_node(atom.type_symbol, element=atom.type_symbol)
+        lGraph.add_node(atom, element=atom.type_symbol)
     for atom in ligand.atoms:
         for bonded_atom in atom.bondedAtoms:
-            if not bonded_atom.isInUnitCell:
-                lGraph.add_node(atom.type_symbol, element=atom.type_symbol)
+            while not bonded_atom.is_in_unit_cell():
+                bonded_atom = bonded_atom.original
+                assert (bonded_atom in ligand.atoms)
             lGraph.add_edge(atom, bonded_atom)
     mGraph = nx.Graph()
     for atom in mof.atoms:
-        mGraph.add_node(atom.type_symbol, element=atom.type_symbol)
+        mGraph.add_node(atom, element=atom.type_symbol)
     for atom in mof.atoms:
         for bonded_atom in atom.bondedAtoms:
+            while not bonded_atom.is_in_unit_cell():
+                bonded_atom = bonded_atom.original
+                assert(bonded_atom in mof.atoms)
             mGraph.add_edge(atom, bonded_atom)
     graph_matcher = iso.GraphMatcher(mGraph, lGraph)
     print("match without testing element:", graph_matcher.subgraph_is_isomorphic())
     graph_matcher = iso.GraphMatcher(lGraph, mGraph, node_match=iso.categorical_node_match(['element'], [None]))
     print("match with generated element test:", graph_matcher.subgraph_is_isomorphic())
-    graph_matcher = iso.GraphMatcher(lGraph, mGraph, node_match=lambda a, b: a['element'] == b['element'])
-    print("match with lambda element test:", graph_matcher.subgraph_is_isomorphic())
+    graph_matcher = iso.GraphMatcher(lGraph, mGraph, node_match=nodes_are_equal)
+    print("match with hand-made element test:", graph_matcher.subgraph_is_isomorphic())
     mof_contains_ligand = graph_matcher.subgraph_is_isomorphic()
     return mof_contains_ligand
 
@@ -52,10 +62,10 @@ if __name__ == '__main__':
     find_ligand_in_mof(carbon, mof_808)
 
     print("\nBenzene in Benzene: (expected True)")
-    find_ligand_in_mof(benzene, benzene)  # This is the problem statement
+    find_ligand_in_mof(benzene, benzene)
 
     print("\nBenzene in mof: (expected True)")
-    find_ligand_in_mof(carbon, benzene)
+    find_ligand_in_mof(benzene, mof_808)
 
     print("\nSolitaryBenzene in mof: (expected False)")
-    find_ligand_in_mof(carbon, solitary_benzene)
+    find_ligand_in_mof(solitary_benzene, mof_808)
