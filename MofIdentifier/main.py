@@ -28,3 +28,8 @@ if __name__ == '__main__':
             assert len(atom.bondedAtoms) == 1
         else:
             assert len(atom.bondedAtoms) > 0
+    bonds_listed = 0
+    for atom in mof.atoms:
+        for bonded_atom in atom.bondedAtoms:
+            bonds_listed += 1
+    print(bonds_listed)
