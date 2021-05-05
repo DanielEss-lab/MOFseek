@@ -113,8 +113,8 @@ class MofBondCreator:
         dist = self.distance(atom_a, atom_b)
         if self.is_bond_distance(dist, atom_a, atom_b):
             self.num_bonds += 1
-            if not atom_a.isInUnitCell or not atom_b.isInUnitCell:
-                if not atom_a.isInUnitCell and not atom_b.isInUnitCell:
+            if not atom_a.is_in_unit_cell() or not atom_b.is_in_unit_cell():
+                if not atom_a.is_in_unit_cell() and not atom_b.is_in_unit_cell():
                     raise Exception
                 self.num_bonds_across_cell_border += 1
             atom_a.bondedAtoms.append(atom_b)

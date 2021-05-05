@@ -11,7 +11,7 @@ class Atom:
             self.y = y
             self.z = z
         self.bondedAtoms = list(())
-        self.isInUnitCell = True
+        self.original = None  # Used when an atom is copied outside of unit cell
 
     @classmethod
     def from_cartesian(cls, label, type_symbol, x, y, z):
@@ -36,8 +36,11 @@ class Atom:
     def __hash__(self):
         return hash(self.label)
 
+    def is_in_unit_cell(self):
+        return self.original is None
+
     def copy_to_relative_position(self, da, db, dc, mof):
         atom = Atom.from_fractional(self.label, self.type_symbol, self.a + da, self.b + db, self.c + dc, mof)
-        atom.isInUnitCell = False
+        atom.original = self
         atom.bondedAtoms = self.bondedAtoms
         return atom
