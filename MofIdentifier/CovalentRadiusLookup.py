@@ -13,7 +13,12 @@ class CovalentRadiusLookup:
                 self.data[symbol] = radius
 
     def lookup(self, symbol):
-        return self.data[symbol]/100
+        if symbol == '*':
+            return 1.2
+        elif symbol == '%':
+            return 2.4
+        else:
+            return self.data[symbol]/100
 
 
 if __name__ == '__main__':
