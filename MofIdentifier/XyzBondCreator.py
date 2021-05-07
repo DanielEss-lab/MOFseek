@@ -24,6 +24,7 @@ class XyzBondCreator:
         for i in range(len(atoms)):
             for j in range(i+1, len(atoms)):
                 self.compare_for_bond(atoms[i], atoms[j])
+        return molecule
 
     def compare_for_bond(self, atom_a, atom_b):
         self.num_compared = self.num_compared + 1

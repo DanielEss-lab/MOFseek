@@ -9,38 +9,80 @@ from MofIdentifier.XyzBondCreator import XyzBondCreator
 class MyTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.carbon = XyzReader.read_xyz('SingleCarbon.xyz')
-        bond_creator = XyzBondCreator()
-        bond_creator.connect_atoms(cls.carbon)
-        cls.iron = XyzReader.read_xyz('SingleIron.xyz')
-        bond_creator.connect_atoms(cls.iron)
-        cls.benzene = XyzReader.read_xyz('BenzeneBase.xyz')
-        bond_creator.connect_atoms(cls.benzene)
-        cls.solitary_benzene = XyzReader.read_xyz('Benzene.xyz')
-        bond_creator.connect_atoms(cls.solitary_benzene)
+        cls.bond_creator = XyzBondCreator()
+        XyzReader.read_xyz('SingleIron.xyz')
+        XyzReader.read_xyz('six_disjoint_carbons.xyz')
+        XyzReader.read_xyz('BenzeneBase.xyz')
+        XyzReader.read_xyz('Benzene.xyz')
+        XyzReader.read_xyz('ligandsWildcards/M6_node.xyz')
+        XyzReader.read_xyz('ligandsWildcards/_compact_M6_node.xyz')
+
         cls.mof_808 = CifReader.read_mof('smod7-pos-1.cif')
         bond_creator = MofBondCreator(cls.mof_808)
         bond_creator.connect_atoms()
 
     def test_single_atom(self):
-        self.assertEqual(True, find_ligand_in_mof(self.carbon, self.carbon), "Carbon should be subgraph of Carbon")
-        self.assertEqual(True, find_ligand_in_mof(self.iron, self.iron), "Iron should be subgraph of Iron")
-        self.assertEqual(False, find_ligand_in_mof(self.carbon, self.iron), "Carbon should not be subgraph of Iron")
-        self.assertEqual(False, find_ligand_in_mof(self.iron, self.carbon), "Iron should not be subgraph of Carbon")
+        carbon = self.bond_creator.connect_atoms(XyzReader.read_xyz('SingleCarbon.xyz'))
+        iron = self.bond_creator.connect_atoms(XyzReader.read_xyz('SingleIron.xyz'))
+        self.assertEqual(True, find_ligand_in_mof(carbon, carbon), "Carbon should be subgraph of Carbon")
+        self.assertEqual(True, find_ligand_in_mof(iron, iron), "Iron should be subgraph of Iron")
+        self.assertEqual(False, find_ligand_in_mof(carbon, iron), "Carbon should not be subgraph of Iron")
+        self.assertEqual(False, find_ligand_in_mof(iron, carbon), "Iron should not be subgraph of Carbon")
 
     def test_atom_in_ligand(self):
-        self.assertEqual(True, find_ligand_in_mof(self.carbon, self.benzene), "Carbon should be subgraph of Benzene")
-        self.assertEqual(False, find_ligand_in_mof(self.iron, self.benzene), "Iron should not be subgraph of Benzene")
+        carbon = self.bond_creator.connect_atoms(XyzReader.read_xyz('SingleCarbon.xyz'))
+        iron = self.bond_creator.connect_atoms(XyzReader.read_xyz('SingleIron.xyz'))
+        benzene = self.bond_creator.connect_atoms(XyzReader.read_xyz('BenzeneBase.xyz'))
+        self.assertEqual(True, find_ligand_in_mof(carbon, benzene), "Carbon should be subgraph of Benzene")
+        self.assertEqual(False, find_ligand_in_mof(iron, benzene), "Iron should not be subgraph of Benzene")
 
     def test_ligand_in_ligand(self):
-        self.assertEqual(True, find_ligand_in_mof(self.benzene, self.solitary_benzene), "Benzene(6C) should be "
-                                                                                        "subgraph of Benzene(6C, 6H")
-        self.assertEqual(False, find_ligand_in_mof(self.solitary_benzene, self.benzene), "Not other way around")
+        benzene = self.bond_creator.connect_atoms(XyzReader.read_xyz('BenzeneBase.xyz'))
+        solitary_benzene = self.bond_creator.connect_atoms(XyzReader.read_xyz('Benzene.xyz'))
+        self.assertEqual(True, find_ligand_in_mof(benzene, solitary_benzene), "Benzene(6C) should be "
+                                                                              "subgraph of Benzene(6C, 6H")
+        self.assertEqual(False, find_ligand_in_mof(solitary_benzene, benzene), "Not other way around")
 
     def test_ligand_in_mof(self):
-        self.assertEqual(True, find_ligand_in_mof(self.benzene, self.mof_808), "Benzene(6C) should be in mof")
-        self.assertEqual(False, find_ligand_in_mof(self.solitary_benzene, self.mof_808), "Filled Benzene(6C, 6H) "
-                                                                                         "should not be in mof")
+        benzene = self.bond_creator.connect_atoms(XyzReader.read_xyz('BenzeneBase.xyz'))
+        solitary_benzene = self.bond_creator.connect_atoms(XyzReader.read_xyz('Benzene.xyz'))
+        self.assertEqual(True, find_ligand_in_mof(benzene, self.mof_808), "Benzene(6C) should be in mof")
+        self.assertEqual(False, find_ligand_in_mof(solitary_benzene, self.mof_808), "Filled Benzene(6C, 6H) "
+                                                                                    "should not be in mof")
+
+    def test_requires_single_ligand(self):
+        benzene = self.bond_creator.connect_atoms(XyzReader.read_xyz('BenzeneBase.xyz'))
+        six_carbon = self.bond_creator.connect_atoms(XyzReader.read_xyz('six_disjoint_carbons.xyz'))
+        with self.assertRaises(Exception):
+            find_ligand_in_mof(six_carbon, benzene)
+
+    def test_asterisk_WCA(self):
+        # To match anything
+        H2O_1 = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/H2O_1.xyz'))
+        H2O_2 = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/H2O_2.xyz'))
+        H20_good_ex = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/H2O_1_good.xyz'))
+        H20_bad_ex = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/H2O_1_bad.xyz'))
+        self.assertEqual(True, find_ligand_in_mof(H2O_1, H20_good_ex), "Should find match in structures")
+        self.assertEqual(True, find_ligand_in_mof(H2O_2, H20_good_ex), "Should find match in structures")
+        self.assertEqual(False, find_ligand_in_mof(H2O_1, H20_bad_ex), "Should not find match in structures")
+        self.assertEqual(False, find_ligand_in_mof(H2O_2, H20_bad_ex), "Should not find match in structures")
+
+    def test_percent_sign_WCA(self):
+        # To match metals only
+        m6 = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/M6_node.xyz'))
+        m6_fe = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/_compact_M6_node.xyz'))
+        m6_bad = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/contains_M6_node_bad.xyz'))
+        self.assertEqual(True, find_ligand_in_mof(m6, m6_fe), "Should find match in structures")
+        self.assertEqual(False, find_ligand_in_mof(m6, m6_bad), "Should not find match in structures")
+
+    def test_pound_sign_WCA(self):
+        # To match Carbon and Hydrogen only
+        CO2_1 = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/CO2_1.xyz'))
+        CO2_1_good_ex = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/contains_CO2_1_good.xyz'))
+        CO2_1_bad_ex = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/contains_CO2_1_bad.xyz'))
+        self.assertEqual(True, find_ligand_in_mof(CO2_1, CO2_1_good_ex), "Should find match in structures")
+        self.assertEqual(False, find_ligand_in_mof(CO2_1, CO2_1_bad_ex), "Should not find match in structures")
+
 
 if __name__ == '__main__':
     unittest.main()
