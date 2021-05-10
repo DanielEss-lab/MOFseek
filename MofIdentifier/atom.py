@@ -1,3 +1,10 @@
+metals = 'LiBeNaMgAlKCaScTiVCrMnFeCoNiCuZnGaRbSrYZrNbMoTcRuRhPdAgCdInSnCsBaLaCePrNdPmSmEuGdTbDyHoErTmYbLuHfTaWReOsIrPtAuHgTlPbBiPoFrRaAcThPaUNpPuAmCmBkCfEsFmMdNoLrRfDbSgBhHsMtDsRgCnNhFlMcLv '
+
+
+def isMetal(type_symbol):
+    return metals.find(type_symbol) >= 0
+
+
 class Atom:
     def __init__(self, label, type_symbol, x, y, z, is_fractional=False):
         self.label = label
