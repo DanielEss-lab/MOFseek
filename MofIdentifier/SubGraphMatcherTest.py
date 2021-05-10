@@ -6,17 +6,10 @@ from MofIdentifier.SubGraphMatcher import find_ligand_in_mof
 from MofIdentifier.XyzBondCreator import XyzBondCreator
 
 
-class MyTestCase(unittest.TestCase):
+class SubGraphMatcherTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.bond_creator = XyzBondCreator()
-        XyzReader.read_xyz('ligands/SingleIron.xyz')
-        XyzReader.read_xyz('ligands/six_disjoint_carbons.xyz')
-        XyzReader.read_xyz('ligands/BenzeneBase.xyz')
-        XyzReader.read_xyz('ligands/Benzene.xyz')
-        XyzReader.read_xyz('ligandsWildcards/M6_node.xyz')
-        XyzReader.read_xyz('ligandsWildcards/_compact_M6_node.xyz')
-
         cls.mof_808 = CifReader.read_mof('smod7-pos-1.cif')
         bond_creator = MofBondCreator(cls.mof_808)
         bond_creator.connect_atoms()
@@ -70,7 +63,7 @@ class MyTestCase(unittest.TestCase):
     def test_percent_sign_WCA(self):
         # To match metals only
         m6 = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/M6_node.xyz'))
-        m6_fe = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/_compact_M6_node.xyz'))
+        m6_fe = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/M6_node_compact.xyz'))
         m6_bad = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/contains_M6_node_bad.xyz'))
         self.assertEqual(True, find_ligand_in_mof(m6, m6_fe), "Should find match in structures")
         self.assertEqual(False, find_ligand_in_mof(m6, m6_bad), "Should not find match in structures")
@@ -85,7 +78,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_numbered_bond_WCA(self):
         m6 = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/M6_node_alternate.xyz'))
-        m6_fe = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/_compact_M6_node.xyz'))
+        m6_fe = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/M6_node_compact.xyz'))
         m6_bad = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/contains_M6_node_bad.xyz'))
         self.assertEqual(True, find_ligand_in_mof(m6, m6_fe), "Should find match in structures")
         self.assertEqual(False, find_ligand_in_mof(m6, m6_bad), "Should not find match in structures")
