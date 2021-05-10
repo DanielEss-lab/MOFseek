@@ -7,7 +7,9 @@ import igraph
 
 def vertices_are_equal(g1, g2, i1, i2):
     elem_1 = g1.vs[i1]['element']
+    elem_1 = elem_1[0] if len(elem_1) > 1 and elem_1[1].isnumeric() else elem_1
     elem_2 = g2.vs[i2]['element']
+    elem_2 = elem_2[0] if len(elem_2) > 1 and elem_2[1].isnumeric() else elem_2
     result = elem_1 == elem_2 \
         or elem_1 == '*' or elem_2 == '*' \
         or (elem_1 == '%' and atom.isMetal(elem_2)) or (elem_2 == '%' and atom.isMetal(elem_1)) \
@@ -49,9 +51,9 @@ def find_ligand_in_mof(ligand, mof):
 if __name__ == '__main__':
     bond_creator = XyzBondCreator()
 
-    ligand = XyzReader.read_xyz('ligandsWildcards/CO2_1.xyz')
+    ligand = XyzReader.read_xyz('ligandsWildcards/M6_node.xyz')
     bond_creator.connect_atoms(ligand)
-    molecule = XyzReader.read_xyz('ligandsWildcards/contains_CO2_1_bad.xyz')
+    molecule = XyzReader.read_xyz('ligandsWildcards/contains_M6_node_good.xyz')
     bond_creator.connect_atoms(molecule)
 
     before_read_time = time.time()

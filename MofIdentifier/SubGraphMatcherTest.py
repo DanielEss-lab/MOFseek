@@ -83,6 +83,13 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(True, find_ligand_in_mof(CO2_1, CO2_1_good_ex), "Should find match in structures")
         self.assertEqual(False, find_ligand_in_mof(CO2_1, CO2_1_bad_ex), "Should not find match in structures")
 
+    def test_numbered_bond_WCA(self):
+        m6 = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/M6_node_alternate.xyz'))
+        m6_fe = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/_compact_M6_node.xyz'))
+        m6_bad = self.bond_creator.connect_atoms(XyzReader.read_xyz('ligandsWildcards/contains_M6_node_bad.xyz'))
+        self.assertEqual(True, find_ligand_in_mof(m6, m6_fe), "Should find match in structures")
+        self.assertEqual(False, find_ligand_in_mof(m6, m6_bad), "Should not find match in structures")
+
 
 if __name__ == '__main__':
     unittest.main()
