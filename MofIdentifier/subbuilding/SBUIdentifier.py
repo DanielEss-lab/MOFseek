@@ -1,10 +1,27 @@
-from MofIdentifier import atom
+import MofIdentifier
 from MofIdentifier.subbuilding.SBUs import SBUs, SBU, UnitType
 
 
 def split(mof):
     identifier = SBUIdentifier(mof)
     return identifier.run_algorithm()
+
+
+def reduce_duplicates(sbu_list):
+    sbu_list = sbu_list.copy()
+    new_sbu_list = list()
+    i = 0
+    while i < len(sbu_list):
+        new_sbu_list.append(sbu_list[i])
+        j = i + 1
+        while j < len(sbu_list):
+            if sbu_list[i] == (sbu_list[j]):
+                new_sbu_list[i].frequency += 1
+                sbu_list.pop(j)
+            else:
+                j += 1
+        i += 1
+    return new_sbu_list
 
 
 class SBUIdentifier:
@@ -15,7 +32,7 @@ class SBUIdentifier:
         self.groups = list(())
 
     def been_visited(self, atom):
-        return atom in self.atom_to_SBU
+        return atom.label in self.atom_to_SBU
 
     def mark_group(self, atom, group_id):
         self.atom_to_SBU[atom.label] = group_id
@@ -28,7 +45,7 @@ class SBUIdentifier:
         connectors = list(())
         auxiliaries = list(())
         for atom in self.atoms:
-            if atom.isMetal(atom.type_symbol) and not self.been_visited(atom):
+            if MofIdentifier.atom.isMetal(atom.type_symbol) and not self.been_visited(atom):
                 sbu = self.identify_cluster(atom)
                 clusters.append(sbu)
                 self.groups.append(sbu)
@@ -50,9 +67,9 @@ class SBUIdentifier:
             self.set_adj_ids(cluster)
         if len(connectors) == 0:
             raise Exception('Exiting algorithm early because no connectors found')
-        clusters = self.reduce_duplicates(clusters)
-        connectors = self.reduce_duplicates(connectors)
-        auxiliaries = self.reduce_duplicates(auxiliaries)
+        clusters = reduce_duplicates(clusters)
+        connectors = reduce_duplicates(connectors)
+        auxiliaries = reduce_duplicates(auxiliaries)
         return SBUs(clusters, connectors, auxiliaries)
 
     def identify_cluster(self, metal_atom):
@@ -64,13 +81,14 @@ class SBUIdentifier:
         cluster.add(metal_atom)
         self.mark_group(metal_atom, self.num_groups)
         for neighbor in metal_atom.bondedAtoms:
-            if atom.isMetal(neighbor.type_symbol) and not self.been_visited(neighbor):
+            if MofIdentifier.atom.isMetal(neighbor.type_symbol) and not self.been_visited(neighbor):
                 self.identify_cluster_recurse(neighbor, cluster)
         for neighbor in metal_atom.bondedAtoms:
             if not self.been_visited(neighbor):
                 has_been_added = False
                 for second_neighbor in neighbor.bondedAtoms:
-                    if atom.isMetal(second_neighbor.type_symbol) and not self.been_visited(second_neighbor):
+                    if MofIdentifier.atom.isMetal(second_neighbor.type_symbol) and not self.been_visited(
+                            second_neighbor):
                         if not has_been_added:
                             cluster.add(neighbor)
                             self.mark_group(neighbor, self.num_groups)
@@ -78,23 +96,23 @@ class SBUIdentifier:
                         self.identify_cluster_recurse(second_neighbor, cluster)
 
     def identify_ligand(self, nonmetal_atom):
-        ligand = set(())
-        sbu = SBU(self.num_groups, None, ligand)
+        ligand = SBU(self.num_groups, None, set(()))
         self.identify_ligand_recurse(nonmetal_atom, ligand)
-        if len(sbu.adjacent_sbu_ids) > 1:
-            sbu.type = UnitType.CONNECTOR
+        if len(ligand.adjacent_sbu_ids) > 1:
+            ligand.type = UnitType.CONNECTOR
         else:
-            sbu.type = UnitType.AUXILIARY
-        return sbu
+            ligand.type = UnitType.AUXILIARY
+        return ligand
 
     def identify_ligand_recurse(self, nonmetal_atom, ligand):
-        ligand.add(nonmetal_atom)
+        ligand.atoms.add(nonmetal_atom)
         self.mark_group(nonmetal_atom, self.num_groups)
         for neighbor in nonmetal_atom.bondedAtoms:
             if not self.been_visited(neighbor):
                 self.identify_ligand_recurse(neighbor, ligand)
-            else:
-                ligand.adjacent_sbu_ids.add(self.group_id_of(neighbor))
+            elif MofIdentifier.atom.isMetal(neighbor.type_symbol):
+                ligand.adjacent_sbu_ids.add(
+                    self.group_id_of(neighbor))
 
     def successfully_adds_to_cluster(self, atom):
         num_cluster_neighbors = 0
@@ -111,13 +129,19 @@ class SBUIdentifier:
                     num_noncluster_neighbors += 1
             else:
                 num_noncluster_neighbors += 1
-        if num_cluster_neighbors > num_noncluster_neighbors != 1 and len(cluster_ids) == 1:
+        if atom.type_symbol == 'H':
+            for neighbor in atom.bondedAtoms:
+                if self.successfully_adds_to_cluster(neighbor):
+                    cluster = self.groups[self.group_id_of(neighbor)]
+                    cluster.atoms.add(atom)
+                    self.mark_group(atom, cluster.sbu_id)
+                    return True
+        if num_cluster_neighbors > num_noncluster_neighbors and len(cluster_ids) == 1:
             # if num_noncluster_neighbors == 1 then it's likely to be part of an aux sbu, not part of the cluster
-            cluster.atoms.append(atom)
-            self.mark_group(atom, cluster)
+            cluster.atoms.add(atom)
+            self.mark_group(atom, cluster.sbu_id)
             return True
-        else:
-            return False
+        return False
 
     def set_adj_ids(self, cluster):
         for atom in cluster.atoms:
@@ -125,19 +149,3 @@ class SBUIdentifier:
                 neighbor_id = self.group_id_of(neighbor)
                 if neighbor_id != cluster.sbu_id:
                     cluster.adjacent_sbu_ids.add(neighbor_id)
-
-    def reduce_duplicates(self, sbu_list):
-        sbu_list = sbu_list.copy()
-        new_sbu_list = list()
-        i = 0
-        while i < len(sbu_list):
-            new_sbu_list.append(sbu_list[i])
-            j = i+1
-            while j < len(sbu_list):
-                if sbu_list[i].matches(sbu_list[j]):
-                    new_sbu_list[0].frequency += 1
-                    sbu_list.pop(j)
-                else:
-                    j += 1
-            i += 1
-        return new_sbu_list

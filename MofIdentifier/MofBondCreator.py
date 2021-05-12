@@ -1,6 +1,6 @@
 from math import ceil, floor, sqrt
 
-from CovalentRadiusLookup import CovalentRadiusLookup
+from MofIdentifier.CovalentRadiusLookup import CovalentRadiusLookup
 
 max_bond_length = 4
 # max_bond_length 5.2 is a worst-case scenario that probably won't occur in most real mofs;

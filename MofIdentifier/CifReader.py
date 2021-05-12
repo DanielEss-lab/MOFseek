@@ -1,7 +1,7 @@
 from CifFile import ReadCif
 
-from MOF import MOF
-from atom import Atom
+from MofIdentifier.MOF import MOF
+from MofIdentifier.atom import Atom
 
 
 def read_mof(filename):

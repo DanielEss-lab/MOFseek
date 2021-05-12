@@ -25,8 +25,8 @@ def igraph_from_molecule(molecule):
         for bonded_atom in atom.bondedAtoms:
             while not bonded_atom.is_in_unit_cell():
                 bonded_atom = bonded_atom.original
-                assert (bonded_atom in molecule.atoms)
-            graph.add_edge(atom.label, bonded_atom.label)
+            if bonded_atom in molecule.atoms:
+                graph.add_edge(atom.label, bonded_atom.label)
     return graph
 
 
@@ -46,8 +46,8 @@ def find_ligand_in_mof(ligand, mof):
 
 
 def are_isomorphic(mol_1, mol_2):
-    graph_a = igraph_from_molecule(ligand)
-    graph_b = igraph_from_molecule(ligand)
+    graph_a = igraph_from_molecule(mol_1)
+    graph_b = igraph_from_molecule(mol_2)
     match = graph_a.isomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
     return match
 

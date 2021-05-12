@@ -20,7 +20,7 @@ class SBU:
         self.adjacent_sbu_ids = set(())
         self.type = unit_type
         self.atoms = atoms
-        self.frequency = 0
+        self.frequency = 1
 
     def __eq__(self, other):
         is_isomorphic = SubGraphMatcher.are_isomorphic(self, other)
