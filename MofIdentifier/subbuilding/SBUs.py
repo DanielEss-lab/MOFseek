@@ -58,5 +58,5 @@ class SBU:
     def __eq__(self, other):
         is_isomorphic = SubGraphMatcher.are_isomorphic(self, other)
         return is_isomorphic and len(self.adjacent_connector_ids) == len(other.adjacent_connector_ids) \
-               and len(self.adjacent_cluster_ids) == len(other.adjacent_cluster_ids) \
-               and len(self.adjacent_auxiliary_ids) == len(other.adjacent_auxiliary_ids)
+            and len(self.adjacent_cluster_ids) == len(other.adjacent_cluster_ids) \
+            and len(self.adjacent_auxiliary_ids) == len(other.adjacent_auxiliary_ids)
