@@ -15,12 +15,12 @@ class SBUIdentifierTest(unittest.TestCase):
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 4)
-        assert (len(sbu_breakdown.clusters[0].adjacent_sbu_ids) == 6)
+        assert (len(sbu_breakdown.clusters[0].adjacent_connector_ids) == 6)
         assert (len(sbu_breakdown.clusters[0].atoms) == 1)
 
         assert (len(sbu_breakdown.connectors) == 1)
         assert (sbu_breakdown.connectors[0].frequency == 8)
-        assert (len(sbu_breakdown.connectors[0].adjacent_sbu_ids) == 3)
+        assert (len(sbu_breakdown.connectors[0].adjacent_cluster_ids) == 3)
         assert (len(sbu_breakdown.connectors[0].atoms) == 13)
 
         assert (len(sbu_breakdown.auxiliaries) == 0)
@@ -33,12 +33,16 @@ class SBUIdentifierTest(unittest.TestCase):
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 4)
-        assert (len(sbu_breakdown.clusters[0].adjacent_sbu_ids) == 16)
+        assert (len(sbu_breakdown.clusters[0].adjacent_cluster_ids) == 0)
+        assert (len(sbu_breakdown.clusters[0].adjacent_connector_ids) == 6)
+        assert (len(sbu_breakdown.clusters[0].adjacent_auxiliary_ids) == 10)
         assert (len(sbu_breakdown.clusters[0].atoms) == 18)
 
         assert (len(sbu_breakdown.connectors) == 1)
         assert (sbu_breakdown.connectors[0].frequency == 8)
-        assert (len(sbu_breakdown.connectors[0].adjacent_sbu_ids) == 3)
+        assert (len(sbu_breakdown.connectors[0].adjacent_cluster_ids) == 3)
+        assert (len(sbu_breakdown.connectors[0].adjacent_connector_ids) == 0)
+        assert (len(sbu_breakdown.connectors[0].adjacent_auxiliary_ids) == 0)
         assert (len(sbu_breakdown.connectors[0].atoms) == 18)
 
         assert (len(sbu_breakdown.auxiliaries) == 3)

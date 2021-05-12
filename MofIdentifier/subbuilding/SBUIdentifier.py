@@ -98,7 +98,7 @@ class SBUIdentifier:
     def identify_ligand(self, nonmetal_atom):
         ligand = SBU(self.num_groups, None, set(()))
         self.identify_ligand_recurse(nonmetal_atom, ligand)
-        if len(ligand.adjacent_sbu_ids) > 1:
+        if len(ligand.adjacent_cluster_ids) > 1:
             ligand.type = UnitType.CONNECTOR
         else:
             ligand.type = UnitType.AUXILIARY
@@ -111,7 +111,7 @@ class SBUIdentifier:
             if not self.been_visited(neighbor):
                 self.identify_ligand_recurse(neighbor, ligand)
             elif MofIdentifier.atom.isMetal(neighbor.type_symbol):
-                ligand.adjacent_sbu_ids.add(
+                ligand.adjacent_cluster_ids.add(
                     self.group_id_of(neighbor))
 
     def successfully_adds_to_cluster(self, atom):
@@ -148,4 +148,7 @@ class SBUIdentifier:
             for neighbor in atom.bondedAtoms:
                 neighbor_id = self.group_id_of(neighbor)
                 if neighbor_id != cluster.sbu_id:
-                    cluster.adjacent_sbu_ids.add(neighbor_id)
+                    if self.groups[neighbor_id].type == UnitType.CONNECTOR:
+                        cluster.adjacent_connector_ids.add(neighbor_id)
+                    else:
+                        cluster.adjacent_auxiliary_ids.add(neighbor_id)
