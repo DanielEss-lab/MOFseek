@@ -1,4 +1,6 @@
 import MofIdentifier
+from MofIdentifier.CifReader import read_mof
+from MofIdentifier.MofBondCreator import MofBondCreator
 from MofIdentifier.subbuilding.SBUs import SBUs, SBU, UnitType
 
 
@@ -152,3 +154,12 @@ class SBUIdentifier:
                         cluster.adjacent_connector_ids.add(neighbor_id)
                     else:
                         cluster.adjacent_auxiliary_ids.add(neighbor_id)
+
+
+if __name__ == '__main__':
+    mof = read_mof('../smod7-pos-1.cif')
+    bond_creator = MofBondCreator(mof)
+    bond_creator.connect_atoms()
+    print(mof)
+    split_mof = split(mof)
+    print(split_mof)
