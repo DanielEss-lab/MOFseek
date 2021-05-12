@@ -34,12 +34,12 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 4)
         assert (len(sbu_breakdown.clusters[0].adjacent_sbu_ids) == 16)
-        assert (len(sbu_breakdown.clusters[0].atoms) == 14)
+        assert (len(sbu_breakdown.clusters[0].atoms) == 18)
 
         assert (len(sbu_breakdown.connectors) == 1)
         assert (sbu_breakdown.connectors[0].frequency == 8)
         assert (len(sbu_breakdown.connectors[0].adjacent_sbu_ids) == 3)
-        assert (len(sbu_breakdown.connectors[0].atoms) == 13)
+        assert (len(sbu_breakdown.connectors[0].atoms) == 18)
 
         assert (len(sbu_breakdown.auxiliaries) == 3)
 
