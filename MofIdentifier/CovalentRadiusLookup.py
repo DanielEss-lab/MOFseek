@@ -19,7 +19,7 @@ class CovalentRadiusLookup:
         if symbol == '#':
             return 1.1
         elif symbol == '*':
-            return 1.9
+            return 1.7
         elif symbol == '%':
             return 1.7
         else:
