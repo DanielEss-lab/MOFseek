@@ -1,9 +1,9 @@
 import unittest
 
-from MofIdentifier import XyzReader, CifReader
-from MofIdentifier.MofBondCreator import MofBondCreator
-from MofIdentifier.SubGraphMatcher import find_ligand_in_mof
-from MofIdentifier.XyzBondCreator import XyzBondCreator
+import XyzReader, CifReader
+from MofBondCreator import MofBondCreator
+from SubGraphMatcher import find_ligand_in_mof
+from XyzBondCreator import XyzBondCreator
 
 
 class SubGraphMatcherTest(unittest.TestCase):
