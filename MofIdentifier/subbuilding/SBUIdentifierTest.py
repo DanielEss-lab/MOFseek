@@ -90,12 +90,19 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(big_node.adjacent_connector_ids) == 8)
         assert (len(big_node.adjacent_auxiliary_ids) == 0)
 
-        assert (len(sbu_breakdown.connectors) == 1)
-        assert (sbu_breakdown.connectors[0].frequency == 16)
-        assert (len(sbu_breakdown.connectors[0].adjacent_cluster_ids) == 3)
-        assert (len(sbu_breakdown.connectors[0].adjacent_connector_ids) == 0)
-        assert (len(sbu_breakdown.connectors[0].adjacent_auxiliary_ids) == 0)
-        assert (len(sbu_breakdown.connectors[0].atoms) == 5)
+        assert (len(sbu_breakdown.connectors) == 2)
+        central_phosphate = None
+        straight_phosphate = None
+        for connector in sbu_breakdown.connectors:
+            if len(connector.adjacent_cluster_ids) == 3:
+                central_phosphate = connector
+            elif len(connector.adjacent_cluster_ids) == 2:
+                straight_phosphate = connector
+        assert (central_phosphate is not None and straight_phosphate is not None)
+        assert (central_phosphate.frequency == 4)
+        assert (straight_phosphate.frequency == 12)
+        assert (len(central_phosphate.adjacent_connector_ids) == len(straight_phosphate.adjacent_connector_ids) == 0)
+        assert (len(central_phosphate.adjacent_auxiliary_ids) == len(straight_phosphate.adjacent_auxiliary_ids) == 0)
 
         assert (len(sbu_breakdown.auxiliaries) == 1)
         assert (sbu_breakdown.auxiliaries[0].frequency == 4)

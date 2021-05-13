@@ -6,7 +6,7 @@ max_bond_length = 4
 # max_bond_length 5.2 is a worst-case scenario that probably won't occur in most real mofs;
 # a more realistic (and still cautious) value would be ~3.5
 bond_length_flat_error_margin = 0.05
-bond_length_multiplicative_error_margin = 1.05
+bond_length_multiplicative_error_margin = 1.10
 
 
 class MofBondCreator:
