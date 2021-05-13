@@ -75,27 +75,34 @@ class SBUIdentifier:
         return SBUs(clusters, connectors, auxiliaries)
 
     def identify_cluster(self, metal_atom):
-        cluster = set(())
+        cluster = SBU(self.num_groups, UnitType.CLUSTER, set())
         self.identify_cluster_recurse(metal_atom, cluster)
-        return SBU(self.num_groups, UnitType.CLUSTER, cluster)
+        return cluster
 
     def identify_cluster_recurse(self, metal_atom, cluster):
-        cluster.add(metal_atom)
+        cluster.atoms.add(metal_atom)
         self.mark_group(metal_atom, self.num_groups)
         for neighbor in metal_atom.bondedAtoms:
             if MofIdentifier.atom.isMetal(neighbor.type_symbol) and not self.been_visited(neighbor):
                 self.identify_cluster_recurse(neighbor, cluster)
+        # The following section helps to identify more complex nodes by including metal atoms two steps away
+        # It does this only when the intermediate molecule (usually Oxygen) ONLY connects to metals.
         for neighbor in metal_atom.bondedAtoms:
-            if not self.been_visited(neighbor):
-                has_been_added = False
-                for second_neighbor in neighbor.bondedAtoms:
-                    if MofIdentifier.atom.isMetal(second_neighbor.type_symbol) and not self.been_visited(
-                            second_neighbor):
-                        if not has_been_added:
-                            cluster.add(neighbor)
-                            self.mark_group(neighbor, self.num_groups)
-                            has_been_added = True
-                        self.identify_cluster_recurse(second_neighbor, cluster)
+            self.check_for_including_distant_metals(neighbor, cluster)
+
+    def check_for_including_distant_metals(self, possible_in_node_link, cluster):
+        if not self.been_visited(possible_in_node_link):
+            has_been_added = False
+            for second_neighbor in possible_in_node_link.bondedAtoms:
+                if not MofIdentifier.atom.isMetal(second_neighbor.type_symbol):
+                    return
+            for second_neighbor in possible_in_node_link.bondedAtoms:
+                if second_neighbor not in cluster.atoms:
+                    if not has_been_added:
+                        cluster.atoms.add(possible_in_node_link)
+                        self.mark_group(possible_in_node_link, self.num_groups)
+                        has_been_added = True
+                    self.identify_cluster_recurse(second_neighbor, cluster)
 
     def identify_ligand(self, nonmetal_atom):
         ligand = SBU(self.num_groups, None, set(()))
@@ -157,7 +164,7 @@ class SBUIdentifier:
 
 
 if __name__ == '__main__':
-    mof = read_mof('../smod7-pos-1.cif')
+    mof = read_mof('../mofsForTests/ABETAE_clean.cif')
     bond_creator = MofBondCreator(mof)
     bond_creator.connect_atoms()
     print(mof)
