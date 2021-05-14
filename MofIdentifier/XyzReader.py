@@ -1,8 +1,15 @@
 import time
 import pandas as pd
-from MofIdentifier.Ligand import Ligand
-from MofIdentifier.XyzBondCreator import XyzBondCreator
-from MofIdentifier.atom import Atom
+from Ligand import Ligand
+from XyzBondCreator import XyzBondCreator
+from atom import Atom
+
+
+def get_molecule(filename):
+    mol = read_xyz(filename)
+    bond_creator = XyzBondCreator()
+    bond_creator.connect_atoms(mol)
+    return mol
 
 
 def read_xyz(file):

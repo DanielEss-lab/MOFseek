@@ -2,9 +2,18 @@ from CifFile import ReadCif
 
 from MofIdentifier.MOF import MOF
 from MofIdentifier.atom import Atom
+from MofIdentifier.MofBondCreator import MofBondCreator
 
 
-def read_mof(filename):
+
+def get_mof(filename):
+    mof = read_cif(filename)
+    bond_creator = MofBondCreator(mof)
+    bond_creator.connect_atoms()
+    return mof
+
+
+def read_cif(filename):
     cf = ReadCif(filename)
     cb = cf.first_block()
     label = filename
@@ -37,5 +46,6 @@ def read_mof(filename):
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
     MOF_808 = read_mof('mofsForTests/smod7-pos-1.cif')
+
     print(MOF_808)
     print(*MOF_808.elementsPresent)

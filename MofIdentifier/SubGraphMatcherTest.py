@@ -1,16 +1,16 @@
 import unittest
 
-from MofIdentifier import XyzReader, CifReader
-from MofIdentifier.MofBondCreator import MofBondCreator
-from MofIdentifier.SubGraphMatcher import find_ligand_in_mof
-from MofIdentifier.XyzBondCreator import XyzBondCreator
+import XyzReader, CifReader
+from MofBondCreator import MofBondCreator
+from SubGraphMatcher import find_ligand_in_mof
+from XyzBondCreator import XyzBondCreator
 
 
 class SubGraphMatcherTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.bond_creator = XyzBondCreator()
-        cls.mof_808 = CifReader.read_mof('mofsForTests/smod7-pos-1.cif')
+        cls.mof_808 = CifReader.read_cif('smod7-pos-1.cif')
         bond_creator = MofBondCreator(cls.mof_808)
         bond_creator.connect_atoms()
 

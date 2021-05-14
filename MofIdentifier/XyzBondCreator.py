@@ -1,6 +1,7 @@
 from math import sqrt
 
 from MofIdentifier.CovalentRadiusLookup import CovalentRadiusLookup
+from CovalentRadiusLookup import lookup
 
 max_bond_length = 4
 # max_bond_length 5.2 is a worst-case scenario that probably won't occur in real mofs;
@@ -15,7 +16,6 @@ def is_bond_numbered_wca(element):\
 
 class XyzBondCreator:
     def __init__(self):
-        self.chart = CovalentRadiusLookup()
         self.num_compared = 0
         self.num_bonds = 0
 
