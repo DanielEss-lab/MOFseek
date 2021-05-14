@@ -5,6 +5,13 @@ from XyzBondCreator import XyzBondCreator
 from atom import Atom
 
 
+def get_molecule(filename):
+    mol = read_xyz(filename)
+    bond_creator = XyzBondCreator()
+    bond_creator.connect_atoms(mol)
+    return mol
+
+
 def read_xyz(file):
     molecule = pd.read_table(file, skiprows=2, delim_whitespace=True,
                              names=['atom', 'x', 'y', 'z'])

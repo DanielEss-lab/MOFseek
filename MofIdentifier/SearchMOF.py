@@ -1,74 +1,108 @@
 import os
+
 import CifReader
 import XyzReader
 import SubGraphMatcher
 from pathlib import Path
-from XyzBondCreator import XyzBondCreator
 
 
-def ligands_list():
-    bond_creator = XyzBondCreator()
+def get_ligand_list_from_console_input():
+    # An empty list for ligands that user wants to search
+    ligands = []
 
-    Benzene = XyzReader.read_xyz(Path(__file__).parent / "ligandsWildcards/BenzeneWildCard.xyz")
-    bond_creator.connect_atoms(Benzene)
+    # User specifies xyz file name - CO2_1.xyz
+    user_input = input("Enter a xyz file name: (Example: CO2_1.xyz). If you want to quit, type \"quit\"\n")
 
-    CO2_1 = XyzReader.read_xyz(Path(__file__).parent / 'ligandsWildcards/CO2_1.xyz')
-    bond_creator.connect_atoms(CO2_1)
+    if user_input == "quit":
+        raise SystemExit()  # Exit the code execution immediately
 
-    H2O_1 = XyzReader.read_xyz(Path(__file__).parent / 'ligandsWildcards/H2O_1.xyz')
-    bond_creator.connect_atoms(H2O_1)
-
-    H2O_2 = XyzReader.read_xyz(Path(__file__).parent / 'ligandsWildcards/H2O_2.xyz')
-    bond_creator.connect_atoms(H2O_2)
-
-    HSO4_1 = XyzReader.read_xyz(Path(__file__).parent / 'ligandsWildcards/HSO4_1.xyz')
-    bond_creator.connect_atoms(HSO4_1)
-
-    HSO4_2 = XyzReader.read_xyz(Path(__file__).parent / 'ligandsWildcards/HSO4_2.xyz')
-    bond_creator.connect_atoms(HSO4_2)
-
-    M6_node = XyzReader.read_xyz(Path(__file__).parent / 'ligandsWildcards/M6_node.xyz')
-    bond_creator.connect_atoms(M6_node)
-
-    SO4_1 = XyzReader.read_xyz(Path(__file__).parent / 'ligandsWildcards/SO4_1.xyz')
-    bond_creator.connect_atoms(SO4_1)
-
-    SO4_2 = XyzReader.read_xyz(Path(__file__).parent / 'ligandsWildcards/SO4_2.xyz')
-    bond_creator.connect_atoms(SO4_2)
-
-    SO4_3 = XyzReader.read_xyz(Path(__file__).parent / 'ligandsWildcards/SO4_3.xyz')
-    bond_creator.connect_atoms(SO4_3)
-
-    ligands = {Benzene, CO2_1, H2O_1, H2O_2, HSO4_1, HSO4_2, M6_node, SO4_1, SO4_2, SO4_3}
+    # Use while loop
+    while user_input != "done":
+        ligands.append(user_input)
+        print("Enter a xyz file name: (Example: CO2_1.xyz). When you're done, type \"done\"")
+        user_input = input()
 
     return ligands
 
 
-def read_Cif(file_path):
+def read_ligands_from_files(ligand_names):
+    ligands = []
+    ligands_found = 0
+    for file_name_in_directory in os.listdir(Path(__file__).parent / "ligandsWildcards"):
+        if file_name_in_directory.endswith(".xyz"):
+            for ligand_name in ligand_names:
+                if file_name_in_directory == ligand_name:
+                    ligands.append(
+                        XyzReader.get_molecule(str(Path(__file__).parent / "ligandsWildcards") + "/" + ligand_name))
+                    ligands_found += 1
+    if ligands_found < len(ligand_names):
+        raise Exception('Did not find all ligands')
+    return ligands
+
+
+def search_mofs_for_ligands(mofs_path, ligands):
+    # list of mofs that has specific ligands
+    good_mofs = []
+    print("Searching... \n")
     # Change the directory
-    os.chdir(file_path)
+    while True:
+        try:
+            os.chdir(mofs_path)
+        except OSError:
+            print(OSError)
+            mofs_path = get_mof_path_from_console_input
+            continue
+        else:
+            break
 
     for file in os.listdir():
         # Check whether file is in text format or not
         if file.endswith(".cif"):
-            mof = CifReader.read_mof(file)
-            print(mof)
-            print("Elements in mof:", *mof.elementsPresent)
-            search_ligands(mof)
-            print("Ligand in mof:", *mof.ligandsPresent, "\n")
+            try:
+                mof = CifReader.get_mof(file)
+                # print(mof)
+                # print("Elements in mof:", *mof.elementsPresent)
+                if mof_contains_ligands(mof, ligands):
+                    good_mofs.append(mof.label)
+                # print("Ligand in mof:", *mof.ligandsPresent, "\n")
+            except Exception:
+                print("Error reading file: ", file)
+                print(Exception)
+    return good_mofs
 
 
-def search_ligands(mof):
-    bond_creator = XyzBondCreator()
-    bond_creator.connect_atoms(mof)
-    # if find_ligand_in_mof returns true, then put the ligand into mof.ligandsPresent set
-    for ligand in ligands_list():
-        if SubGraphMatcher.find_ligand_in_mof(ligand, mof):
-            mof.ligandsPresent.add(Path(ligand.label).stem)
+def mof_contains_ligands(mof, ligands_list):
+    # if find_ligand_in_mof returns true, then put the mofs into the list
+    for ligand in ligands_list:
+        if not SubGraphMatcher.find_ligand_in_mof(ligand, mof):
+            return False
+    return True
+
+
+def get_mof_path_from_console_input():
+    prompt = "Enter a folder path that has .cif files: (Example: \\\\Users\\shers\\Desktop\\Chem\\structure_10143)\n"
+    path = input(prompt)
+    if path == "quit":
+        raise SystemExit()  # Exit the code execution immediately
+
+    while not is_valid_path(path):
+        print("Invalid folder path: please try again or type \"quit\" to exit")
+        path = input(prompt)
+        if path == "quit":
+            raise SystemExit()  # Exit the code execution immediately
+    return path
+
+
+def is_valid_path(user_path):
+    return os.path.exists(user_path)
 
 
 if __name__ == '__main__':
     # Folder Path
-    user_path = input("Enter a folder path that has .cif files: (Example: \\Users\shers\Desktop\Chem\structure_10143)\n")
-    # path = "\'" + user_path
-    read_Cif(user_path)
+    user_path = get_mof_path_from_console_input()
+    ligand_file_names = get_ligand_list_from_console_input()
+    ligands = read_ligands_from_files(ligand_file_names)
+    good_mofs = search_mofs_for_ligands(user_path, ligands)
+    print(*ligand_file_names, " present in the following file(s):")
+    print(*good_mofs, sep="\n")
+    # read_xyzFiles_from_list()
