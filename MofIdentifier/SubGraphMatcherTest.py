@@ -10,7 +10,7 @@ class SubGraphMatcherTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.bond_creator = XyzBondCreator()
-        cls.mof_808 = CifReader.read_mof('smod7-pos-1.cif')
+        cls.mof_808 = CifReader.read_cif('smod7-pos-1.cif')
         bond_creator = MofBondCreator(cls.mof_808)
         bond_creator.connect_atoms()
 

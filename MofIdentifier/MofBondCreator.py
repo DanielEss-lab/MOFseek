@@ -1,6 +1,6 @@
 from math import ceil, floor, sqrt
 
-from CovalentRadiusLookup import CovalentRadiusLookup
+from CovalentRadiusLookup import lookup
 
 max_bond_length = 4
 # max_bond_length 5.2 is a worst-case scenario that probably won't occur in most real mofs;
@@ -10,7 +10,6 @@ bond_length_error_margin = 0.15
 
 class MofBondCreator:
     def __init__(self, mof):
-        self.chart = CovalentRadiusLookup()
         self.mof = mof
         # Floor the number of buckets to overestimate the size of buckets
         # to ensure we're comparing at all viable distances
@@ -25,17 +24,17 @@ class MofBondCreator:
         # the math remains simpler to use fractional coordinates (usually a, b, and c). Unfortunately, we refer to the
         # index of buckets by x y and z instead of a b and c
         for atom in mof.atoms:
-            x_bucket = floor(atom.a * self.num_x_buckets)
-            y_bucket = floor(atom.b * self.num_y_buckets)
-            z_bucket = floor(atom.c * self.num_z_buckets)
+            x_bucket = floor(atom.a * self.num_x_buckets) if atom.a < 1.0 else self.num_x_buckets - 1
+            y_bucket = floor(atom.b * self.num_y_buckets) if atom.b < 1.0 else self.num_y_buckets - 1
+            z_bucket = floor(atom.c * self.num_z_buckets) if atom.c < 1.0 else self.num_z_buckets - 1
             self.cellSpace[z_bucket][y_bucket][x_bucket].append(atom)
         self.num_compared = 0
         self.num_bonds = 0
         self.num_bonds_across_cell_border = 0
 
     def is_bond_distance(self, d, a, b):
-        rad_a = self.chart.lookup(a.type_symbol)
-        rad_b = self.chart.lookup(b.type_symbol)
+        rad_a = lookup(a.type_symbol)
+        rad_b = lookup(b.type_symbol)
         return d < rad_a + rad_b + bond_length_error_margin
 
     def get_bucket(self, z, y, x):
