@@ -16,35 +16,39 @@ def vertices_are_equal(g1, g2, i1, i2):
     return result
 
 
-def find_ligand_in_mof(ligand, mof):
-    # before_setup_time = time.time()
-    lGraph = igraph.Graph()
-    for atom in ligand.atoms:
-        lGraph.add_vertex(atom.label, element=atom.type_symbol)
-    for atom in ligand.atoms:
+def igraph_from_molecule(molecule):
+    graph = igraph.Graph()
+    for atom in molecule.atoms:
+        graph.add_vertex(atom.label, element=atom.type_symbol)
+    for atom in molecule.atoms:
         for bonded_atom in atom.bondedAtoms:
             while not bonded_atom.is_in_unit_cell():
                 bonded_atom = bonded_atom.original
-                assert (bonded_atom in ligand.atoms)
-            lGraph.add_edge(atom.label, bonded_atom.label)
+            if bonded_atom in molecule.atoms:
+                graph.add_edge(atom.label, bonded_atom.label)
+    return graph
+
+
+def find_ligand_in_mof(ligand, mof):
+    # before_setup_time = time.time()
+    lGraph = igraph_from_molecule(ligand)
     if len(lGraph.clusters()) != 1:
         raise Exception('Every atom in the ligand must be connected to a single molecule; try tweaking the input file '
                         'and try again.')
-    mGraph = igraph.Graph()
-    for atom in mof.atoms:
-        mGraph.add_vertex(atom.label, element=atom.type_symbol)
-    for atom in mof.atoms:
-        for bonded_atom in atom.bondedAtoms:
-            while not bonded_atom.is_in_unit_cell():
-                bonded_atom = bonded_atom.original
-                assert (bonded_atom in mof.atoms)
-            mGraph.add_edge(atom.label, bonded_atom.label)
+    mGraph = igraph_from_molecule(mof)
     # after_setup_time = time.time()
     mof_contains_ligand = mGraph.subisomorphic_vf2(lGraph, node_compat_fn=vertices_are_equal)
     # end_time = time.time()
     # print('time to make graphs: {}'.format(after_setup_time - before_setup_time))
     # print('time to run VF2: {}'.format(end_time - after_setup_time))
     return mof_contains_ligand
+
+
+def are_isomorphic(mol_1, mol_2):
+    graph_a = igraph_from_molecule(mol_1)
+    graph_b = igraph_from_molecule(mol_2)
+    match = graph_a.isomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
+    return match
 
 
 if __name__ == '__main__':
