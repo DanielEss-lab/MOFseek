@@ -1,7 +1,6 @@
 from math import sqrt
 
-from MofIdentifier.CovalentRadiusLookup import CovalentRadiusLookup
-from CovalentRadiusLookup import lookup
+from MofIdentifier.CovalentRadiusLookup import lookup
 
 max_bond_length = 4
 # max_bond_length 5.2 is a worst-case scenario that probably won't occur in real mofs;
@@ -20,8 +19,8 @@ class XyzBondCreator:
         self.num_bonds = 0
 
     def is_bond_distance(self, d, a, b):
-        rad_a = self.chart.lookup(a.type_symbol)
-        rad_b = self.chart.lookup(b.type_symbol)
+        rad_a = lookup(a.type_symbol)
+        rad_b = lookup(b.type_symbol)
         return d < (rad_a + rad_b) * bond_length_multiplicative_error_margin + bond_length_flat_error_margin
 
     def connect_atoms(self, molecule):

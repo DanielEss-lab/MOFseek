@@ -1,5 +1,5 @@
 import MofIdentifier
-from MofIdentifier.CifReader import read_mof
+from MofIdentifier.CifReader import get_mof
 from MofIdentifier.MofBondCreator import MofBondCreator
 from MofIdentifier.subbuilding.SBUs import SBUs, SBU, UnitType
 
@@ -164,9 +164,7 @@ class SBUIdentifier:
 
 
 if __name__ == '__main__':
-    mof = read_mof('../mofsForTests/ABETAE_clean.cif')
-    bond_creator = MofBondCreator(mof)
-    bond_creator.connect_atoms()
+    mof = get_mof('../mofsForTests/ABETAE_clean.cif')
     print(mof)
     split_mof = split(mof)
     print(split_mof)

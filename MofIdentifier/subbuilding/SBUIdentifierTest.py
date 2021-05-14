@@ -1,17 +1,13 @@
 import unittest
 
-from MofIdentifier import CifReader
-from MofIdentifier.MofBondCreator import MofBondCreator
-from MofIdentifier.XyzBondCreator import XyzBondCreator
-from MofIdentifier.subbuilding import SBUIdentifier
+from MofIdentifier.CifReader import get_mof
+from MofIdentifier.subbuilding.SBUIdentifier import split
 
 
 class SBUIdentifierTest(unittest.TestCase):
     def test_simple_mof(self):
-        mof_abavij = CifReader.read_mof('../mofsForTests/ABAVIJ_clean.cif')
-        bond_creator = MofBondCreator(mof_abavij)
-        bond_creator.connect_atoms()
-        sbu_breakdown = SBUIdentifier.split(mof_abavij)
+        mof_abavij = get_mof('../mofsForTests/ABAVIJ_clean.cif')
+        sbu_breakdown = split(mof_abavij)
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 4)
@@ -26,10 +22,8 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.auxiliaries) == 0)
 
     def test_complex_mof(self):
-        mof_808 = CifReader.read_mof('../mofsForTests/smod7-pos-1.cif')
-        bond_creator = MofBondCreator(mof_808)
-        bond_creator.connect_atoms()
-        sbu_breakdown = SBUIdentifier.split(mof_808)
+        mof_808 = get_mof('../mofsForTests/smod7-pos-1.cif')
+        sbu_breakdown = split(mof_808)
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 4)
@@ -48,10 +42,8 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.auxiliaries) == 3)
 
     def test_small_mof(self):
-        mof_abetae = CifReader.read_mof('../mofsForTests/ABETAE_clean.cif')
-        bond_creator = MofBondCreator(mof_abetae)
-        bond_creator.connect_atoms()
-        sbu_breakdown = SBUIdentifier.split(mof_abetae)
+        mof_abetae = get_mof('../mofsForTests/ABETAE_clean.cif')
+        sbu_breakdown = split(mof_abetae)
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 20)
@@ -68,10 +60,8 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.connectors[0].atoms) == 5)
 
     def test_notalladjacent_core(self):
-        mof_akoheo = CifReader.read_mof('../mofsForTests/AKOHEO_clean.cif')
-        bond_creator = MofBondCreator(mof_akoheo)
-        bond_creator.connect_atoms()
-        sbu_breakdown = SBUIdentifier.split(mof_akoheo)
+        mof_akoheo = get_mof('../mofsForTests/AKOHEO_clean.cif')
+        sbu_breakdown = split(mof_akoheo)
 
         assert (len(sbu_breakdown.clusters) == 2)
         iron_node = None

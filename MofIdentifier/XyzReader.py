@@ -1,8 +1,8 @@
 import time
 import pandas as pd
-from Ligand import Ligand
-from XyzBondCreator import XyzBondCreator
-from atom import Atom
+from MofIdentifier.Ligand import Ligand
+from MofIdentifier.XyzBondCreator import XyzBondCreator
+from MofIdentifier.atom import Atom
 
 
 def get_molecule(filename):

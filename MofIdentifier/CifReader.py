@@ -5,7 +5,6 @@ from MofIdentifier.atom import Atom
 from MofIdentifier.MofBondCreator import MofBondCreator
 
 
-
 def get_mof(filename):
     mof = read_cif(filename)
     bond_creator = MofBondCreator(mof)
@@ -45,7 +44,7 @@ def read_cif(filename):
 
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-    MOF_808 = read_mof('mofsForTests/smod7-pos-1.cif')
+    MOF_808 = get_mof('mofsForTests/smod7-pos-1.cif')
 
     print(MOF_808)
     print(*MOF_808.elementsPresent)

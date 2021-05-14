@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from atom import Atom
+from MofIdentifier.atom import Atom
 
 
 class MOF:

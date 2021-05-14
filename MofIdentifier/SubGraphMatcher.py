@@ -1,6 +1,7 @@
 import time
-import XyzReader, CifReader, atom
-from XyzBondCreator import XyzBondCreator
+
+from MofIdentifier import atom, XyzReader
+from MofIdentifier.XyzBondCreator import XyzBondCreator
 import igraph
 
 
