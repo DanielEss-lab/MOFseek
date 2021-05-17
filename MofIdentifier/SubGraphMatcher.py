@@ -45,6 +45,30 @@ def find_ligand_in_mof(ligand, mof):
     return mof_contains_ligand
 
 
+def filter_for_mofs_with_ligands(mofs, ligands):
+    ligand_graphs = []
+    mofs_containing_ligands = []
+    for ligand in ligands:
+        lGraph = igraph_from_molecule(ligand)
+        if len(lGraph.clusters()) != 1:
+            raise Exception('Every atom in the ligand must be connected to a single molecule; try tweaking the input '
+                            'file and try again.')
+        ligand_graphs.append(lGraph)
+    for mof in mofs:
+        mGraph = igraph_from_molecule(mof)
+        if mof_has_all_ligands(mGraph, ligand_graphs):
+            mofs_containing_ligands.append(mof)
+    return mofs_containing_ligands
+
+
+def mof_has_all_ligands(mof_graph, ligand_graphs):
+    for lGraph in ligand_graphs:
+        mof_contains_ligand = mof_graph.subisomorphic_vf2(lGraph, node_compat_fn=vertices_are_equal)
+        if not mof_contains_ligand:
+            return False
+    return True
+
+
 def are_isomorphic(mol_1, mol_2):
     graph_a = igraph_from_molecule(mol_1)
     graph_b = igraph_from_molecule(mol_2)

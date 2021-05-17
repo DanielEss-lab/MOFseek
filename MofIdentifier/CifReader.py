@@ -32,11 +32,15 @@ def read_cif(filename):
     atom_data_loop = cb.GetLoop('_atom_site_label')
     atoms = list(())
     for atomData in atom_data_loop:
+        a = float(atomData._atom_site_fract_x)
+        a += 1 if a < 0 else 0
+        b = float(atomData._atom_site_fract_y)
+        b += 1 if b < 0 else 0
+        c = float(atomData._atom_site_fract_z)
+        c += 1 if c < 0 else 0
         atom = Atom.from_fractional(atomData._atom_site_label,
                                     atomData._atom_site_type_symbol,
-                                    float(atomData._atom_site_fract_x),
-                                    float(atomData._atom_site_fract_y),
-                                    float(atomData._atom_site_fract_z), mof)
+                                    a, b, c, mof)
         atoms.append(atom)
     mof.set_atoms(atoms)
     return mof

@@ -40,10 +40,9 @@ def read_ligands_from_files(ligand_names):
     return ligands
 
 
-def search_mofs_for_ligands(mofs_path, ligands):
+def get_all_mofs_in_directory(mofs_path):
     # list of mofs that has specific ligands
-    good_mofs = []
-    print("Searching... \n")
+    mofs = []
     # Change the directory
     while True:
         try:
@@ -60,15 +59,11 @@ def search_mofs_for_ligands(mofs_path, ligands):
         if file.endswith(".cif"):
             try:
                 mof = CifReader.get_mof(file)
-                # print(mof)
-                # print("Elements in mof:", *mof.elementsPresent)
-                if mof_contains_ligands(mof, ligands):
-                    good_mofs.append(mof.label)
-                # print("Ligand in mof:", *mof.ligandsPresent, "\n")
+                mofs.append(mof)
             except Exception:
                 print("Error reading file: ", file)
                 print(Exception)
-    return good_mofs
+    return mofs
 
 
 def mof_contains_ligands(mof, ligands_list):
@@ -101,8 +96,12 @@ if __name__ == '__main__':
     # Folder Path
     user_path = get_mof_path_from_console_input()
     ligand_file_names = get_ligand_list_from_console_input()
+    print('loading mofs and ligands from files...')
     ligands = read_ligands_from_files(ligand_file_names)
-    good_mofs = search_mofs_for_ligands(user_path, ligands)
+    mofs = get_all_mofs_in_directory(user_path)
+    print('Filtering for subgraph isomorphism...')
+    good_mofs = SubGraphMatcher.filter_for_mofs_with_ligands(mofs, ligands)
+    mof_names = map(lambda x: x.label, good_mofs)
     print(*ligand_file_names, " present in the following file(s):")
-    print(*good_mofs, sep="\n")
+    print(*mof_names, sep="\n")
     # read_xyzFiles_from_list()

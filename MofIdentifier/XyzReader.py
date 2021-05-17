@@ -4,10 +4,10 @@ from MofIdentifier.Ligand import Ligand
 from MofIdentifier.XyzBondCreator import XyzBondCreator
 from MofIdentifier.atom import Atom
 
+bond_creator = XyzBondCreator()
 
 def get_molecule(filename):
     mol = read_xyz(filename)
-    bond_creator = XyzBondCreator()
     bond_creator.connect_atoms(mol)
     return mol
 
