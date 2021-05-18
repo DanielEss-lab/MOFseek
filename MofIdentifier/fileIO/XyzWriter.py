@@ -4,3 +4,7 @@ def write_molecule_to_file(filename, atoms):
         for atom in atoms:
             xyz.write("{:4} {:11.6f} {:11.6f} {:11.6f}\n".format(
                 atom.type_symbol, atom.x, atom.y, atom.z))
+
+
+def write_all_molecules_to_directory(directory_name, molecules):
+    pass

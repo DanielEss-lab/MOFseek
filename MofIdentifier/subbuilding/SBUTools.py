@@ -1,5 +1,7 @@
+from collections import deque
 from enum import Enum
 from MofIdentifier import SubGraphMatcher
+from MofIdentifier.fileIO import XyzBondCreator
 
 
 class SBUs:
@@ -26,6 +28,9 @@ class UnitType(Enum):
     CONNECTOR = 2
     AUXILIARY = 3
 
+    def __str__(self):
+        return "cluster" if self == UnitType.CLUSTER else "connector" if self == UnitType.CONNECTOR else "auxiliary"
+
 
 class SBU:
     def __init__(self, sbu_id, unit_type, atoms):
@@ -37,6 +42,24 @@ class SBU:
         self.atoms = atoms
         self.frequency = 1
 
+    def normalize_atoms(self, mof):
+        starting_atom = next(iter(self.atoms))  # Get an atom, any atom
+        visited_labels = {starting_atom.label}
+        queue = deque([starting_atom])
+        while queue:
+            atom = queue.popleft()
+            for neighbor in (n for n in atom.bondedAtoms if n in self.atoms and n.label not in visited_labels):
+                d = XyzBondCreator.distance(atom, neighbor)
+                if not XyzBondCreator.is_bond_distance(d, atom, neighbor):
+                    for (nx, ax) in [(neighbor.a, atom.a), (neighbor.b, atom.b), (neighbor.c, atom.c)]:
+                        if nx - ax > 0.5:
+                            nx -= 1.0
+                        elif nx - ax < -0.5:
+                            nx += 1.0
+                    neighbor.set_xyz_within_mof(mof)
+                visited_labels.add(neighbor.label)
+                queue.append(neighbor)
+
     def __str__(self):
         elements = dict()
         for atom in self.atoms:
@@ -47,11 +70,10 @@ class SBU:
         atoms_string = ''
         for element in elements:
             atoms_string = atoms_string + str(elements[element]) + element + ' '
-        unit = "Cluster" if self.type == UnitType.CLUSTER else \
-            "Connector" if self.type == UnitType.CONNECTOR else "Auxiliary"
-        return "({freq}x) {name}({atom_n} total atoms) each bonded to {cluster} clusters, {connector} connectors, " \
+        unit = str(self.type)
+        return "({freq}x) {name}({atom_n} atom {unittype}) each bonded to {cluster} clusters, {connector} connectors, "\
                "and {aux} auxiliary groups".format(freq=self.frequency, name=atoms_string, atom_n=len(self.atoms),
-                                                   cluster=len(self.adjacent_cluster_ids),
+                                                   unittype=unit, cluster=len(self.adjacent_cluster_ids),
                                                    connector=len(self.adjacent_connector_ids),
                                                    aux=len(self.adjacent_auxiliary_ids))
 

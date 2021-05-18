@@ -1,7 +1,6 @@
 import MofIdentifier
-from MofIdentifier.CifReader import get_mof
-from MofIdentifier.MofBondCreator import MofBondCreator
-from MofIdentifier.subbuilding.SBUs import SBUs, SBU, UnitType
+from MofIdentifier.fileIO.CifReader import get_mof
+from MofIdentifier.subbuilding.SBUTools import SBUs, SBU, UnitType
 
 
 def split(mof):
@@ -29,6 +28,7 @@ def reduce_duplicates(sbu_list):
 class SBUIdentifier:
     def __init__(self, mof):
         self.atoms = mof.atoms
+        self.mof = mof
         self.atom_to_SBU = dict()
         self.num_groups = 0
         self.groups = list(())
@@ -72,6 +72,8 @@ class SBUIdentifier:
         clusters = reduce_duplicates(clusters)
         connectors = reduce_duplicates(connectors)
         auxiliaries = reduce_duplicates(auxiliaries)
+        for sbu in clusters + connectors + auxiliaries:
+            sbu.normalize_atoms(self.mof)
         return SBUs(clusters, connectors, auxiliaries)
 
     def identify_cluster(self, metal_atom):

@@ -32,8 +32,11 @@ class Atom:
     @classmethod
     def from_fractional(cls, label, type_symbol, a, b, c, mof):
         atom = cls(label, type_symbol, a, b, c, is_fractional=True)
-        (atom.x, atom.y, atom.z) = mof.conversion_to_Cartesian(atom)
+        atom.set_xyz_within_mof(mof)
         return atom
+
+    def set_xyz_within_mof(self, mof):
+        (self.x, self.y, self.z) = mof.conversion_to_Cartesian(self)
 
     def __str__(self):
         bonds_string = ''

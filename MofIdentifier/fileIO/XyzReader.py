@@ -1,7 +1,7 @@
 import time
 import pandas as pd
 from MofIdentifier.Ligand import Ligand
-from MofIdentifier.XyzBondCreator import XyzBondCreator
+from MofIdentifier.fileIO.XyzBondCreator import XyzBondCreator
 from MofIdentifier.atom import Atom
 
 bond_creator = XyzBondCreator()
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
 
     before_read_time = time.time()
-    ligand = read_xyz('ligands/Benzene.xyz')
+    ligand = read_xyz('../ligands/Benzene.xyz')
     between_time = time.time()
     bond_creator = XyzBondCreator()
     bond_creator.connect_atoms(ligand)

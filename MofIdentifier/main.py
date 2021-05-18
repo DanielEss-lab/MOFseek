@@ -1,6 +1,6 @@
 import time
-import CifReader
-from MofBondCreator import MofBondCreator
+from MofIdentifier.fileIO import CifReader
+from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
 
 
 if __name__ == '__main__':

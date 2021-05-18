@@ -1,6 +1,6 @@
 import unittest
 
-from MofIdentifier.CifReader import get_mof
+from MofIdentifier.fileIO.CifReader import get_mof
 from MofIdentifier.subbuilding.SBUIdentifier import split
 
 

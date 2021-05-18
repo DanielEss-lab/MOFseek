@@ -1,7 +1,8 @@
 import time
 
-from MofIdentifier import atom, XyzReader
-from MofIdentifier.XyzBondCreator import XyzBondCreator
+from MofIdentifier import atom
+from MofIdentifier.fileIO import XyzReader
+from MofIdentifier.fileIO.XyzBondCreator import XyzBondCreator
 import igraph
 
 
@@ -74,6 +75,23 @@ def are_isomorphic(mol_1, mol_2):
     graph_b = igraph_from_molecule(mol_2)
     match = graph_a.isomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
     return match
+
+
+def filter_for_molecules_not_in_set(molecules, mol_set):
+    not_present_molecules = []
+    existing_mol_graphs = map(lambda existing_mol: igraph_from_molecule(existing_mol), mol_set)
+    for molecule in molecules:
+        mol_graph = igraph_from_molecule(molecule)
+        if not is_isomorphic_to_any(mol_graph, existing_mol_graphs):
+            not_present_molecules.append(molecule)
+    return not_present_molecules
+
+
+def is_isomorphic_to_any(graph, graphs):
+    for other_graph in graphs:
+        if graph.isomorphic_vf2(other_graph, node_compat_fn=vertices_are_equal):
+            return True
+    return False
 
 
 if __name__ == '__main__':
