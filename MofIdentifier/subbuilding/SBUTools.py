@@ -17,12 +17,12 @@ class SBUCollection:
             for cluster in self.clusters:
                 string += "\n" + cluster.__str__()
             string += "\n"
-        if len(self.clusters) > 0:
+        if len(self.connectors) > 0:
             string += "Connectors:"
             for connector in self.connectors:
                 string += "\n" + connector.__str__()
             string += "\n"
-        if len(self.clusters) > 0:
+        if len(self.auxiliaries) > 0:
             string += "Auxiliaries:"
             for auxiliary in self.auxiliaries:
                 string += "\n" + auxiliary.__str__()

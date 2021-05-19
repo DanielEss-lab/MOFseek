@@ -1,7 +1,7 @@
 import os
 
 from MofIdentifier.fileIO import XyzReader, CifReader
-import SubGraphMatcher
+from MofIdentifier import SubGraphMatcher
 from pathlib import Path
 
 

@@ -18,7 +18,7 @@ def process_new_mof(mof):
     return new_sbus, recognized_sbus
 
 
-def get_existing_sbus():  # FIXME: right now this just returns a SBUCollection of Ligand objects, not sbus
+def get_existing_sbus():  # NOTE: right now this just returns a SBUCollection of Ligand objects, not sbus
     clusters = []
     connectors = []
     aux = []
@@ -74,8 +74,9 @@ def share_names(sbu_list):
 
 
 if __name__ == '__main__':
-    mof = CifReader.get_mof('../mofsForTests/AKOHEO_clean.cif')
+    mof = CifReader.get_mof('../mofsForTests/ABETAE_clean.cif')
     (new_sbus, recognized_sbus) = process_new_mof(mof)
+    print(mof.label)
     print('New:')
     print(new_sbus)
     print('\nRecognized:')

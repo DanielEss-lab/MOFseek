@@ -101,6 +101,25 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.auxiliaries[0].adjacent_auxiliary_ids) == 0)
         assert (len(sbu_breakdown.auxiliaries[0].atoms) == 2)
 
+    def test_abnormal_fractional_coordinates(self):
+        mof_ja_007 = get_mof('../mofsForTests/ja500330a_si_007_auto.cif')
+        sbu_breakdown = split(mof_ja_007)
+
+        assert (len(sbu_breakdown.clusters) == 1)
+        assert (sbu_breakdown.clusters[0].frequency == 16)
+        assert (len(sbu_breakdown.clusters[0].adjacent_cluster_ids) == 0)
+        assert (len(sbu_breakdown.clusters[0].adjacent_connector_ids) == 6)
+        assert (len(sbu_breakdown.clusters[0].adjacent_auxiliary_ids) == 12)
+        assert (len(sbu_breakdown.clusters[0].atoms) == 18)
+
+        assert (len(sbu_breakdown.connectors) == 1)
+        assert (sbu_breakdown.connectors[0].frequency == 32)
+        assert (len(sbu_breakdown.connectors[0].adjacent_cluster_ids) == 3)
+        assert (len(sbu_breakdown.connectors[0].adjacent_connector_ids) == 0)
+        assert (len(sbu_breakdown.connectors[0].adjacent_auxiliary_ids) == 0)
+        assert (len(sbu_breakdown.connectors[0].atoms) == 18)
+
+        assert (len(sbu_breakdown.auxiliaries) == 1)
 
 
 if __name__ == '__main__':
