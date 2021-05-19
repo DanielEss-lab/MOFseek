@@ -6,6 +6,7 @@ from MofIdentifier.atom import Atom
 
 bond_creator = XyzBondCreator()
 
+
 def get_molecule(filename):
     mol = read_xyz(filename)
     bond_creator.connect_atoms(mol)

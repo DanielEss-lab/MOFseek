@@ -1,6 +1,6 @@
 import MofIdentifier
 from MofIdentifier.fileIO.CifReader import get_mof
-from MofIdentifier.subbuilding.SBUTools import SBUs, SBU, UnitType
+from MofIdentifier.subbuilding.SBUTools import SBUCollection, SBU, UnitType
 
 
 def split(mof):
@@ -8,7 +8,7 @@ def split(mof):
     return identifier.run_algorithm()
 
 
-def reduce_duplicates(sbu_list):
+def reduce_duplicates(sbu_list, is_duplicate):
     sbu_list = sbu_list.copy()
     new_sbu_list = list()
     i = 0
@@ -16,8 +16,8 @@ def reduce_duplicates(sbu_list):
         new_sbu_list.append(sbu_list[i])
         j = i + 1
         while j < len(sbu_list):
-            if sbu_list[i] == (sbu_list[j]):
-                new_sbu_list[i].frequency += 1
+            if is_duplicate(sbu_list[i], sbu_list[j]):
+                new_sbu_list[i].frequency += sbu_list[j].frequency
                 sbu_list.pop(j)
             else:
                 j += 1
@@ -69,12 +69,12 @@ class SBUIdentifier:
             self.set_adj_ids(cluster)
         if len(connectors) == 0:
             raise Exception('Exiting algorithm early because no connectors found')
-        clusters = reduce_duplicates(clusters)
-        connectors = reduce_duplicates(connectors)
-        auxiliaries = reduce_duplicates(auxiliaries)
+        clusters = reduce_duplicates(clusters, lambda x, y: x == y)
+        connectors = reduce_duplicates(connectors, lambda x, y: x == y)
+        auxiliaries = reduce_duplicates(auxiliaries, lambda x, y: x == y)
         for sbu in clusters + connectors + auxiliaries:
             sbu.normalize_atoms(self.mof)
-        return SBUs(clusters, connectors, auxiliaries)
+        return SBUCollection(clusters, connectors, auxiliaries)
 
     def identify_cluster(self, metal_atom):
         cluster = SBU(self.num_groups, UnitType.CLUSTER, set())
@@ -166,7 +166,7 @@ class SBUIdentifier:
 
 
 if __name__ == '__main__':
-    mof = get_mof('../mofsForTests/ABETAE_clean.cif')
+    mof = get_mof('../mofsForTests/Periodic_55_00 (27.771).cif')
     print(mof)
     split_mof = split(mof)
     print(split_mof)

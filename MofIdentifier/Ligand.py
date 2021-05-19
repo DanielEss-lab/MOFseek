@@ -1,6 +1,10 @@
 class Ligand:
     def __init__(self, label, atoms):
-        self.label = label
+        slice_index = label.rfind('\\')
+        if slice_index > -1:
+            self.label = label[slice_index + 1:]
+        else:
+            self.label = label
         self.atoms = atoms
         self.elementsPresent = set()
         for atom in atoms:
