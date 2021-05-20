@@ -1,6 +1,6 @@
 from collections import deque
 from enum import Enum
-from MofIdentifier import SubGraphMatcher
+from MofIdentifier import StrongSubGraphMatcher
 from MofIdentifier.fileIO import XyzBondCreator
 
 
@@ -104,10 +104,10 @@ class SBU:
                                                                aux=len(self.adjacent_auxiliary_ids))
 
     def __eq__(self, other):
-        is_isomorphic = SubGraphMatcher.are_isomorphic(self, other)
+        is_isomorphic = StrongSubGraphMatcher.mol_are_isomorphic(self, other)
         return is_isomorphic and len(self.adjacent_connector_ids) == len(other.adjacent_connector_ids) \
             and len(self.adjacent_cluster_ids) == len(other.adjacent_cluster_ids) \
             and len(self.adjacent_auxiliary_ids) == len(other.adjacent_auxiliary_ids)
 
     def graph_equals(self, other):
-        return len(self.atoms) == len(other.atoms) and SubGraphMatcher.are_isomorphic(self, other)
+        return len(self.atoms) == len(other.atoms) and StrongSubGraphMatcher.mol_are_isomorphic(self, other)

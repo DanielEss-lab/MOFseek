@@ -2,7 +2,7 @@ import glob
 import os
 from pathlib import Path
 
-from MofIdentifier import SubGraphMatcher
+from MofIdentifier import StrongSubGraphMatcher
 from MofIdentifier.fileIO import XyzReader, XyzWriter, CifReader
 from MofIdentifier.subbuilding import SBUTools, SBUIdentifier
 from MofIdentifier.subbuilding.SBUTools import UnitType
@@ -33,11 +33,11 @@ def get_existing_sbus():  # NOTE: right now this just returns a SBUCollection of
 
 def match_to_existing_sbus(existing_sbus, sbus_in_question):
     new_clusters, found_clusters = \
-        SubGraphMatcher.name_molecules_from_set(sbus_in_question.clusters, existing_sbus.clusters)
+        StrongSubGraphMatcher.name_molecules_from_set(sbus_in_question.clusters, existing_sbus.clusters)
     new_conn, found_conn = \
-        SubGraphMatcher.name_molecules_from_set(sbus_in_question.connectors, existing_sbus.connectors)
+        StrongSubGraphMatcher.name_molecules_from_set(sbus_in_question.connectors, existing_sbus.connectors)
     new_aux, found_aux = \
-        SubGraphMatcher.name_molecules_from_set(sbus_in_question.auxiliaries, existing_sbus.auxiliaries)
+        StrongSubGraphMatcher.name_molecules_from_set(sbus_in_question.auxiliaries, existing_sbus.auxiliaries)
     return (SBUTools.SBUCollection(new_clusters, new_conn, new_aux),
             SBUTools.SBUCollection(found_clusters, found_conn, found_aux))
 
@@ -74,7 +74,7 @@ def share_names(sbu_list):
 
 
 if __name__ == '__main__':
-    mof = CifReader.get_mof('../mofsForTests/Periodic_55_00 (27.771).cif')
+    mof = CifReader.get_mof('../mofsForTests/M6 MOFs/Periodic_07_00 (42.066).cif')
     (new_sbus, recognized_sbus) = process_new_mof(mof)
     print(mof.label)
     print('New:')
