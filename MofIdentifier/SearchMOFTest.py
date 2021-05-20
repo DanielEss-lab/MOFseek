@@ -25,7 +25,7 @@ class SearchMofTest(unittest.TestCase):
         print(*ligands, " present in the following file(s):")
         print(*mof_names, sep="\n")
         time.sleep(1)
-        assert True
+        self.assertEqual(27, len(good_mofs))
 
 
 

@@ -33,6 +33,6 @@ def mol_from_str(string, mol_name=None):
 
 
 if __name__ == '__main__':
-    mol = mol_from_str('C1=NNN=N1')
+    mol = mol_from_str('[H]C1=CC([H])=CC([H])=C1')
     print(mol)
     print(*mol.atoms, sep='\n')
