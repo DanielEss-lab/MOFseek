@@ -74,7 +74,7 @@ def share_names(sbu_list):
 
 
 if __name__ == '__main__':
-    mof = CifReader.get_mof('../mofsForTests/ABETAE_clean.cif')
+    mof = CifReader.get_mof('../mofsForTests/Periodic_55_00 (27.771).cif')
     (new_sbus, recognized_sbus) = process_new_mof(mof)
     print(mof.label)
     print('New:')
