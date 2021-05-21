@@ -1,8 +1,8 @@
 import os
 import time
 
-from MofIdentifier.fileIO import XyzReader, CifReader, SmilesReader, LigandReader
-from MofIdentifier import StrongSubGraphMatcher, WeakSubGraphMatcher
+from MofIdentifier.fileIO import CifReader, SmilesReader, LigandReader
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from pathlib import Path
 
 
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     ligands = [SmilesReader.mol_from_str('C1=NNN=N1')]
     mofs = CifReader.get_all_mofs_in_directory(user_path)
     print('Filtering for subgraph isomorphism...')
-    good_mofs = WeakSubGraphMatcher.filter_for_mofs_with_ligands(mofs, ligands)
+    good_mofs = SubGraphMatcher.filter_for_mofs_with_ligands(mofs, ligands)
     mof_names = map(lambda x: x.label, good_mofs)
     end_time = time.time()
     print("C1=NNN=N1 present in the following file(s):")

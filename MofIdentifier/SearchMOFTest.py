@@ -2,7 +2,8 @@ import time
 import unittest
 from pathlib import Path
 
-from MofIdentifier import SearchMOF, SubGraphMatcher
+from MofIdentifier import SearchMOF
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import SmilesReader, CifReader
 
 

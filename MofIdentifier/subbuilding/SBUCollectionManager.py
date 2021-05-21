@@ -2,7 +2,7 @@ import glob
 import os
 from pathlib import Path
 
-from MofIdentifier import StrongSubGraphMatcher
+from MofIdentifier.SubGraphMatching import StrongSubGraphMatcher
 from MofIdentifier.fileIO import XyzReader, XyzWriter, CifReader
 from MofIdentifier.subbuilding import SBUTools, SBUIdentifier
 from MofIdentifier.subbuilding.SBUTools import UnitType

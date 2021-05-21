@@ -1,6 +1,6 @@
 from collections import deque
 from enum import Enum
-from MofIdentifier import SubGraphMatcher
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import XyzBondCreator
 
 

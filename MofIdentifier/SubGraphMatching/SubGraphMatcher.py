@@ -1,4 +1,5 @@
-from MofIdentifier import WeakSubGraphMatcher, StrongSubGraphMatcher, atom
+from MofIdentifier import atom
+from MofIdentifier.SubGraphMatching import WeakSubGraphMatcher, StrongSubGraphMatcher
 
 
 def vertices_are_equal(g1, g2, i1, i2):

@@ -1,6 +1,6 @@
 import time
 
-from MofIdentifier import SubGraphMatcher
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import XyzReader
 from MofIdentifier.fileIO.XyzBondCreator import XyzBondCreator
 import igraph
@@ -43,9 +43,9 @@ def graphs_near_isomorphic(graph_a, graph_b):
 if __name__ == '__main__':
     bond_creator = XyzBondCreator()
 
-    ligand = XyzReader.read_xyz('ligandsWildcards/M6_node.xyz')
+    ligand = XyzReader.read_xyz('../ligandsWildcards/M6_node.xyz')
     bond_creator.connect_atoms(ligand)
-    molecule = XyzReader.read_xyz('ligandsWildcards/contains_M6_node_good.xyz')
+    molecule = XyzReader.read_xyz('../ligandsWildcards/contains_m6_node_good.xyz')
     bond_creator.connect_atoms(molecule)
 
     before_read_time = time.time()
