@@ -57,14 +57,6 @@ def repeat_get_all_mofs_in_directory(mofs_path):
     return mofs
 
 
-def mof_contains_ligands(mof, ligands_list):
-    # if find_ligand_in_mof returns true, then put the mofs into the list
-    for ligand in ligands_list:
-        if not StrongSubGraphMatcher.find_ligand_in_mof(ligand, mof):
-            return False
-    return True
-
-
 def get_mof_path_from_console_input():
     prompt = "Enter a folder path that has .cif files: (Example: \\\\Users\\shers\\Desktop\\Chem\\structure_10143)\n"
     path = input(prompt)

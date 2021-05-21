@@ -2,7 +2,7 @@ import time
 import unittest
 from pathlib import Path
 
-from MofIdentifier import SearchMOF, StrongSubGraphMatcher, WeakSubGraphMatcher, SubGraphMatcher
+from MofIdentifier import SearchMOF, SubGraphMatcher
 from MofIdentifier.fileIO import SmilesReader, CifReader
 
 
@@ -12,7 +12,7 @@ class SearchMofTest(unittest.TestCase):
         ligand_file_names = ["M6_node.xyz", "H2O_1.xyz"]
         ligands = SearchMOF.read_ligands_from_files(ligand_file_names)
         mofs = CifReader.get_all_mofs_in_directory(user_path)
-        good_mofs = StrongSubGraphMatcher.filter_for_mofs_with_ligands(mofs, ligands)
+        good_mofs = SubGraphMatcher.filter_for_mofs_with_ligands(mofs, ligands)
         self.assertEqual(4, len(good_mofs))
 
     def test_SMILES_in_M6_mofs(self):
