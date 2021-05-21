@@ -1,6 +1,6 @@
 from collections import deque
 from enum import Enum
-from MofIdentifier import SubGraphMatcher
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import XyzBondCreator
 
 
@@ -49,10 +49,7 @@ class SBU:
         self.atoms = atoms
         self.frequency = 1
         self.label = 'Unlabeled'
-
-    # @classmethod
-    # def sbu_from_ligand(cls, molecule):
-    #     return cls(None, None, molecule.atoms)
+        self.should_use_weak_comparison = False
 
     def normalize_atoms(self, mof):
         atoms = []
@@ -104,10 +101,10 @@ class SBU:
                                                                aux=len(self.adjacent_auxiliary_ids))
 
     def __eq__(self, other):
-        is_isomorphic = SubGraphMatcher.are_isomorphic(self, other)
+        is_isomorphic = SubGraphMatcher.match(self, other)
         return is_isomorphic and len(self.adjacent_connector_ids) == len(other.adjacent_connector_ids) \
             and len(self.adjacent_cluster_ids) == len(other.adjacent_cluster_ids) \
             and len(self.adjacent_auxiliary_ids) == len(other.adjacent_auxiliary_ids)
 
     def graph_equals(self, other):
-        return len(self.atoms) == len(other.atoms) and SubGraphMatcher.are_isomorphic(self, other)
+        return len(self.atoms) == len(other.atoms) and SubGraphMatcher.match(self, other)

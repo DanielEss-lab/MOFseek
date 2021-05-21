@@ -1,3 +1,5 @@
+import os
+
 from CifFile import ReadCif
 
 from MofIdentifier.MOF import MOF
@@ -10,6 +12,26 @@ def get_mof(filename):
     bond_creator = MofBondCreator(mof)
     bond_creator.connect_atoms()
     return mof
+
+
+def get_all_mofs_in_directory(mofs_path):
+    mofs = []
+    # Change the directory
+    original_path = os.getcwd()
+    os.chdir(mofs_path)
+
+    for file in os.listdir():
+        # Check whether file is in text format or not
+        if file.endswith(".cif"):
+            try:
+                mof = get_mof(file)
+                mofs.append(mof)
+            except Exception:
+                print("Error reading file: ", file)
+                print(Exception)
+    # Return to original directory
+    os.chdir(original_path)
+    return mofs
 
 
 def read_cif(filename):

@@ -6,6 +6,7 @@ class Ligand:
         else:
             self.label = label
         self.atoms = atoms
+        self.should_use_weak_comparison = False
         self.elementsPresent = set()
         for atom in atoms:
             self.elementsPresent.add(atom.type_symbol)
