@@ -1,4 +1,4 @@
-from MofIdentifier import atom
+from MofIdentifier.Molecules import atom
 from MofIdentifier.SubGraphMatching import WeakSubGraphMatcher, StrongSubGraphMatcher
 
 
@@ -8,9 +8,9 @@ def vertices_are_equal(g1, g2, i1, i2):
     elem_2 = g2.vs[i2]['element']
     elem_2 = elem_2[0] if len(elem_2) > 1 and elem_2[1].isnumeric() else elem_2
     result = elem_1 == elem_2 \
-        or elem_1 == '*' or elem_2 == '*' \
-        or (elem_1 == '%' and atom.isMetal(elem_2)) or (elem_2 == '%' and atom.isMetal(elem_1)) \
-        or (elem_1 == '#' and (elem_2 == 'H' or elem_2 == 'C')) or (
+             or elem_1 == '*' or elem_2 == '*' \
+             or (elem_1 == '%' and atom.isMetal(elem_2)) or (elem_2 == '%' and atom.isMetal(elem_1)) \
+             or (elem_1 == '#' and (elem_2 == 'H' or elem_2 == 'C')) or (
                      elem_2 == '#' and (elem_1 == 'H' or elem_1 == 'C'))
     return result
 

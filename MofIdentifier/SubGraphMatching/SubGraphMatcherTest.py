@@ -1,6 +1,6 @@
 import unittest
 
-from MofIdentifier.fileIO import XyzReader, CifReader, SmilesReader, LigandReader
+from MofIdentifier.fileIO import XyzReader, CifReader, LigandReader
 from MofIdentifier.SubGraphMatching import SubGraphMatcher, WeakSubGraphMatcher, StrongSubGraphMatcher
 
 

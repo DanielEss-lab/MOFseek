@@ -1,8 +1,7 @@
 from pysmiles import read_smiles
 
-from MofIdentifier.Ligand import Ligand
-from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.atom import Atom
+from MofIdentifier.Molecules.Ligand import Ligand
+from MofIdentifier.Molecules.atom import Atom
 
 replacement = 'Rpl'
 
