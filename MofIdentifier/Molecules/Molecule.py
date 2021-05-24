@@ -24,6 +24,10 @@ class Molecule:
 
     def get_hydrogenless_graph(self):
         if self.no_h_graph is None:
-            self.no_h_graph = GraphMaker.hydrogenless_graph_from_mol(self)
+            if 'H' not in self.elementsPresent:
+                self.no_h_graph = self.graph
+            elif self.graph is None:
+                self.no_h_graph = GraphMaker.hydrogenless_graph_from_mol(self)
+            else:
+                self.no_h_graph = GraphMaker.hydrogenless_graph_from_old_graph(self)
         return self.no_h_graph
-

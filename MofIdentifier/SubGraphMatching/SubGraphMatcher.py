@@ -64,13 +64,6 @@ def mol_are_isomorphic(mol_1, mol_2):
     return match
 
 
-# def get_hydrogenless_graph(mol):
-#     graph = mol.get_graph().copy()
-#     to_delete_ids = [v.index for v in graph.vs if 'H' == v['element']]
-#     graph.delete_vertices(to_delete_ids)
-#     return graph
-
-
 def mol_near_isomorphic(mol_1, mol_2):
     graph_a = mol_1.get_hydrogenless_graph()
     graph_b = mol_2.get_hydrogenless_graph()

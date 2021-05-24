@@ -28,3 +28,10 @@ def hydrogenless_graph_from_mol(molecule):
                     if bonded_atom in molecule.atoms:
                         graph.add_edge(atom.label, bonded_atom.label)
     return graph
+
+
+def hydrogenless_graph_from_old_graph(mol):
+    graph = mol.get_graph().copy()
+    to_delete_ids = [v.index for v in graph.vs if 'H' == v['element']]
+    graph.delete_vertices(to_delete_ids)
+    return graph
