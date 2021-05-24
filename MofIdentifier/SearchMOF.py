@@ -46,7 +46,7 @@ def repeat_get_all_mofs_in_directory(mofs_path):
     # Change the directory
     while True:
         try:
-            CifReader.get_all_mofs_in_directory(mofs_path)
+            mofs = CifReader.get_all_mofs_in_directory(mofs_path)
         except OSError:
             print(OSError)
             mofs_path = get_mof_path_from_console_input
@@ -76,26 +76,14 @@ def is_valid_path(user_path):
 
 
 if __name__ == '__main__':
-    # user_path = get_mof_path_from_console_input()
-    # ligand_file_names = get_ligand_list_from_console_input()
-    # print('loading mofs and ligands from files...')
-    # ligands = read_ligands_from_files(ligand_file_names)
-    # mofs = repeat_get_all_mofs_in_directory(user_path)
-    # print('Filtering for subgraph isomorphism...')
-    # good_mofs = SubGraphMatcher.filter_for_mofs_with_ligands(mofs, ligands)
-    # mof_names = map(lambda x: x.label, good_mofs)
-    # print(*ligand_file_names, " present in the following file(s):")
-    # print(*mof_names, sep="\n")
     user_path = get_mof_path_from_console_input()
-    start_time = time.time()
+    ligand_file_names = get_ligand_list_from_console_input()
     print('loading mofs and ligands from files...')
-    ligands = [SmilesReader.mol_from_str('C1=NNN=N1')]
-    mofs = CifReader.get_all_mofs_in_directory(user_path)
+    ligands = read_ligands_from_files(ligand_file_names)
+    mofs = repeat_get_all_mofs_in_directory(user_path)
     print('Filtering for subgraph isomorphism...')
-    good_mofs = SubGraphMatcher.filter_for_mofs_with_ligands(mofs, ligands)
+    good_mofs = [mof for mof in mofs if SubGraphMatcher.mof_has_all_ligands(mof, ligands)]
     mof_names = map(lambda x: x.label, good_mofs)
-    end_time = time.time()
-    print("C1=NNN=N1 present in the following file(s):")
+    print(*ligand_file_names, " present in the following file(s):")
     print(*mof_names, sep="\n")
-    time_taken = int(end_time - start_time)
-    print('Time taken to search: {} seconds ({} minutes)', time_taken, round(time_taken/60))
+

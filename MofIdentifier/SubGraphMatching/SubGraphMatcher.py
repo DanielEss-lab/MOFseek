@@ -31,18 +31,9 @@ def find_ligand_in_mof(ligand, mof):
     return mof_contains_ligand
 
 
-def filter_for_mofs_with_ligands(mofs, ligands):
-    mofs_containing_ligands = []
-    for mof in mofs:
-        if mof_has_all_ligands(mof, ligands):
-            mofs_containing_ligands.append(mof)
-    return mofs_containing_ligands
-
-
 def mof_has_all_ligands(mof, ligands):
     for ligand in ligands:
-        mof_contains_ligand = mof.get_graph().subisomorphic_vf2(ligand.get_graph(), node_compat_fn=vertices_are_equal)
-        if not mof_contains_ligand:
+        if not find_ligand_in_mof(ligand, mof):
             return False
     return True
 
@@ -60,7 +51,7 @@ def name_molecules_from_set(molecules, mol_set):  # Can operate on anything with
 
 def does_assign_label_from_set(molecule, mol_set):
     for mol_from_set in mol_set:
-        if molecule.get_graph().isomorphic_vf2(mol_from_set.get_graph(), node_compat_fn=vertices_are_equal):
+        if match(molecule, mol_from_set):
             molecule.label = mol_from_set.label
             return True
     return False
@@ -73,10 +64,6 @@ def mol_are_isomorphic(mol_1, mol_2):
     return match
 
 
-def graphs_are_isomorphic(graph_a, graph_b):
-    return graph_a.isomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
-
-
 # def get_hydrogenless_graph(mol):
 #     graph = mol.get_graph().copy()
 #     to_delete_ids = [v.index for v in graph.vs if 'H' == v['element']]
@@ -87,10 +74,6 @@ def graphs_are_isomorphic(graph_a, graph_b):
 def mol_near_isomorphic(mol_1, mol_2):
     graph_a = mol_1.get_hydrogenless_graph()
     graph_b = mol_2.get_hydrogenless_graph()
-    return graphs_near_isomorphic(graph_a, graph_b)
-
-
-def graphs_near_isomorphic(graph_a, graph_b):
     if graph_a.vcount() != graph_b.vcount():
         return False
     match = (graph_a.subisomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
