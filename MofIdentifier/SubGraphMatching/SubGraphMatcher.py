@@ -1,5 +1,4 @@
 from MofIdentifier.Molecules import atom
-from MofIdentifier.SubGraphMatching import WeakSubGraphMatcher, StrongSubGraphMatcher
 
 
 def vertices_are_equal(g1, g2, i1, i2):
@@ -15,19 +14,11 @@ def vertices_are_equal(g1, g2, i1, i2):
     return result
 
 
-def graph_from_mol(mol1):
-    if mol1.should_use_weak_comparison:
-        graph1 = WeakSubGraphMatcher.igraph_from_molecule(mol1)
-    else:
-        graph1 = StrongSubGraphMatcher.igraph_from_molecule(mol1)
-    return graph1
-
-
 def match(mol1, mol2):
     if mol1.should_use_weak_comparison or mol2.should_use_weak_comparison:
-        return WeakSubGraphMatcher.mol_near_isomorphic(mol1, mol2)
+        return mol_near_isomorphic(mol1, mol2)
     else:
-        return StrongSubGraphMatcher.mol_are_isomorphic(mol1, mol2)
+        return mol_are_isomorphic(mol1, mol2)
 
 
 def find_ligand_in_mof(ligand, mof):
@@ -73,3 +64,35 @@ def does_assign_label_from_set(molecule, mol_set):
             molecule.label = mol_from_set.label
             return True
     return False
+
+
+def mol_are_isomorphic(mol_1, mol_2):
+    graph_a = mol_1.get_graph()
+    graph_b = mol_2.get_graph()
+    match = graph_a.isomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
+    return match
+
+
+def graphs_are_isomorphic(graph_a, graph_b):
+    return graph_a.isomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
+
+
+# def get_hydrogenless_graph(mol):
+#     graph = mol.get_graph().copy()
+#     to_delete_ids = [v.index for v in graph.vs if 'H' == v['element']]
+#     graph.delete_vertices(to_delete_ids)
+#     return graph
+
+
+def mol_near_isomorphic(mol_1, mol_2):
+    graph_a = mol_1.get_hydrogenless_graph()
+    graph_b = mol_2.get_hydrogenless_graph()
+    return graphs_near_isomorphic(graph_a, graph_b)
+
+
+def graphs_near_isomorphic(graph_a, graph_b):
+    if graph_a.vcount() != graph_b.vcount():
+        return False
+    match = (graph_a.subisomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
+             or graph_b.subisomorphic_vf2(graph_a, node_compat_fn=vertices_are_equal))
+    return match

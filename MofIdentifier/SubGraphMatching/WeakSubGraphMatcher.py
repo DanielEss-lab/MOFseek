@@ -1,9 +1,7 @@
 import time
 
-from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import XyzReader
 from MofIdentifier.fileIO.XyzBondCreator import XyzBondCreator
-import igraph
 
 
 # This subgraph matcher will IGNORE HYDROGEN and will call a match for
@@ -24,26 +22,6 @@ def igraph_from_molecule(molecule):
                     if bonded_atom in molecule.atoms:
                         graph.add_edge(atom.label, bonded_atom.label)
     return graph
-
-
-def mol_near_isomorphic(mol_1, mol_2):
-    graph_a = mol_1.get_graph().copy()
-    to_delete_ids = [v.index for v in graph_a.vs if 'H' == v['element']]
-    graph_a.delete_vertices(to_delete_ids)
-
-    graph_b = mol_2.get_graph().copy()
-    to_delete_ids = [v.index for v in graph_b.vs if 'H' == v['element']]
-    graph_b.delete_vertices(to_delete_ids)
-
-    return graphs_near_isomorphic(graph_a, graph_b)
-
-
-def graphs_near_isomorphic(graph_a, graph_b):
-    if graph_a.vcount() != graph_b.vcount():
-        return False
-    match = (graph_a.subisomorphic_vf2(graph_b, node_compat_fn=SubGraphMatcher.vertices_are_equal)
-             or graph_b.subisomorphic_vf2(graph_a, node_compat_fn=SubGraphMatcher.vertices_are_equal))
-    return match
 
 
 if __name__ == '__main__':
