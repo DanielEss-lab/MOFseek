@@ -1,5 +1,7 @@
 from collections import deque
 from enum import Enum
+
+from MofIdentifier.Molecules import Molecule
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import XyzBondCreator
 
@@ -39,17 +41,19 @@ class UnitType(Enum):
         return "cluster" if self == UnitType.CLUSTER else "connector" if self == UnitType.CONNECTOR else "auxiliary"
 
 
-class SBU:
+class SBU(Molecule.Molecule):
     def __init__(self, sbu_id, unit_type, atoms):
+        super().__init__('Unlabeled', atoms)
         self.sbu_id = sbu_id
         self.adjacent_cluster_ids = set(())
         self.adjacent_connector_ids = set(())
         self.adjacent_auxiliary_ids = set(())
         self.type = unit_type
-        self.atoms = atoms
         self.frequency = 1
-        self.label = 'Unlabeled'
-        self.should_use_weak_comparison = False
+
+    def add_atom(self, atom):
+        self.atoms.add(atom)
+        self.elementsPresent.add(atom.type_symbol)
 
     def normalize_atoms(self, mof):
         atoms = []

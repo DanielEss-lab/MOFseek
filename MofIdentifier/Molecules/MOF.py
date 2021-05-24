@@ -1,12 +1,13 @@
 import numpy as np
 import math
 
-from MofIdentifier.atom import Atom
+from MofIdentifier.Molecules import Molecule
+from MofIdentifier.Molecules.atom import Atom
 
 
-class MOF:
+class MOF(Molecule.Molecule):
     def __init__(self, label, symmetry, a, b, c, al, be, ga):
-        self.label = label
+        super().__init__(label, None)
         self.symmetry = symmetry
         self.length_a = a
         self.length_b = b
@@ -14,7 +15,6 @@ class MOF:
         self.angle_alpha = al
         self.angle_beta = be
         self.angle_gamma = ga
-        self.elementsPresent = set()
         # Convert unit vectors to Cartesian in order to understand how basis set changes. It's a bit of a workaround TBH
         (self.length_x, n, n) = self.conversion_to_Cartesian(Atom('-', '-', 1, 0, 0, True))
         (n, self.length_y, n) = self.conversion_to_Cartesian(Atom('-', '-', 0, 1, 0, True))

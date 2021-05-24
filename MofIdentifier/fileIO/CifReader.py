@@ -2,8 +2,8 @@ import os
 
 from CifFile import ReadCif
 
-from MofIdentifier.MOF import MOF
-from MofIdentifier.atom import Atom
+from MofIdentifier.Molecules.MOF import MOF
+from MofIdentifier.Molecules.atom import Atom
 from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
 
 

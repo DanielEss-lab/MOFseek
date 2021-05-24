@@ -1,8 +1,8 @@
 import time
 import pandas as pd
-from MofIdentifier.Ligand import Ligand
+from MofIdentifier.Molecules.Ligand import Ligand
 from MofIdentifier.fileIO.XyzBondCreator import XyzBondCreator
-from MofIdentifier.atom import Atom
+from MofIdentifier.Molecules.atom import Atom
 
 bond_creator = XyzBondCreator()
 
