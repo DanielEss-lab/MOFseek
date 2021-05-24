@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+from MofIdentifier.SubGraphMatching import StrongSubGraphMatcher
 from MofIdentifier.atom import Atom
 
 
@@ -15,10 +16,16 @@ class MOF:
         self.angle_beta = be
         self.angle_gamma = ga
         self.elementsPresent = set()
+        self.igraph = None
         # Convert unit vectors to Cartesian in order to understand how basis set changes. It's a bit of a workaround TBH
         (self.length_x, n, n) = self.conversion_to_Cartesian(Atom('-', '-', 1, 0, 0, True))
         (n, self.length_y, n) = self.conversion_to_Cartesian(Atom('-', '-', 0, 1, 0, True))
         (n, n, self.length_z) = self.conversion_to_Cartesian(Atom('-', '-', 0, 0, 1, True))
+
+    def get_graph(self):
+        if self.igraph is None:
+            self.igraph = StrongSubGraphMatcher.igraph_from_molecule(self)
+        return self.igraph
 
     def __str__(self):
         return "{} with fractional dimensions {}, {}, {}".format(self.label,

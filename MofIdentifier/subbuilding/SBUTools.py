@@ -47,9 +47,15 @@ class SBU:
         self.adjacent_auxiliary_ids = set(())
         self.type = unit_type
         self.atoms = atoms
+        self.igraph = None
         self.frequency = 1
         self.label = 'Unlabeled'
         self.should_use_weak_comparison = False
+
+    def get_graph(self):
+        if self.igraph is None:
+            self.igraph = SubGraphMatcher.graph_from_mol(self)
+        return self.igraph
 
     def normalize_atoms(self, mof):
         atoms = []

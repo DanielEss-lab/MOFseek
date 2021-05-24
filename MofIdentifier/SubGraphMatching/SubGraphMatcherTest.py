@@ -93,10 +93,10 @@ class WeakSubGraphMatcherTest(unittest.TestCase):
         self.assertEqual(False, StrongSubGraphMatcher.mol_are_isomorphic(all_bonds_present, most_bonds_present), "Should not find match in structures")
 
     def test_counting_hydrogen(self):
-        bare_node = XyzReader.get_molecule('../ligandsWildcards/M6_node.xyz')
-        node_with_hydrogen = XyzReader.get_molecule('../ligandsWildcards/contains_m6_node_good.xyz')
-        self.assertEqual(True, WeakSubGraphMatcher.mol_near_isomorphic(bare_node, node_with_hydrogen), "Should find match in structures")
-        self.assertEqual(False, StrongSubGraphMatcher.mol_are_isomorphic(bare_node, node_with_hydrogen), "Should not find match in structures")
+        bare_benzene = LigandReader.get_mol_from_file('../ligands/Benzene.txt')
+        benzene_with_h = LigandReader.get_mol_from_file('../ligands/FullBenzene.txt')
+        self.assertEqual(True, WeakSubGraphMatcher.mol_near_isomorphic(bare_benzene, benzene_with_h), "Should find match in structures")
+        self.assertEqual(False, StrongSubGraphMatcher.mol_are_isomorphic(bare_benzene, benzene_with_h), "Should not find match in structures")
 
 
 class SubGraphMatcherTest(unittest.TestCase):

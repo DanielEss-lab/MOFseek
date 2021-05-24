@@ -20,8 +20,8 @@ def igraph_from_molecule(molecule):
 
 
 def mol_are_isomorphic(mol_1, mol_2):
-    graph_a = igraph_from_molecule(mol_1)
-    graph_b = igraph_from_molecule(mol_2)
+    graph_a = mol_1.get_graph()
+    graph_b = mol_2.get_graph()
     match = graph_a.isomorphic_vf2(graph_b, node_compat_fn=SubGraphMatcher.vertices_are_equal)
     return match
 

@@ -1,9 +1,11 @@
 from pysmiles import read_smiles
 
 from MofIdentifier.Ligand import Ligand
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.atom import Atom
 
 replacement = 'Rpl'
+
 
 def mol_from_file(filepath):
     with open(filepath, 'r') as file:
@@ -20,6 +22,8 @@ def convert_mol_to_h(mol):
         if atom.type_symbol == replacement:
             atom.type_symbol = 'H'
             atom.label = atom.label.replace(replacement, 'H')
+    mol.elementsPresent.add('H')
+    mol.elementsPresent.remove(replacement)
 
 
 def mol_from_str(string, mol_name=None):

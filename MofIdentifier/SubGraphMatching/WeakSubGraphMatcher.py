@@ -27,8 +27,14 @@ def igraph_from_molecule(molecule):
 
 
 def mol_near_isomorphic(mol_1, mol_2):
-    graph_a = igraph_from_molecule(mol_1)
-    graph_b = igraph_from_molecule(mol_2)
+    graph_a = mol_1.get_graph().copy()
+    to_delete_ids = [v.index for v in graph_a.vs if 'H' == v['element']]
+    graph_a.delete_vertices(to_delete_ids)
+
+    graph_b = mol_2.get_graph().copy()
+    to_delete_ids = [v.index for v in graph_b.vs if 'H' == v['element']]
+    graph_b.delete_vertices(to_delete_ids)
+
     return graphs_near_isomorphic(graph_a, graph_b)
 
 

@@ -3,6 +3,7 @@ import os
 from CifFile import ReadCif
 
 from MofIdentifier.MOF import MOF
+from MofIdentifier.SubGraphMatching import StrongSubGraphMatcher
 from MofIdentifier.atom import Atom
 from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
 
