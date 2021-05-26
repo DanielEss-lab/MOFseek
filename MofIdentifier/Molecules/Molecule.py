@@ -3,7 +3,7 @@ from MofIdentifier.SubGraphMatching import GraphMaker
 
 class Molecule:
     def __init__(self, label, atoms, igraph=None, weak_comparison_enabled=False):
-        slice_index = label.rfind('\\')
+        slice_index = max(label.rfind('\\'), label.rfind('/'))
         if slice_index > -1:
             self.label = label[slice_index + 1:]
         else:
