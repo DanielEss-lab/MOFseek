@@ -31,6 +31,13 @@ class SBUCollection:
             string += "\n"
         return string
 
+    def all(self):
+        return self.clusters + self.connectors + self.auxiliaries
+
+    def __add__(self, other):
+        return SBUCollection(self.clusters + other.clusters, self.connectors
+                             + other.connectors, self.auxiliaries + other.auxiliaries)
+
 
 class UnitType(Enum):
     CLUSTER = 1
@@ -50,6 +57,9 @@ class SBU(Molecule.Molecule):
         self.adjacent_auxiliary_ids = set(())
         self.type = unit_type
         self.frequency = 1
+
+    def connections(self):
+        return len(self.adjacent_auxiliary_ids) + len(self.adjacent_cluster_ids) + len(self.adjacent_connector_ids)
 
     def add_atom(self, atom):
         self.atoms.add(atom)

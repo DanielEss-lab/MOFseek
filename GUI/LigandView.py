@@ -2,7 +2,7 @@ import tkinter as tk
 
 
 def make_view(parent, ligand):
-    view = tk.Frame(parent, height=40, width=40, bd=1, relief=tk.SOLID)
+    view = tk.Frame(parent, height=40, width=80, bd=1, relief=tk.SOLID)
 
     row1 = tk.Frame(master=view, height=20)
     name = tk.Label(row1, text=ligand.label)

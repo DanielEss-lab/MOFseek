@@ -1,8 +1,10 @@
 import tkinter as tk
 
-from GUI import MOFView, SBUView, SearchView, SearchResultsView
+from GUI import MOFView, SBUView, SearchView, SearchResultsView, MoleculeView
 from MofIdentifier.fileIO import CifReader
 from MofIdentifier.subbuilding import SBUIdentifier
+
+instance = None
 
 
 class Root(tk.Tk):
@@ -16,7 +18,7 @@ class Root(tk.Tk):
         # button2 = ttk.Button(frame, text='Close Window?!', command=self.destroy)
         # button2.pack()
         # greeting = tk.Label(frame, text="Hello, Tkinter", fg="blue", anchor=tk.S)  # foreground
-        # greeting.pack()  # Change the label by binding it to a Tkinter variable using textbariable= ?
+        # greeting.pack()  # Change the label by binding it to a Tkinter variable using textvariable= ?
         # entry = tk.Entry(frame, fg="#222222", bg="#cccccc", width=50)
         # entry.pack()  # To get text: entry.get()
         # text_box = tk.Text()
@@ -33,12 +35,18 @@ class Root(tk.Tk):
         # for sbu in sbus.clusters + sbus.connectors + sbus.auxiliaries:
         #     SBUView.make_view(self, sbu).pack()
         # self.minsize(100, 100)
-        # # self.geometry('200x200')
+        self.geometry('800x500')
 
         self.search_v = SearchView.make_view(self)
         self.search_v.pack()
         self.search_results_v = SearchResultsView.View(self)
         self.search_results_v.pack()
 
+        self.molecule_v = None
+
     def display_search_results(self, results):
         self.search_results_v.display_results(results)
+
+    def highlight_molecule(self, mol):
+        self.molecule_v = MoleculeView.make_view(self, mol)
+        self.molecule_v.pack(side=tk.BOTTOM)

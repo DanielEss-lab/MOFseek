@@ -8,8 +8,9 @@ class View(tk.Frame):
         self.parent = parent
         tk.Frame.__init__(self, self.parent, height=400, width=400, bd=2, relief=tk.SOLID)
 
-        self.canvas = tk.Canvas(self, borderwidth=0, background="#ffffff")
-        self.frame = tk.Frame(self.canvas, background="#ffffff")
+        self.canvas = tk.Canvas(self, borderwidth=0, background="#ffffff", width=800)
+        self.frame = tk.Frame(self.canvas, background="#ffffff", width=400)
+        self.canvas.master = parent
         self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.vsb.set)
 
@@ -39,4 +40,4 @@ class View(tk.Frame):
     def display_results(self, results):
         for mof in results:
             mof_v = MOFView.make_view(self.frame, mof)
-            mof_v.pack()
+            mof_v.pack(expand=True)
