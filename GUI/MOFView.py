@@ -1,7 +1,7 @@
-import subprocess
 import tkinter as tk
 
-from MofIdentifier.subbuilding import SBUIdentifier, SBUCollectionManager
+from MofIdentifier.fileIO import FileOpen
+from MofIdentifier.subbuilding import SBUCollectionManager
 
 
 def make_view(parent, mof):
@@ -10,10 +10,11 @@ def make_view(parent, mof):
     row1 = tk.Frame(master=view, height=20)
     name = tk.Label(row1, text=mof.label)
     name.pack(side='left')
-    open = tk.Label(row1, text="Open File", cursor='hand2')
-    open.bind('<Button-1>', lambda e: subprocess.check_call(['open', mof.filepath]))
+    open = tk.Label(row1, text="Open File", cursor='hand2', padx=8)
+    open.bind('<Button-1>', lambda e: FileOpen.open_file(mof.filepath))
     open.pack(side='right')
-    see = tk.Label(row1, text="<NYI: see>")
+    see = tk.Label(row1, text="Reveal File", cursor='hand2', padx=8)
+    see.bind('<Button-1>', lambda e: FileOpen.see_file(mof.filepath))
     see.pack(side='right')
     row1.pack(fill=tk.X)
 
@@ -44,19 +45,19 @@ def make_view(parent, mof):
         return fun
 
     for node in sbus.clusters:
-        text = f"{node.frequency}x{node.label} ({node.connections()} connections)"
+        text = f"{node.frequency}x {node.label} (c {node.connections()})"
         sbu_label = tk.Label(row3, text=text, fg='#0000a0', cursor='hand2', padx=3)
         event_function = have_root_highlight(node)
         sbu_label.bind('<Button-1>', event_function)
         sbu_label.pack(side='left')
     for conn in sbus.connectors:
-        text = f"{conn.frequency}x{conn.label} ({conn.connections()} connections)"
+        text = f"{conn.frequency}x {conn.label} (c {conn.connections()})"
         sbu_label = tk.Label(row3, text=text, fg='#008100', cursor='hand2', padx=3)
         event_function = have_root_highlight(conn)
         sbu_label.bind('<Button-1>', event_function)
         sbu_label.pack(side='left')
     for aux in sbus.auxiliaries:
-        text = f"{aux.frequency}x{aux.label} ({aux.connections()} connections)"
+        text = f"{aux.frequency}x {aux.label} (c {aux.connections()})"
         sbu_label = tk.Label(row3, text=text, fg='#810000', cursor='hand2', padx=3)
         event_function = have_root_highlight(aux)
         sbu_label.bind('<Button-1>', event_function)

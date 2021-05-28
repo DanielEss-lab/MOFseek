@@ -8,7 +8,7 @@ class View(tk.Frame):
         self.parent = parent
         tk.Frame.__init__(self, self.parent, height=400, width=800, bd=2, relief=tk.SOLID)
 
-        self.canvas = tk.Canvas(self, borderwidth=0, background="#ffffff", width=800)
+        self.canvas = tk.Canvas(self, borderwidth=0, background="#ffffff")
         self.frame = tk.Frame(self.canvas, background="#ffffff")
         self.canvas.master = parent
         self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)

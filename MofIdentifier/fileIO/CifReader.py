@@ -1,4 +1,6 @@
 import os
+from io import FileIO
+from pathlib import Path
 
 from CifFile import ReadCif
 
@@ -20,22 +22,23 @@ def get_all_mofs_in_directory(mofs_path):
     original_path = os.getcwd()
     os.chdir(mofs_path)
 
-    for file in os.listdir():
+    for file_name in os.listdir(mofs_path):
         # Check whether file is in text format or not
-        if file.endswith(".cif"):
+        if file_name.endswith(".cif"):
             try:
-                mof = get_mof(file)
+                filepath = Path(file_name).resolve()
+                mof = get_mof(str(filepath))
                 mofs.append(mof)
             except Exception:
-                print("Error reading file: ", file)
-                print(Exception)
+                print("Error reading file: ", file_name)
+                print(Exception.with_traceback())
     # Return to original directory
     os.chdir(original_path)
     return mofs
 
 
 def read_cif(filename):
-    cf = ReadCif(filename)
+    cf = ReadCif(FileIO(filename, 'rb'))
     cb = cf.first_block()
     file_path = filename
     try:
@@ -71,7 +74,6 @@ def read_cif(filename):
 
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-    MOF_808 = get_mof('../mofsForTests/smod7-pos-1.cif')
+    MOFs = get_all_mofs_in_directory('../mofsForTests/')
 
-    print(MOF_808)
-    print(*MOF_808.elementsPresent)
+    print(*MOFs)

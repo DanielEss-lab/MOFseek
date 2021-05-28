@@ -1,8 +1,6 @@
 import tkinter as tk
 
-from GUI import MOFView, SBUView, SearchView, SearchResultsView, MoleculeView, UploadLigandView
-from MofIdentifier.fileIO import CifReader
-from MofIdentifier.subbuilding import SBUIdentifier
+from GUI import SearchView, SearchResultsView, MoleculeView, UploadLigandView
 
 instance = None
 

@@ -53,6 +53,7 @@ def does_assign_label_from_set(molecule, mol_set):
     for mol_from_set in mol_set:
         if match(molecule, mol_from_set):
             molecule.label = mol_from_set.label
+            molecule.filepath = mol_from_set.filepath
             return True
     return False
 
