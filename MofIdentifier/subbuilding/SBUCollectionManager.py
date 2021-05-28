@@ -22,11 +22,11 @@ def get_existing_sbus():  # NOTE: right now this just returns a SBUCollection of
     clusters = []
     connectors = []
     aux = []
-    for filename in glob.glob(os.path.join('cluster/', '*.xyz')):
+    for filename in glob.glob(os.path.join(Path(__file__).parent / 'cluster/', '*.xyz')):
         clusters.append(XyzReader.get_molecule(filename))
-    for filename in glob.glob(os.path.join('connector/', '*.xyz')):
+    for filename in glob.glob(os.path.join(Path(__file__).parent / 'connector/', '*.xyz')):
         connectors.append(XyzReader.get_molecule(filename))
-    for filename in glob.glob(os.path.join('auxiliary/', '*.xyz')):
+    for filename in glob.glob(os.path.join(Path(__file__).parent / 'auxiliary/', '*.xyz')):
         aux.append(XyzReader.get_molecule(filename))
     return SBUTools.SBUCollection(clusters, connectors, aux)
 
@@ -49,6 +49,7 @@ def write_sbus(new_sbus, file_counts):
             file_name = type_name + '_' + str(num_type)
             sbu.label = file_name
             file_path = os.path.join(Path(__file__).parent, type_name, file_name + '.xyz')
+            sbu.filepath = file_path
             XyzWriter.write_molecule_to_file(file_path, sbu.atoms, file_name)
             num_type += 1
         if len(sbus) != len(sbus_to_write):
@@ -66,9 +67,11 @@ def share_names(sbu_list):
             if sbu_list[i].label == 'Unlabeled':
                 if sbu_list[i].graph_equals(sbu_list[j]):
                     sbu_list[i].label = sbu_list[j].label
+                    sbu_list[i].filepath = sbu_list[j].filepath
             elif sbu_list[j].label == 'Unlabeled':
                 if sbu_list[j].graph_equals(sbu_list[i]):
                     sbu_list[j].label = sbu_list[i].label
+                    sbu_list[j].filepath = sbu_list[i].filepath
             j += 1
         i += 1
 

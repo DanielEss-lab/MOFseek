@@ -2,12 +2,13 @@ from MofIdentifier.SubGraphMatching import GraphMaker
 
 
 class Molecule:
-    def __init__(self, label, atoms, igraph=None, weak_comparison_enabled=False):
-        slice_index = max(label.rfind('\\'), label.rfind('/'))
+    def __init__(self, filepath, atoms, igraph=None, weak_comparison_enabled=False):
+        self.filepath = filepath
+        slice_index = max(filepath.rfind('\\'), filepath.rfind('/'))
         if slice_index > -1:
-            self.label = label[slice_index + 1:]
+            self.label = filepath[slice_index + 1:]
         else:
-            self.label = label
+            self.label = filepath
         self.atoms = atoms
         self.elementsPresent = set()
         self.graph = igraph

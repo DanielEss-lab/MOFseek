@@ -6,8 +6,8 @@ from MofIdentifier.Molecules.atom import Atom
 
 
 class MOF(Molecule.Molecule):
-    def __init__(self, label, symmetry, a, b, c, al, be, ga):
-        super().__init__(label, None)
+    def __init__(self, filepath, symmetry, a, b, c, al, be, ga):
+        super().__init__(filepath, None)
         self.symmetry = symmetry
         self.length_a = a
         self.length_b = b

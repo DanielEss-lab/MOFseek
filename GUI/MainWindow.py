@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from GUI import MOFView, SBUView, SearchView, SearchResultsView, MoleculeView
+from GUI import MOFView, SBUView, SearchView, SearchResultsView, MoleculeView, UploadLigandView
 from MofIdentifier.fileIO import CifReader
 from MofIdentifier.subbuilding import SBUIdentifier
 
@@ -37,10 +37,12 @@ class Root(tk.Tk):
         # self.minsize(100, 100)
         self.geometry('800x500')
 
+        self.upload_mof_v = UploadLigandView.View(self)
+        self.upload_mof_v.pack()
         self.search_v = SearchView.make_view(self)
         self.search_v.pack()
         self.search_results_v = SearchResultsView.View(self)
-        self.search_results_v.pack()
+        self.search_results_v.pack(fill=tk.X)
 
         self.molecule_v = None
 
@@ -48,5 +50,7 @@ class Root(tk.Tk):
         self.search_results_v.display_results(results)
 
     def highlight_molecule(self, mol):
+        if self.molecule_v is not None:
+            self.molecule_v.destroy()
         self.molecule_v = MoleculeView.make_view(self, mol)
         self.molecule_v.pack(side=tk.BOTTOM)

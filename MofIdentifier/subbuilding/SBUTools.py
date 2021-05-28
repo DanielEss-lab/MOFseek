@@ -50,7 +50,7 @@ class UnitType(Enum):
 
 class SBU(Molecule.Molecule):
     def __init__(self, sbu_id, unit_type, atoms):
-        super().__init__('Unlabeled', atoms)
+        super().__init__('No Filepath/Unlabeled', atoms)
         self.sbu_id = sbu_id
         self.adjacent_cluster_ids = set(())
         self.adjacent_connector_ids = set(())
