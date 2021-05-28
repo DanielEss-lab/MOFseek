@@ -4,6 +4,12 @@ from MofIdentifier.fileIO import FileOpen
 from MofIdentifier.subbuilding import SBUCollectionManager
 
 
+def format_elements(mof):
+    elements = list(mof.elementsPresent)
+    elements.sort()
+    return ' '.join(elements)
+
+
 def make_view(parent, mof):
     root = parent.master.master
     view = tk.Frame(parent, height=40, bd=2, relief=tk.SOLID)
@@ -31,6 +37,7 @@ def make_view(parent, mof):
     ]
     for idx, text in enumerate(attributes):
         _attribute_view(row2, text, idx).pack(side='left')
+    _attribute_view(row2, 'Elements', format_elements(mof)).pack(side='left')
     row2.pack(fill=tk.X)
 
     row3 = tk.Frame(master=view, height=20)

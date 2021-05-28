@@ -9,6 +9,7 @@ class Root(tk.Tk):
     def __init__(self):
         super(Root, self).__init__()
         self.title("Ess lab | P66 | GUI WIP")
+        # self.iconbitmap('')  # .ico file
         # frame = tk.Frame(self, bg="white", bd='5')  # background
         # frame.pack(side='bottom')
         # button = tk.Button(frame, text='Close Window', width=10, height=3, command=self.destroy)
