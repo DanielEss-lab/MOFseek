@@ -55,8 +55,18 @@ class View(tk.Frame):
         self.add_attribute_search_entries()
 
         self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
+        btn_clear = tk.Button(self, text="Clear", command=self.clear)
+        btn_clear.grid(row=3, column=0, pady=2, columnspan=1)
         btn_search = tk.Button(self, text="Search", command=self.perform_search)
         btn_search.grid(row=3, column=0, pady=2, columnspan=12)
+
+    def clear(self):
+        for entry in self.attribute_entries:
+            entry.max.delete(0, tk.END)
+            entry.min.delete(0, tk.END)
+        self.ent_ligand.delete(0, tk.END)
+        self.ent_elements.delete(0, tk.END)
+
 
     def perform_search(self):
         def callback():
