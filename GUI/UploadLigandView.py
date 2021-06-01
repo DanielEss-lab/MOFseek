@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter.filedialog import askopenfilename
+from tkinter import messagebox
 
 from MofIdentifier.fileIO import CifReader, LigandReader
 
@@ -13,7 +14,11 @@ class View(tk.Frame):
         btn.pack()
 
     def open_file(self):
-        file = askopenfilename(filetypes=[('XYZ Files', '*.xyz'), ('SMILES Files', '*.txt')])
-        if file is not None:
-            mol = LigandReader.get_mol_from_file(file)
-            print(mol)
+        filename = askopenfilename(filetypes=[('XYZ Files', '*.xyz'), ('SMILES Files', '*.txt')])
+        if filename is not None and len(filename) > 0:
+            try:
+                mol = LigandReader.get_mol_from_file(filename)
+            except:
+                messagebox.showerror("Bad File", "Unable to extract a molecule from this file")
+                return
+            self.parent.add_custom_ligand(mol)

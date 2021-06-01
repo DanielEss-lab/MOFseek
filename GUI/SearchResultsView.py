@@ -38,6 +38,11 @@ class View(tk.Frame):
         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def display_results(self, results):
+        for widget in self.frame.winfo_children():
+            widget.destroy()
+
+        lbl_num_results = tk.Label(self.frame, text=f"{len(results)} Results")
+        lbl_num_results.grid(sticky=("N", "S", "W"))
         for mof in results:
             mof_v = MOFView.make_view(self.frame, mof)
-            mof_v.pack(expand=True, fill=tk.X)
+            mof_v.grid(sticky=("N", "S", "E", "W"))

@@ -36,9 +36,7 @@ class Root(tk.Tk):
         # self.minsize(100, 100)
         self.geometry('800x500')
 
-        self.upload_mof_v = UploadLigandView.View(self)
-        self.upload_mof_v.pack()
-        self.search_v = SearchView.make_view(self)
+        self.search_v = SearchView.View(self)
         self.search_v.pack()
         self.search_results_v = SearchResultsView.View(self)
         self.search_results_v.pack(fill=tk.X)
