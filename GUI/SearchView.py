@@ -118,7 +118,7 @@ class View(tk.Frame):
             entry = AttributeEntry(attribute_row, text)
             self.attribute_entries.append(entry)
             entry.pack(side='left')
-        attribute_row.grid(column=0, row=2, columnspan=12, pady=2)
+        # attribute_row.grid(column=0, row=2, columnspan=12, pady=2) #TODO: add back in when ready
 
 
 class AttributeEntry(tk.Frame):
