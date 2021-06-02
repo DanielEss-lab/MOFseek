@@ -17,8 +17,8 @@ class View(tk.Frame):
         second_row_button.grid(row=1, column=0, pady=2)
 
     def get_values(self):
-        return [box.get() for box in self.box_by_row_index.values() if box.get() is not None and box.get() != '']\
-               + [self.initial_combobox.get()]
+        values = [box.get() for box in self.box_by_row_index.values()] + [self.initial_combobox.get()]
+        return [value for value in values if value is not None and value != '']
 
     def set_possible_values(self, values):
         self.values = values

@@ -12,16 +12,22 @@ from MofIdentifier.fileIO import CifReader, LigandReader
 
 
 class SearchTerms:
-    def __init__(self, ligands, element_symbol_list):
+    def __init__(self, ligands, element_symbol_list, excl_ligands, excl_elements):
         self.ligands = ligands
         self.element_symbols = element_symbol_list
+        self.excl_ligands = excl_ligands
+        self.excl_element_symbols = excl_elements
         # Add parameters here
 
     def passes(self, MOF):
         for element in self.element_symbols:
             if element not in MOF.elementsPresent:
                 return False
-        return SubGraphMatcher.mof_has_all_ligands(MOF, self.ligands)
+        for element in self.excl_element_symbols:
+            if element in MOF.elementsPresent:
+                return False
+        return SubGraphMatcher.mof_has_all_ligands(MOF, self.ligands) \
+            and SubGraphMatcher.mof_has_no_ligands(MOF, self.excl_ligands)
 
 
 def search_ligand_names_in_mofsForTests(search):
@@ -44,32 +50,37 @@ class View(tk.Frame):
         self.upload_mof_v = UploadLigandView.View(self)
         self.upload_mof_v.grid(row=0, column=0, pady=2, columnspan=12)
 
-        self.lbl_ligand = tk.Label(self, text="Ligands: ")
+        self.lbl_ligand = tk.Label(self, text="Required Ligands: ")
         self.lbl_ligand.grid(row=1, column=0, pady=2, sticky=tk.E)
-        # self.ent_ligand = tk.Entry(self)
-        # self.ent_ligand.insert(0, 'H2O_1.xyz')
-        # self.ent_ligand.grid(row=1, column=1, pady=2, sticky=tk.EW)
-        # self.combo = AutoCompleteComboBox.Box(self)
-        # self.combo.set_completion_list(self.all_ligands_names())
-        # self.combo.grid(row=1, column=1, pady=2, sticky=tk.EW)
-        # self.combo.focus_set()
         self.ent_ligand = MultipleAutoCompleteSearch.View(self)
         self.ent_ligand.set_possible_values(self.all_ligands_names())
         self.ent_ligand.grid(row=1, column=1, pady=2, sticky=tk.EW)
         self.ent_ligand.initial_combobox.focus_set()
-
-        self.lbl_elements = tk.Label(self, text="Elements: ")
+        self.lbl_elements = tk.Label(self, text="Required Elements: ")
         self.lbl_elements.grid(row=1, column=2, pady=2, sticky=tk.E)
         self.ent_elements = tk.Entry(self)
         self.ent_elements.insert(0, 'C, H')
         self.ent_elements.grid(row=1, column=3, pady=2, sticky=tk.EW)
-        self.add_attribute_search_entries()
+
+        self.lbl_excl_ligand = tk.Label(self, text="Forbidden Ligands: ")
+        self.lbl_excl_ligand.grid(row=2, column=0, pady=2, sticky=tk.E)
+        self.ent_excl_ligand = MultipleAutoCompleteSearch.View(self)
+        self.ent_excl_ligand.set_possible_values(self.all_ligands_names())
+        self.ent_excl_ligand.grid(row=2, column=1, pady=2, sticky=tk.EW)
+        self.ent_excl_ligand.initial_combobox.focus_set()
+        self.lbl_excl_elements = tk.Label(self, text="Forbidden Elements: ")
+        self.lbl_excl_elements.grid(row=2, column=2, pady=2, sticky=tk.E)
+        self.ent_excl_elements = tk.Entry(self)
+        self.ent_excl_elements.insert(0, '')
+        self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.EW)
+
+        self.add_attribute_search_entries()  # Row 3
 
         self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
         btn_clear = tk.Button(self, text="Clear", command=self.clear)
-        btn_clear.grid(row=3, column=0, pady=2, columnspan=1)
+        btn_clear.grid(row=4, column=0, pady=2, columnspan=1)
         btn_search = tk.Button(self, text="Search", command=self.perform_search)
-        btn_search.grid(row=3, column=0, pady=2, columnspan=12)
+        btn_search.grid(row=4, column=0, pady=2, columnspan=12)
 
     def clear(self):
         for entry in self.attribute_entries:
@@ -84,24 +95,31 @@ class View(tk.Frame):
             self.search_from_input()
             self.progress.stop()
             self.progress.grid_forget()
-        self.progress.grid(row=4, column=0, pady=2, columnspan=12, sticky=tk.EW)
+
+        self.progress.grid(row=5, column=0, pady=2, columnspan=12, sticky=tk.EW)
         threading.Thread(target=callback).start()
 
     def search_from_input(self):
-        ligand_names = self.ent_ligand.get_values()
+        def get_ligands(multiple_auto_combobox):
+            ligand_names = multiple_auto_combobox.get_values()
 
-        ligands = list()
-        other_ligands = list()
-        for ligand_name in ligand_names:
-            if ligand_name in self.custom_ligands:
-                ligands.append(self.custom_ligands[ligand_name])
-            else:
-                other_ligands.append(ligand_name)
-        ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
+            ligands = list()
+            other_ligands = list()
+            for ligand_name in ligand_names:
+                if ligand_name in self.custom_ligands:
+                    ligands.append(self.custom_ligands[ligand_name])
+                else:
+                    other_ligands.append(ligand_name)
+            ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
+            return ligands
 
+        ligands = get_ligands(self.ent_ligand)
+        forbidden_ligands = get_ligands(self.ent_excl_ligand)
         element_symbols_text = self.ent_elements.get()
         element_symbols = re.findall(r"[\w']+", element_symbols_text)
-        search = SearchTerms(ligands, element_symbols)
+        forbidden_element_symbols_text = self.ent_excl_elements.get()
+        forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
+        search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols)
         results = search_ligand_names_in_mofsForTests(search)
         self.parent.display_search_results(results)
 
