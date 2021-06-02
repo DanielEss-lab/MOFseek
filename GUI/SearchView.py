@@ -124,8 +124,8 @@ class View(tk.Frame):
         self.parent.display_search_results(results)
 
     def add_custom_ligand(self, mol):
-        self.ent_ligand.add_new_possible_value(mol.label)
-        self.custom_ligands[mol.label] = mol
+        self.ent_ligand.add_new_possible_value('* ' + mol.label)
+        self.custom_ligands['* ' + mol.label] = mol
 
     def add_attribute_search_entries(self):
         def attribute_heading(parent):

@@ -53,7 +53,8 @@ class View(tk.Frame):
         combobox.grid_forget()
 
     def add_new_possible_value(self, label):
-        self.set_possible_values(self.values.extend(label))
+        self.values.append(label)
+        self.set_possible_values(self.values)
 
 
 if __name__ == '__main__':
