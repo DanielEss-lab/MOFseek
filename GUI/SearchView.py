@@ -4,10 +4,11 @@ import tkinter.ttk as ttk
 import re
 from pathlib import Path
 
-from GUI import UploadLigandView
+from GUI import UploadLigandView, MultipleAutoCompleteSearch
+from GUI import AutoCompleteComboBox
 from MofIdentifier import SearchMOF
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import CifReader
+from MofIdentifier.fileIO import CifReader, LigandReader
 
 
 class SearchTerms:
@@ -42,15 +43,25 @@ class View(tk.Frame):
         self.grid_columnconfigure(1, weight=2)
         self.upload_mof_v = UploadLigandView.View(self)
         self.upload_mof_v.grid(row=0, column=0, pady=2, columnspan=12)
+
         self.lbl_ligand = tk.Label(self, text="Ligands: ")
         self.lbl_ligand.grid(row=1, column=0, pady=2, sticky=tk.E)
-        self.ent_ligand = tk.Entry(self)
-        self.ent_ligand.insert(0, 'H2O_1.xyz')
+        # self.ent_ligand = tk.Entry(self)
+        # self.ent_ligand.insert(0, 'H2O_1.xyz')
+        # self.ent_ligand.grid(row=1, column=1, pady=2, sticky=tk.EW)
+        # self.combo = AutoCompleteComboBox.Box(self)
+        # self.combo.set_completion_list(self.all_ligands_names())
+        # self.combo.grid(row=1, column=1, pady=2, sticky=tk.EW)
+        # self.combo.focus_set()
+        self.ent_ligand = MultipleAutoCompleteSearch.View(self)
+        self.ent_ligand.set_possible_values(self.all_ligands_names())
         self.ent_ligand.grid(row=1, column=1, pady=2, sticky=tk.EW)
+        self.ent_ligand.initial_combobox.focus_set()
+
         self.lbl_elements = tk.Label(self, text="Elements: ")
         self.lbl_elements.grid(row=1, column=2, pady=2, sticky=tk.E)
         self.ent_elements = tk.Entry(self)
-        self.ent_elements.insert(0, 'N')
+        self.ent_elements.insert(0, 'C, H')
         self.ent_elements.grid(row=1, column=3, pady=2, sticky=tk.EW)
         self.add_attribute_search_entries()
 
@@ -64,9 +75,8 @@ class View(tk.Frame):
         for entry in self.attribute_entries:
             entry.max.delete(0, tk.END)
             entry.min.delete(0, tk.END)
-        self.ent_ligand.delete(0, tk.END)
+        self.ent_ligand.clear()
         self.ent_elements.delete(0, tk.END)
-
 
     def perform_search(self):
         def callback():
@@ -78,8 +88,7 @@ class View(tk.Frame):
         threading.Thread(target=callback).start()
 
     def search_from_input(self):
-        ligand_names_text = self.ent_ligand.get().replace(',', ' ')
-        ligand_names = [name for name in ligand_names_text.split(' ') if len(name) > 0]
+        ligand_names = self.ent_ligand.get_values()
 
         ligands = list()
         other_ligands = list()
@@ -97,8 +106,7 @@ class View(tk.Frame):
         self.parent.display_search_results(results)
 
     def add_custom_ligand(self, mol):
-        pretext = ', ' if len(self.ent_ligand.get()) > 0 else ''
-        self.ent_ligand.insert(tk.END, pretext + mol.label)
+        self.ent_ligand.add_new_possible_value(mol.label)
         self.custom_ligands[mol.label] = mol
 
     def add_attribute_search_entries(self):
@@ -128,7 +136,12 @@ class View(tk.Frame):
             entry = AttributeEntry(attribute_row, text)
             self.attribute_entries.append(entry)
             entry.pack(side='left')
-        # attribute_row.grid(column=0, row=2, columnspan=12, pady=2) #TODO: add back in when ready
+        # attribute_row.grid(column=0, row=2, columnspan=12, pady=2)  # TODO: add back in when ready
+
+    def all_ligands_names(self):  # Will change with adding DB
+        path = str(Path(__file__).parent / "../MofIdentifier/ligandsWildCards")
+        ligands = LigandReader.get_all_mols_from_directory(path)
+        return [ligand.label for ligand in ligands]
 
 
 class AttributeEntry(tk.Frame):
