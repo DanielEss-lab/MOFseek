@@ -10,6 +10,8 @@ from MofIdentifier import SearchMOF
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import CifReader, LigandReader
 
+ROW_MAXIMUM = 6
+
 
 class SearchTerms:
     def __init__(self, ligands, element_symbol_list, excl_ligands, excl_elements):
@@ -27,7 +29,10 @@ class SearchTerms:
             if element in MOF.elementsPresent:
                 return False
         return SubGraphMatcher.mof_has_all_ligands(MOF, self.ligands) \
-            and SubGraphMatcher.mof_has_no_ligands(MOF, self.excl_ligands)
+               and SubGraphMatcher.mof_has_no_ligands(MOF, self.excl_ligands)
+
+    def __str__(self):
+        return f"ligands:{self.ligands}-{self.excl_ligands}, elements:{self.element_symbols}-{self.excl_element_symbols}"
 
 
 def search_ligand_names_in_mofsForTests(search):
@@ -43,7 +48,8 @@ class View(tk.Frame):
         tk.Frame.__init__(self, self.parent, height=40, width=300, bd=2, relief=tk.SOLID)
         self.attribute_entries = list()
         self.custom_ligands = dict()
-
+        self.search_to_results = dict()
+        self.text_to_search = dict()
         for i in range(8 + 1):
             self.grid_columnconfigure(i, weight=1)
         self.grid_columnconfigure(1, weight=2)
@@ -76,11 +82,20 @@ class View(tk.Frame):
 
         self.add_attribute_search_entries()  # Row 3
 
+        self.lbl_redo_search = tk.Label(self, text="Previous searches: ")
+        self.lbl_redo_search.grid(row=4, column=0, pady=2)
+        self.redo_search_selected = tk.StringVar()
+        self.redo_search_selected.set('History')
+        self.dropdown_redo_search = ttk.OptionMenu(self, self.redo_search_selected, *self.search_to_results.keys())
+        self.dropdown_redo_search.grid(row=4, column=1, pady=2, sticky=tk.EW)
+        self.btn_redo_search = tk.Button(self, text="Redo", command=self.redo_search)
+        self.btn_redo_search.grid(row=4, column=3, pady=2)
+
         self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
         self.btn_clear = tk.Button(self, text="Clear", command=self.clear)
-        self.btn_clear.grid(row=4, column=0, pady=2, columnspan=1)
+        self.btn_clear.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=1)
         self.btn_search = tk.Button(self, text="Search", command=self.perform_search)
-        self.btn_search.grid(row=4, column=0, pady=2, columnspan=12)
+        self.btn_search.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=12)
         self.btn_cancel = tk.Button(self, text="Cancel", command=self.cancel_search)
 
     def clear(self):
@@ -90,15 +105,16 @@ class View(tk.Frame):
         self.ent_ligand.clear()
         self.ent_elements.delete(0, tk.END)
 
-    def perform_search(self):
+    def perform_search(self, search=None):
         def callback():
             self.progress.start()
-            self.search_from_input()
+            self.search_from_input(search)
             self.progress.stop()
             self.progress.grid_forget()
             self.btn_cancel.grid_forget()
-        self.btn_cancel.grid(row=4, column=4, pady=2, columnspan=1)
-        self.progress.grid(row=5, column=0, pady=2, columnspan=12, sticky=tk.EW)
+
+        self.btn_cancel.grid(row=ROW_MAXIMUM - 1, column=4, pady=2, columnspan=1)
+        self.progress.grid(row=ROW_MAXIMUM, column=0, pady=2, columnspan=12, sticky=tk.EW)
         self.thread = TerminableThread.ThreadWithExc(target=callback)
         self.thread.start()
 
@@ -108,28 +124,44 @@ class View(tk.Frame):
         self.progress.grid_forget()
         self.btn_cancel.grid_forget()
 
-    def search_from_input(self):
-        def get_ligands(multiple_auto_combobox):
-            ligand_names = multiple_auto_combobox.get_values()
+    def redo_search(self):
+        search_text = self.redo_search_selected.get()
+        if search_text == 'History':
+            return
+        search = self.text_to_search[search_text]
+        if self.search_to_results[search] is not None:
+            self.parent.display_search_results(self.search_to_results[search])
+        else:
+            self.perform_search(search)
 
-            ligands = list()
-            other_ligands = list()
-            for ligand_name in ligand_names:
-                if ligand_name in self.custom_ligands:
-                    ligands.append(self.custom_ligands[ligand_name])
-                else:
-                    other_ligands.append(ligand_name)
-            ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
-            return ligands
+    def search_from_input(self, search):
+        if search is None:
+            def get_ligands(multiple_auto_combobox):
+                ligand_names = multiple_auto_combobox.get_values()
 
-        ligands = get_ligands(self.ent_ligand)
-        forbidden_ligands = get_ligands(self.ent_excl_ligand)
-        element_symbols_text = self.ent_elements.get()
-        element_symbols = re.findall(r"[\w']+", element_symbols_text)
-        forbidden_element_symbols_text = self.ent_excl_elements.get()
-        forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
-        search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols)
+                ligands = list()
+                other_ligands = list()
+                for ligand_name in ligand_names:
+                    if ligand_name in self.custom_ligands:
+                        ligands.append(self.custom_ligands[ligand_name])
+                    else:
+                        other_ligands.append(ligand_name)
+                ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
+                return ligands
+
+            ligands = get_ligands(self.ent_ligand)
+            forbidden_ligands = get_ligands(self.ent_excl_ligand)
+            element_symbols_text = self.ent_elements.get()
+            element_symbols = re.findall(r"[\w']+", element_symbols_text)
+            forbidden_element_symbols_text = self.ent_excl_elements.get()
+            forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
+            search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols)
+        self.text_to_search[str(search)] = search
+        self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
+                                                        self.redo_search_selected.set(value))
+        self.search_to_results[search] = 'ongoing'
         results = search_ligand_names_in_mofsForTests(search)
+        self.search_to_results[search] = results
         self.parent.display_search_results(results)
 
     def add_custom_ligand(self, mol):
