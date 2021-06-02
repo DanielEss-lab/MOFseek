@@ -29,9 +29,11 @@ def get_all_mofs_in_directory(mofs_path):
                 filepath = Path(file_name).resolve()
                 mof = get_mof(str(filepath))
                 mofs.append(mof)
+            except InterruptedError:
+                raise InterruptedError
             except Exception:
                 print("Error reading file: ", file_name)
-                print(Exception.with_traceback())
+                print(Exception)
     # Return to original directory
     os.chdir(original_path)
     return mofs

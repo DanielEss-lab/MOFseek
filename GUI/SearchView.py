@@ -4,7 +4,7 @@ import tkinter.ttk as ttk
 import re
 from pathlib import Path
 
-from GUI import UploadLigandView, MultipleAutoCompleteSearch
+from GUI import UploadLigandView, MultipleAutoCompleteSearch, TerminableThread
 from GUI import AutoCompleteComboBox
 from MofIdentifier import SearchMOF
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
@@ -77,10 +77,11 @@ class View(tk.Frame):
         self.add_attribute_search_entries()  # Row 3
 
         self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
-        btn_clear = tk.Button(self, text="Clear", command=self.clear)
-        btn_clear.grid(row=4, column=0, pady=2, columnspan=1)
-        btn_search = tk.Button(self, text="Search", command=self.perform_search)
-        btn_search.grid(row=4, column=0, pady=2, columnspan=12)
+        self.btn_clear = tk.Button(self, text="Clear", command=self.clear)
+        self.btn_clear.grid(row=4, column=0, pady=2, columnspan=1)
+        self.btn_search = tk.Button(self, text="Search", command=self.perform_search)
+        self.btn_search.grid(row=4, column=0, pady=2, columnspan=12)
+        self.btn_cancel = tk.Button(self, text="Cancel", command=self.cancel_search)
 
     def clear(self):
         for entry in self.attribute_entries:
@@ -95,9 +96,17 @@ class View(tk.Frame):
             self.search_from_input()
             self.progress.stop()
             self.progress.grid_forget()
-
+            self.btn_cancel.grid_forget()
+        self.btn_cancel.grid(row=4, column=4, pady=2, columnspan=1)
         self.progress.grid(row=5, column=0, pady=2, columnspan=12, sticky=tk.EW)
-        threading.Thread(target=callback).start()
+        self.thread = TerminableThread.ThreadWithExc(target=callback)
+        self.thread.start()
+
+    def cancel_search(self):
+        self.thread.raiseExc(InterruptedError)
+        self.progress.stop()
+        self.progress.grid_forget()
+        self.btn_cancel.grid_forget()
 
     def search_from_input(self):
         def get_ligands(multiple_auto_combobox):
