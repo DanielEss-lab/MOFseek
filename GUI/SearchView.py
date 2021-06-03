@@ -198,7 +198,7 @@ class View(tk.Frame):
         # attribute_row.grid(column=0, row=2, columnspan=12, pady=2)  # TODO: add back in when ready
 
     def all_ligands_names(self):  # Will change with adding DB
-        path = str(Path(__file__).parent / "../MofIdentifier/ligandsWildCards")
+        path = str(Path(__file__).parent / "../MofIdentifier/ligands")
         ligands = LigandReader.get_all_mols_from_directory(path)
         return [ligand.label for ligand in ligands]
 
