@@ -27,6 +27,9 @@ def make_view(parent, sbu):
     row3 = tk.Frame(master=view, height=20)
     mof_label = tk.Label(row3, text="MOFs:")
     mof_label.pack(side='left')
+    search = tk.Label(row1, text="View in search", cursor='hand2', padx=8)
+    search.bind('<Button-1>', lambda e: parent.search_v.force_search_for(sbu))
+    search.pack(side='right')
     row3.pack(fill=tk.X)
 
     return view

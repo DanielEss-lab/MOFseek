@@ -105,6 +105,10 @@ class View(tk.Frame):
         self.ent_ligand.clear()
         self.ent_elements.delete(0, tk.END)
 
+    def force_search_for(self, ligand):
+        search = SearchTerms([ligand], [], [], [])
+        self.perform_search(search)
+
     def perform_search(self, search=None):
         def callback():
             self.progress.start()
