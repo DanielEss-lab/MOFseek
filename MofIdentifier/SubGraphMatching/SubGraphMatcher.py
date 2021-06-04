@@ -59,6 +59,8 @@ def name_molecules_from_set(molecules, mol_set):  # Can operate on anything with
 def does_assign_label_from_set(molecule, mol_set):
     for mol_from_set in mol_set:
         if match(molecule, mol_from_set):
+            molecule.graph = mol_from_set.graph  # We give it the set molecule's graph as well, in case the set had a
+            molecule.no_h_graph = mol_from_set.no_h_graph  # more general graph using wildcards
             molecule.label = mol_from_set.label
             molecule.filepath = mol_from_set.filepath
             return True
