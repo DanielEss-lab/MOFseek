@@ -1,5 +1,3 @@
-import time
-
 from MofIdentifier.SubGraphMatching import SubGraphMatcher, GraphMaker
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUIdentifier

@@ -1,7 +1,6 @@
 import os
-import time
 
-from MofIdentifier.fileIO import CifReader, SmilesReader, LigandReader
+from MofIdentifier.fileIO import CifReader, LigandReader
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from pathlib import Path
 

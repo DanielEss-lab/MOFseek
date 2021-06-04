@@ -4,7 +4,6 @@ from enum import Enum
 from MofIdentifier.Molecules import Molecule
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.bondTools import Distances
-from MofIdentifier.fileIO import XyzBondCreator
 
 
 class SBUCollection:
