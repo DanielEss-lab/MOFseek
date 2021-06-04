@@ -1,12 +1,10 @@
-from math import floor, sqrt
+from math import floor
 
-from MofIdentifier.CovalentRadiusLookup import lookup
+from MofIdentifier.bondTools import Distances
 
 max_bond_length = 4
 # max_bond_length 5.2 is a worst-case scenario that probably won't occur in most real mofs;
 # a more realistic (and still cautious) value would be ~3.5
-bond_length_flat_error_margin = 0.05
-bond_length_multiplicative_error_margin = 1.10
 
 
 class MofBondCreator:
@@ -32,11 +30,6 @@ class MofBondCreator:
         self.num_compared = 0
         self.num_bonds = 0
         self.num_bonds_across_cell_border = 0
-
-    def is_bond_distance(self, d, a, b):
-        rad_a = lookup(a.type_symbol)
-        rad_b = lookup(b.type_symbol)
-        return d < (rad_a + rad_b) * bond_length_multiplicative_error_margin + bond_length_flat_error_margin
 
     def get_bucket(self, z, y, x):
         bucket_belongs_to_unit_cell = True
@@ -110,8 +103,8 @@ class MofBondCreator:
 
     def compare_for_bond(self, atom_a, atom_b):
         self.num_compared = self.num_compared + 1
-        dist = self.distance(atom_a, atom_b)
-        if self.is_bond_distance(dist, atom_a, atom_b):
+        dist = Distances.distance(atom_a, atom_b)
+        if Distances.is_bond_distance(dist, atom_a, atom_b):
             self.num_bonds += 1
             if not atom_a.is_in_unit_cell() or not atom_b.is_in_unit_cell():
                 if not atom_a.is_in_unit_cell() and not atom_b.is_in_unit_cell():
@@ -119,11 +112,6 @@ class MofBondCreator:
                 self.num_bonds_across_cell_border += 1
             atom_a.bondedAtoms.append(atom_b)
             atom_b.bondedAtoms.append(atom_a)
-
-    def distance(self, a, b):
-        ax, ay, az = a.x, a.y, a.z
-        bx, by, bz = b.x, b.y, b.z
-        return sqrt((bx - ax) ** 2 + (by - ay) ** 2 + (bz - az) ** 2)
 
     def get_extra_information(self):
         return self.num_bonds, self.num_compared, self.num_bonds_across_cell_border

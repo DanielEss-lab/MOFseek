@@ -40,7 +40,8 @@ def get_all_mofs_in_directory(mofs_path):
 
 
 def read_cif(filename):
-    cf = ReadCif(FileIO(filename, 'rb'))
+    with FileIO(filename, 'rb') as io:
+        cf = ReadCif(io)
     cb = cf.first_block()
     file_path = filename
     try:

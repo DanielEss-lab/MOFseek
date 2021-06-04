@@ -121,6 +121,18 @@ class SBUIdentifierTest(unittest.TestCase):
 
         assert (len(sbu_breakdown.auxiliaries) == 1)
 
+    def test_single_metal_wide_unit_cell(self):
+        mof_russaa = get_mof('../mofsForTests/RUSSAA_clean.cif')
+        sbu_breakdown = split(mof_russaa)
+        assert (len(sbu_breakdown.auxiliaries) == 0)
+        assert (len(sbu_breakdown.clusters) == 2)
+        assert (len(sbu_breakdown.clusters[0].atoms) == 1)
+        assert (len(sbu_breakdown.clusters[0].atoms) == 1)
+        assert (len(sbu_breakdown.connectors) == 3)
+        assert (sbu_breakdown.connectors[0].frequency == 4)
+        assert (sbu_breakdown.connectors[1].frequency == 4)
+        assert (sbu_breakdown.connectors[2].frequency == 4)
+
 
 if __name__ == '__main__':
     unittest.main()

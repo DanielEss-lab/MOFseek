@@ -3,6 +3,7 @@ from enum import Enum
 
 from MofIdentifier.Molecules import Molecule
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
+from MofIdentifier.bondTools import Distances
 from MofIdentifier.fileIO import XyzBondCreator
 
 
@@ -77,8 +78,8 @@ class SBU(Molecule.Molecule):
         while queue:
             atom = queue.popleft()
             for neighbor in (n for n in atom.bondedAtoms if n in atoms and n not in visited):
-                d = XyzBondCreator.distance(atom, neighbor)
-                if not XyzBondCreator.is_bond_distance(d, atom, neighbor):
+                d = Distances.distance(atom, neighbor)
+                if not Distances.is_bond_distance(d, atom, neighbor):
                     if neighbor.a - atom.a > 0.5:
                         neighbor.a -= 1.0
                     elif neighbor.a - atom.a < -0.5:
