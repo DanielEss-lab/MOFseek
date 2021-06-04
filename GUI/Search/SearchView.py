@@ -1,11 +1,10 @@
-import threading
 import tkinter as tk
 import tkinter.ttk as ttk
 import re
 from pathlib import Path
 
-from GUI import UploadLigandView, MultipleAutoCompleteSearch, TerminableThread
-from GUI import AutoCompleteComboBox
+from GUI import UploadLigandView
+from GUI.Search import MultipleAutoCompleteSearch, TerminableThread
 from MofIdentifier import SearchMOF
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import CifReader, LigandReader
@@ -32,11 +31,19 @@ class SearchTerms:
                and SubGraphMatcher.mof_has_no_ligands(MOF, self.excl_ligands)
 
     def __str__(self):
-        return f"ligands:{self.ligands}-{self.excl_ligands}, elements:{self.element_symbols}-{self.excl_element_symbols}"
+        ligands = [ligand.label for ligand in self.ligands]
+        excl_ligands = [ligand.label for ligand in self.excl_ligands]
+        return f"ligands:{ligands}-{excl_ligands}, elements:{self.element_symbols}-{self.excl_element_symbols}"
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __hash__(self):
+        return hash(str(self))
 
 
 def search_ligand_names_in_mofsForTests(search):
-    path = str(Path(__file__).parent / "../MofIdentifier/mofsForTests")
+    path = str(Path(__file__).parent / "../../MofIdentifier/mofsForTests")
     mofs = CifReader.get_all_mofs_in_directory(path)
     good_mofs = [mof for mof in mofs if search.passes(mof)]
     return good_mofs
@@ -160,13 +167,16 @@ class View(tk.Frame):
             forbidden_element_symbols_text = self.ent_excl_elements.get()
             forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
             search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols)
-        self.text_to_search[str(search)] = search
-        self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
-                                                        self.redo_search_selected.set(value))
-        self.search_to_results[search] = 'ongoing'
-        results = search_ligand_names_in_mofsForTests(search)
-        self.search_to_results[search] = results
-        self.parent.display_search_results(results)
+        if search in self.search_to_results and self.search_to_results[search] is not None:
+            self.parent.display_search_results(self.search_to_results[search])
+        else:
+            self.text_to_search[str(search)] = search
+            self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
+                                                            self.redo_search_selected.set(value))
+            self.search_to_results[search] = 'ongoing'
+            results = search_ligand_names_in_mofsForTests(search)
+            self.search_to_results[search] = results
+            self.parent.display_search_results(results)
 
     def add_custom_ligand(self, mol):
         self.ent_ligand.add_new_possible_value('* ' + mol.label)
@@ -202,7 +212,7 @@ class View(tk.Frame):
         # attribute_row.grid(column=0, row=2, columnspan=12, pady=2)  # TODO: add back in when ready
 
     def all_ligands_names(self):  # Will change with adding DB
-        path = str(Path(__file__).parent / "../MofIdentifier/ligands")
+        path = str(Path(__file__).parent / "../../MofIdentifier/ligands")
         ligands = LigandReader.get_all_mols_from_directory(path)
         return [ligand.label for ligand in ligands]
 

@@ -1,7 +1,8 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from GUI import SearchView, SearchResultsView, MoleculeView, UploadLigandView
+from GUI import SearchResultsView, MoleculeView
+from GUI.Search import SearchView
 
 instance = None
 
@@ -35,7 +36,7 @@ class Root(tk.Tk):
         # for sbu in sbus.clusters + sbus.connectors + sbus.auxiliaries:
         #     SBUView.make_view(self, sbu).pack()
         # self.minsize(100, 100)
-        self.geometry('800x500')
+        self.geometry('900x700')
         self.set_styles()
 
         self.search_v = SearchView.View(self)
