@@ -6,7 +6,7 @@ from MofIdentifier.Molecules.atom import Atom
 
 
 class MOF(Molecule.Molecule):
-    def __init__(self, filepath, symmetry, a, b, c, al, be, ga):
+    def __init__(self, filepath, symmetry, a, b, c, al, be, ga, file_string):
         super().__init__(filepath, None)
         self.symmetry = symmetry
         self.length_a = a
@@ -15,6 +15,7 @@ class MOF(Molecule.Molecule):
         self.angle_alpha = al
         self.angle_beta = be
         self.angle_gamma = ga
+        self.cif_content = file_string
         # Convert unit vectors to Cartesian in order to understand how basis set changes. It's a bit of a workaround TBH
         (self.length_x, n, n) = self.conversion_to_Cartesian(Atom('-', '-', 1, 0, 0, True))
         (n, self.length_y, n) = self.conversion_to_Cartesian(Atom('-', '-', 0, 1, 0, True))
