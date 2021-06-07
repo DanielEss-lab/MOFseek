@@ -8,7 +8,6 @@ cif_collection = database["CIFs"]
 
 
 def read_all_cifs_in_directory(cifs_path):
-    # MOF_808 = CifReader.get_mof('../mofsForTests/smod7-pos-1.cif')
     # print(MOF_808.cif_content)
     print("Starting reading cif files...")
     mofs = CifReader.get_all_mofs_in_directory(cifs_path)
@@ -25,4 +24,6 @@ def read_all_cifs_in_directory(cifs_path):
 
 if __name__ == '__main__':
     read_all_cifs_in_directory("\\Users\\shers\\Desktop\\Chem\\structure_10143")
+    # MOF = CifReader.get_mof('../mofsForTests/SOTXEG_neutral.cif')
+    # cif_collection.update_one({"filename": "SOTXEG_neutral"}, {"$set": {'cif_content': MOF.cif_content}})
     # user_path = read_all_cifs_in_directory("f")
