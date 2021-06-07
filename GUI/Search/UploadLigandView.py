@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter.filedialog import askopenfilename
 from tkinter import messagebox
 
-from MofIdentifier.fileIO import CifReader, LigandReader
+from MofIdentifier.fileIO import LigandReader
 
 
 class View(tk.Frame):

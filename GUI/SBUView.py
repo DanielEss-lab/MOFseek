@@ -9,6 +9,9 @@ def make_view(parent, sbu):
     row1 = tk.Frame(master=view, height=20)
     name = tk.Label(row1, text=sbu.label)
     name.pack(side='left')
+    search = tk.Label(row1, text="Search as Ligand", cursor='hand2', padx=8)
+    search.bind('<Button-1>', lambda e: parent.search_v.force_search_for(sbu))
+    search.pack(side='right')
     open = tk.Label(row1, text="Open File", cursor='hand2', padx=8)
     open.bind('<Button-1>', lambda e: FileOpen.open_file(sbu.filepath))
     open.pack(side='right')
@@ -27,9 +30,9 @@ def make_view(parent, sbu):
     row3 = tk.Frame(master=view, height=20)
     mof_label = tk.Label(row3, text="MOFs:")
     mof_label.pack(side='left')
-    search = tk.Label(row1, text="View in search", cursor='hand2', padx=8)
-    search.bind('<Button-1>', lambda e: parent.search_v.force_search_for(sbu))
-    search.pack(side='right')
+    sbu_search = tk.Label(row3, text="See Details", cursor='hand2', padx=8)
+    sbu_search.bind('<Button-1>', lambda e: parent.search_v.force_search_sbu(sbu))
+    sbu_search.pack(side='right')
     row3.pack(fill=tk.X)
 
     return view

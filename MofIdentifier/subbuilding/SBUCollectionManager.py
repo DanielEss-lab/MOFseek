@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import XyzReader, XyzWriter, CifReader
+from MofIdentifier.fileIO import XyzReader, XyzWriter, CifReader, LigandReader
 from MofIdentifier.subbuilding import SBUTools, SBUIdentifier
 from MofIdentifier.subbuilding.SBUTools import UnitType
 
@@ -84,3 +84,19 @@ if __name__ == '__main__':
     print(new_sbus)
     print('\nRecognized:')
     print(recognized_sbus)
+
+
+def read_sbus_from_files(sbu_names):
+    sbus = []
+    sbus_found = 0
+    for kind in ["cluster", "connector", "auxiliary"]:
+        for file_name_in_directory in os.listdir(Path(__file__).parent / kind):
+            if file_name_in_directory.endswith(".xyz") or file_name_in_directory.endswith(".txt"):
+                for l_name in sbu_names:
+                    if file_name_in_directory == l_name:
+                        sbus.append(
+                            LigandReader.get_mol_from_file(str(Path(__file__).parent / l_name)))
+                        sbus_found += 1
+    if sbus_found < len(sbu_names):
+        raise Exception('Did not find all sbus')
+    return sbus

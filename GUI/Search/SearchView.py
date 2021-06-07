@@ -3,56 +3,19 @@ import tkinter.ttk as ttk
 import re
 from pathlib import Path
 
-from GUI import UploadLigandView
-from GUI.Search import MultipleAutoCompleteSearch, TerminableThread
+from GUI.Search import MultipleAutoCompleteSearch, TerminableThread, UploadLigandView
+from GUI.Search.SearchTerms import SearchTerms, search_ligand_names_in_mofsForTests
 from MofIdentifier import SearchMOF
-from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import CifReader, LigandReader
+from MofIdentifier.fileIO import LigandReader
+from MofIdentifier.subbuilding import SBUCollectionManager
 
 ROW_MAXIMUM = 6
-
-
-class SearchTerms:
-    def __init__(self, ligands, element_symbol_list, excl_ligands, excl_elements):
-        self.ligands = ligands
-        self.element_symbols = element_symbol_list
-        self.excl_ligands = excl_ligands
-        self.excl_element_symbols = excl_elements
-        # Add parameters here
-
-    def passes(self, MOF):
-        for element in self.element_symbols:
-            if element not in MOF.elementsPresent:
-                return False
-        for element in self.excl_element_symbols:
-            if element in MOF.elementsPresent:
-                return False
-        return SubGraphMatcher.mof_has_all_ligands(MOF, self.ligands) \
-               and SubGraphMatcher.mof_has_no_ligands(MOF, self.excl_ligands)
-
-    def __str__(self):
-        ligands = [ligand.label for ligand in self.ligands]
-        excl_ligands = [ligand.label for ligand in self.excl_ligands]
-        return f"ligands:{ligands}-{excl_ligands}, elements:{self.element_symbols}-{self.excl_element_symbols}"
-
-    def __eq__(self, other):
-        return str(self) == str(other)
-
-    def __hash__(self):
-        return hash(str(self))
-
-
-def search_ligand_names_in_mofsForTests(search):
-    path = str(Path(__file__).parent / "../../MofIdentifier/mofsForTests")
-    mofs = CifReader.get_all_mofs_in_directory(path)
-    good_mofs = [mof for mof in mofs if search.passes(mof)]
-    return good_mofs
 
 
 class View(tk.Frame):
     def __init__(self, parent):
         self.parent = parent
-        tk.Frame.__init__(self, self.parent, height=40, width=300, bd=2, relief=tk.SOLID)
+        tk.Frame.__init__(self, self.parent, height=40, width=300, bd=2, padx=12, relief=tk.SOLID)
         self.attribute_entries = list()
         self.custom_ligands = dict()
         self.search_to_results = dict()
@@ -74,18 +37,28 @@ class View(tk.Frame):
         self.ent_elements = tk.Entry(self)
         self.ent_elements.insert(0, 'C, H')
         self.ent_elements.grid(row=1, column=3, pady=2, sticky=tk.EW)
+        self.lbl_sbus = tk.Label(self, text="Required SBUs: ")
+        self.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.E)
+        self.ent_sbus = MultipleAutoCompleteSearch.View(self)
+        self.ent_sbus.set_possible_values(self.all_sbu_names())
+        self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
 
-        self.lbl_excl_ligand = tk.Label(self, text="Forbidden Ligands: ")
+        small_font = ("Arial", 8)
+        self.lbl_excl_ligand = tk.Label(self, text="Forbidden Ligands: ", font=small_font)
         self.lbl_excl_ligand.grid(row=2, column=0, pady=2, sticky=tk.E)
-        self.ent_excl_ligand = MultipleAutoCompleteSearch.View(self)
+        self.ent_excl_ligand = MultipleAutoCompleteSearch.View(self, small_font)
         self.ent_excl_ligand.set_possible_values(self.all_ligands_names())
-        self.ent_excl_ligand.grid(row=2, column=1, pady=2, sticky=tk.EW)
-        self.ent_excl_ligand.initial_combobox.focus_set()
-        self.lbl_excl_elements = tk.Label(self, text="Forbidden Elements: ")
-        self.lbl_excl_elements.grid(row=2, column=2, pady=2, sticky=tk.E)
-        self.ent_excl_elements = tk.Entry(self)
+        self.ent_excl_ligand.grid(row=2, column=1, pady=2, sticky=tk.W)
+        self.lbl_excl_elements = tk.Label(self, text="Forbidden Elements: ", font=small_font)
+        self.lbl_excl_elements.grid(row=2, column=2, sticky=tk.E)
+        self.ent_excl_elements = tk.Entry(self, width=10, font=small_font)
         self.ent_excl_elements.insert(0, '')
-        self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.EW)
+        self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.W)
+        self.lbl_excl_sbus = tk.Label(self, text="Forbidden Sbus: ", font=small_font)
+        self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.E)
+        self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, small_font)
+        self.ent_excl_sbus.set_possible_values(self.all_sbu_names())
+        self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
 
         self.add_attribute_search_entries()  # Row 3
 
@@ -113,7 +86,11 @@ class View(tk.Frame):
         self.ent_elements.delete(0, tk.END)
 
     def force_search_for(self, ligand):
-        search = SearchTerms([ligand], [], [], [])
+        search = SearchTerms(ligands=[ligand])
+        self.perform_search(search)
+
+    def force_search_sbu(self, sbu):
+        search = SearchTerms(sbus=[sbu])
         self.perform_search(search)
 
     def perform_search(self, search=None):
@@ -160,13 +137,29 @@ class View(tk.Frame):
                 ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
                 return ligands
 
+            def get_sbus(multiple_auto_combobox):
+                sbu_names = multiple_auto_combobox.get_values()
+
+                sbus = list()
+                other_sbus = list()
+                for sbu_name in sbu_names:
+                    if sbu_name in self.custom_ligands:
+                        sbus.append(self.custom_ligands[sbu_name])
+                    else:
+                        other_sbus.append(sbu_name)
+                sbus.extend(SBUCollectionManager.read_sbus_from_files(other_sbus))
+                return sbus
+
             ligands = get_ligands(self.ent_ligand)
             forbidden_ligands = get_ligands(self.ent_excl_ligand)
+            sbus = get_sbus(self.ent_sbus)
+            forbidden_sbus = get_sbus(self.ent_excl_sbus)
             element_symbols_text = self.ent_elements.get()
             element_symbols = re.findall(r"[\w']+", element_symbols_text)
             forbidden_element_symbols_text = self.ent_excl_elements.get()
             forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
-            search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols)
+            search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols,
+                                 sbus, forbidden_sbus)
         if search in self.search_to_results and self.search_to_results[search] is not None:
             self.parent.display_search_results(self.search_to_results[search])
         else:
@@ -181,6 +174,9 @@ class View(tk.Frame):
     def add_custom_ligand(self, mol):
         self.ent_ligand.add_new_possible_value('* ' + mol.label)
         self.custom_ligands['* ' + mol.label] = mol
+        self.ent_sbus.add_new_possible_value('* ' + mol.label)
+        self.ent_excl_ligand.add_new_possible_value('* ' + mol.label)
+        self.ent_excl_sbus.add_new_possible_value('* ' + mol.label)
 
     def add_attribute_search_entries(self):
         def attribute_heading(parent):
@@ -215,6 +211,15 @@ class View(tk.Frame):
         path = str(Path(__file__).parent / "../../MofIdentifier/ligands")
         ligands = LigandReader.get_all_mols_from_directory(path)
         return [ligand.label for ligand in ligands]
+
+    def all_sbu_names(self):  # Will change with adding DB
+        path_1 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/cluster")
+        path_2 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/connector")
+        path_3 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/auxiliary")
+        sbus = LigandReader.get_all_mols_from_directory(path_1) + \
+               LigandReader.get_all_mols_from_directory(path_2) + \
+               LigandReader.get_all_mols_from_directory(path_3)
+        return [sbu.label for sbu in sbus]
 
 
 class AttributeEntry(tk.Frame):

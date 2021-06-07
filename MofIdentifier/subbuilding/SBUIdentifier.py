@@ -9,6 +9,20 @@ def split(mof):
     return identifier.run_algorithm()
 
 
+def mof_has_all_sbus(mof, sbus):
+    mof_sbus = split(mof)
+    if all(sbu in mof_sbus for sbu in sbus):
+        return True
+    return False
+
+
+def mof_has_no_sbus(mof, sbus):
+    mof_sbus = split(mof)
+    if any(sbu in mof_sbus for sbu in sbus):
+        return False
+    return True
+
+
 def reduce_duplicates(sbu_list, is_duplicate):
     sbu_list = sbu_list.copy()
     new_sbu_list = list()

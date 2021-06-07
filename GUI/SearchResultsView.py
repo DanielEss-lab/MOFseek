@@ -5,12 +5,21 @@ import tkinter.filedialog as fd
 
 from GUI import MOFView
 
+sort_options = ['Sort by: \u25BC', 'blah (max)', 'blah(min)']
 
 class View(tk.Frame):
     def __init__(self, parent):
         self.parent = parent
         tk.Frame.__init__(self, self.parent, height=450, width=800, bd=2, relief=tk.SOLID)
         self.results = []
+
+        self.selected_sort = tk.StringVar(self)
+        self.selected_sort.set(sort_options[0])
+        sort_dropdown = tk.OptionMenu(self, self.selected_sort, *sort_options,
+                                      command=lambda _: self.display_results(self.results))
+        sort_dropdown.config(indicatoron=0)
+        sort_dropdown.pack()
+
         mainBody = tk.Frame(self, height=400, width=800, bd=1, relief=tk.SOLID)
         self.canvas = tk.Canvas(mainBody, borderwidth=0, background="#ffffff")
         self.frame = tk.Frame(self.canvas, background="#ffffff")
@@ -28,8 +37,9 @@ class View(tk.Frame):
         self.canvas.bind('<Enter>', self._bound_to_mousewheel)
         self.canvas.bind('<Leave>', self._unbound_to_mousewheel)
         mainBody.pack(fill=tk.X)
-        btn_export = tk.Button(self, text='Export Results', command=lambda: self.export())
-        btn_export.pack()
+        self.btn_export = tk.Button(self, text='Export Results', command=lambda: self.export())
+        self.btn_export['state'] = "disabled"
+        self.btn_export.pack()
 
     def on_frame_configure(self, event):
         # Reset the scroll region to encompass the inner frame
@@ -45,6 +55,13 @@ class View(tk.Frame):
         self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def display_results(self, results):
+        sort_name = self.selected_sort.get()
+        # if sort_name == 'Sort by: \u25BC':  # TODO: Uncomment this once MOFS have interesting attributes to sort by
+        #     pass
+        # elif sort_name == 'example_attribute':
+        #     results.sort(key=lambda mof: mof.attribute)
+        # elif sort_name == 'example_attribute_reverse':
+        #     results.sort(key=lambda mof: mof.attribute)
         self.results = results
         for widget in self.frame.winfo_children():
             widget.destroy()
@@ -55,6 +72,10 @@ class View(tk.Frame):
         for mof in results:
             mof_v = MOFView.make_view(self.frame, mof)
             mof_v.grid(sticky=("N", "S", "E", "W"))
+        if len(results) > 0:
+            self.btn_export['state'] = "normal"
+        else:
+            self.btn_export['state'] = "disabled"
 
     def export(self):
         if len(self.results) == 0:

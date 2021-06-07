@@ -48,7 +48,7 @@ def repeat_get_all_mofs_in_directory(mofs_path):
             mofs = CifReader.get_all_mofs_in_directory(mofs_path)
         except OSError:
             print(OSError)
-            mofs_path = get_mof_path_from_console_input
+            mofs_path = get_mof_path_from_console_input()
             continue
         else:
             break
