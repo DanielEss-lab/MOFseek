@@ -33,7 +33,7 @@ if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
 
     before_read_time = time.time()
-    ligand = read_xyz('../ligands/Benzene.xyz')
+    ligand = read_xyz('../ligands/test_resources/Benzene.xyz')
     between_time = time.time()
     bond_creator = XyzBondCreator()
     bond_creator.connect_atoms(ligand)

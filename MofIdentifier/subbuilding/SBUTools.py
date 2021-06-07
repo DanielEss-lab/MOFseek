@@ -3,7 +3,7 @@ from enum import Enum
 
 from MofIdentifier.Molecules import Molecule
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import XyzBondCreator
+from MofIdentifier.bondTools import Distances
 
 
 class SBUCollection:
@@ -31,6 +31,13 @@ class SBUCollection:
             string += "\n"
         return string
 
+    def all(self):
+        return self.clusters + self.connectors + self.auxiliaries
+
+    def __add__(self, other):
+        return SBUCollection(self.clusters + other.clusters, self.connectors
+                             + other.connectors, self.auxiliaries + other.auxiliaries)
+
 
 class UnitType(Enum):
     CLUSTER = 1
@@ -43,13 +50,16 @@ class UnitType(Enum):
 
 class SBU(Molecule.Molecule):
     def __init__(self, sbu_id, unit_type, atoms):
-        super().__init__('Unlabeled', atoms)
+        super().__init__('No Filepath/Unlabeled', atoms)
         self.sbu_id = sbu_id
         self.adjacent_cluster_ids = set(())
         self.adjacent_connector_ids = set(())
         self.adjacent_auxiliary_ids = set(())
         self.type = unit_type
         self.frequency = 1
+
+    def connections(self):
+        return len(self.adjacent_auxiliary_ids) + len(self.adjacent_cluster_ids) + len(self.adjacent_connector_ids)
 
     def add_atom(self, atom):
         self.atoms.add(atom)
@@ -67,8 +77,8 @@ class SBU(Molecule.Molecule):
         while queue:
             atom = queue.popleft()
             for neighbor in (n for n in atom.bondedAtoms if n in atoms and n not in visited):
-                d = XyzBondCreator.distance(atom, neighbor)
-                if not XyzBondCreator.is_bond_distance(d, atom, neighbor):
+                d = Distances.distance(atom, neighbor)
+                if not Distances.is_bond_distance(d, atom, neighbor):
                     if neighbor.a - atom.a > 0.5:
                         neighbor.a -= 1.0
                     elif neighbor.a - atom.a < -0.5:

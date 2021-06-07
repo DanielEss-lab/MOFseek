@@ -2,12 +2,13 @@ from MofIdentifier.SubGraphMatching import GraphMaker
 
 
 class Molecule:
-    def __init__(self, label, atoms, igraph=None, weak_comparison_enabled=False):
-        slice_index = label.rfind('\\')
+    def __init__(self, filepath, atoms, igraph=None, weak_comparison_enabled=False):
+        self.filepath = filepath
+        slice_index = max(filepath.rfind('\\'), filepath.rfind('/'))
         if slice_index > -1:
-            self.label = label[slice_index + 1:]
+            self.label = filepath[slice_index + 1:]
         else:
-            self.label = label
+            self.label = filepath
         self.atoms = atoms
         self.elementsPresent = set()
         self.graph = igraph
@@ -24,10 +25,10 @@ class Molecule:
 
     def get_hydrogenless_graph(self):
         if self.no_h_graph is None:
-            if 'H' not in self.elementsPresent:
-                self.no_h_graph = self.graph
-            elif self.graph is None:
+            if self.graph is None:
                 self.no_h_graph = GraphMaker.hydrogenless_graph_from_mol(self)
+            elif 'H' not in self.elementsPresent:
+                self.no_h_graph = self.graph
             else:
                 self.no_h_graph = GraphMaker.hydrogenless_graph_from_old_graph(self)
         return self.no_h_graph

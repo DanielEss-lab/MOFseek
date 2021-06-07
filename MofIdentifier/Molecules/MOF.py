@@ -6,8 +6,8 @@ from MofIdentifier.Molecules.atom import Atom
 
 
 class MOF(Molecule.Molecule):
-    def __init__(self, label, symmetry, a, b, c, al, be, ga):
-        super().__init__(label, None)
+    def __init__(self, filepath, symmetry, a, b, c, al, be, ga):
+        super().__init__(filepath, None)
         self.symmetry = symmetry
         self.length_a = a
         self.length_b = b
@@ -43,10 +43,5 @@ class MOF(Molecule.Molecule):
         matrix = np.array([[self.length_a, (self.length_b * np.cos(gamma)), (self.length_c * np.cos(beta))],
                            [0, (self.length_b * np.sin(gamma)), self.length_c * value_of_trig],
                            [0, 0, volume_of_cell / (self.length_a * self.length_b * np.sin(gamma))]])
-
-        # n2 = (np.cos(alpha) - np.cos(gamma) * np.cos(beta)) / np.sin(gamma)
-        # M = np.array([[self.length_a, 0, 0],
-        #               [self.length_b * np.cos(gamma), self.length_b * np.sin(gamma), 0],
-        #               [self.length_c * np.cos(beta), self.length_c * n2, self.length_b * np.sqrt(np.sin(beta) ** 2 - n2 ** 2)]])
 
         return np.matmul(matrix, np.array([atom.a, atom.b, atom.c]))

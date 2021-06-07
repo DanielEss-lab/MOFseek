@@ -1,4 +1,6 @@
 import os
+from io import FileIO
+from pathlib import Path
 
 from CifFile import ReadCif
 
@@ -20,14 +22,17 @@ def get_all_mofs_in_directory(mofs_path):
     original_path = os.getcwd()
     os.chdir(mofs_path)
 
-    for file in os.listdir():
+    for file_name in os.listdir(mofs_path):
         # Check whether file is in text format or not
-        if file.endswith(".cif"):
+        if file_name.endswith(".cif"):
             try:
-                mof = get_mof(file)
+                filepath = Path(file_name).resolve()
+                mof = get_mof(str(filepath))
                 mofs.append(mof)
+            except InterruptedError:
+                raise InterruptedError
             except Exception:
-                print("Error reading file: ", file)
+                print("Error reading file: ", file_name)
                 print(Exception)
     # Return to original directory
     os.chdir(original_path)
@@ -35,9 +40,10 @@ def get_all_mofs_in_directory(mofs_path):
 
 
 def read_cif(filename):
-    cf = ReadCif(filename)
+    with FileIO(filename, 'rb') as io:
+        cf = ReadCif(io)
     cb = cf.first_block()
-    label = filename
+    file_path = filename
     try:
         symmetry = cb['_symmetry_cell_setting']
     except KeyError:
@@ -49,7 +55,7 @@ def read_cif(filename):
     angle_beta = float(cb['_cell_angle_beta'])
     angle_gamma = float(cb['_cell_angle_gamma'])
 
-    mof = MOF(label, symmetry, length_a, length_b, length_c, angle_alpha, angle_beta, angle_gamma)
+    mof = MOF(file_path, symmetry, length_a, length_b, length_c, angle_alpha, angle_beta, angle_gamma)
 
     atom_data_loop = cb.GetLoop('_atom_site_label')
     atoms = list(())
@@ -71,7 +77,6 @@ def read_cif(filename):
 
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-    MOF_808 = get_mof('../mofsForTests/smod7-pos-1.cif')
+    MOF = get_mof(r'C:\Users\mdavid4\Desktop\CIFs\structure_10143\SOTXEG_neutral.cif')
 
-    print(MOF_808)
-    print(*MOF_808.elementsPresent)
+    print(MOF)

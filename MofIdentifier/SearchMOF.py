@@ -1,7 +1,6 @@
 import os
-import time
 
-from MofIdentifier.fileIO import CifReader, SmilesReader, LigandReader
+from MofIdentifier.fileIO import CifReader, LigandReader
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from pathlib import Path
 
@@ -28,12 +27,12 @@ def get_ligand_list_from_console_input():
 def read_ligands_from_files(ligand_names):
     ligands = []
     ligands_found = 0
-    for file_name_in_directory in os.listdir(Path(__file__).parent / "ligandsWildcards"):
+    for file_name_in_directory in os.listdir(Path(__file__).parent / "ligands"):
         if file_name_in_directory.endswith(".xyz") or file_name_in_directory.endswith(".txt"):
             for l_name in ligand_names:
                 if file_name_in_directory == l_name:
                     ligands.append(
-                        LigandReader.get_mol_from_file(str(Path(__file__).parent / "ligandsWildcards") + "/" + l_name))
+                        LigandReader.get_mol_from_file(str(Path(__file__).parent / "ligands") + "/" + l_name))
                     ligands_found += 1
     if ligands_found < len(ligand_names):
         raise Exception('Did not find all ligands')
@@ -49,7 +48,7 @@ def repeat_get_all_mofs_in_directory(mofs_path):
             mofs = CifReader.get_all_mofs_in_directory(mofs_path)
         except OSError:
             print(OSError)
-            mofs_path = get_mof_path_from_console_input
+            mofs_path = get_mof_path_from_console_input()
             continue
         else:
             break

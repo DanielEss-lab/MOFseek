@@ -2,8 +2,8 @@ from MofIdentifier.Molecules import Molecule
 
 
 class Ligand(Molecule.Molecule):
-    def __init__(self, label, atoms):
-        super().__init__(label, atoms)
+    def __init__(self, filepath, atoms):
+        super().__init__(filepath, atoms)
         for atom in atoms:
             self.elementsPresent.add(atom.type_symbol)
 

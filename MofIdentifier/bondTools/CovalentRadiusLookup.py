@@ -26,8 +26,6 @@ def lookup(symbol):
 
 
 if __name__ == '__main__':
-    # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-    # chart = CovalentRadiusLookup()
     radius_1 = lookup('Zr')
     radius_2 = lookup('Zr')
     print((radius_1 + radius_2) * 1.10 + 0.05)
