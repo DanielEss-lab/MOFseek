@@ -42,6 +42,8 @@ def get_all_mofs_in_directory(mofs_path):
 def read_cif(filename):
     with FileIO(filename, 'rb') as io:
         cf = ReadCif(io)
+        file = open(filename)
+        file_string = file.read()
     cb = cf.first_block()
     file_path = filename
     try:
@@ -55,7 +57,7 @@ def read_cif(filename):
     angle_beta = float(cb['_cell_angle_beta'])
     angle_gamma = float(cb['_cell_angle_gamma'])
 
-    mof = MOF(file_path, symmetry, length_a, length_b, length_c, angle_alpha, angle_beta, angle_gamma)
+    mof = MOF(file_path, symmetry, length_a, length_b, length_c, angle_alpha, angle_beta, angle_gamma, file_string)
 
     atom_data_loop = cb.GetLoop('_atom_site_label')
     atoms = list(())
