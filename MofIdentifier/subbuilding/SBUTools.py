@@ -116,9 +116,12 @@ class SBU(Molecule.Molecule):
 
     def __eq__(self, other):
         is_isomorphic = SubGraphMatcher.match(self, other)
-        return is_isomorphic and len(self.adjacent_connector_ids) == len(other.adjacent_connector_ids) \
-            and len(self.adjacent_cluster_ids) == len(other.adjacent_cluster_ids) \
-            and len(self.adjacent_auxiliary_ids) == len(other.adjacent_auxiliary_ids)
+        if isinstance(other, SBU):
+            return is_isomorphic and len(self.adjacent_connector_ids) == len(other.adjacent_connector_ids) \
+                and len(self.adjacent_cluster_ids) == len(other.adjacent_cluster_ids) \
+                and len(self.adjacent_auxiliary_ids) == len(other.adjacent_auxiliary_ids)
+        else:
+            return is_isomorphic
 
     def graph_equals(self, other):
         return len(self.atoms) == len(other.atoms) and SubGraphMatcher.match(self, other)

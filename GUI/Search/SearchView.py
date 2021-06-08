@@ -67,9 +67,9 @@ class View(tk.Frame):
         self.redo_search_selected = tk.StringVar()
         self.redo_search_selected.set('History')
         self.dropdown_redo_search = ttk.OptionMenu(self, self.redo_search_selected, *self.search_to_results.keys())
-        self.dropdown_redo_search.grid(row=4, column=1, pady=2, sticky=tk.EW)
+        self.dropdown_redo_search.grid(row=4, column=1, pady=2, sticky=tk.EW, columnspan=4)
         self.btn_redo_search = tk.Button(self, text="Redo", command=self.redo_search)
-        self.btn_redo_search.grid(row=4, column=3, pady=2)
+        self.btn_redo_search.grid(row=4, column=5, pady=2)
 
         self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
         self.btn_clear = tk.Button(self, text="Clear", command=self.clear)
@@ -107,7 +107,10 @@ class View(tk.Frame):
         self.thread.start()
 
     def cancel_search(self):
-        self.thread.raiseExc(InterruptedError)
+        try:
+            self.thread.raiseExc(InterruptedError)
+        except AssertionError as e:
+            print(e)
         self.progress.stop()
         self.progress.grid_forget()
         self.btn_cancel.grid_forget()

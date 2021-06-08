@@ -11,14 +11,14 @@ def split(mof):
 
 def mof_has_all_sbus(mof, sbus):
     mof_sbus = split(mof)
-    if all(sbu in mof_sbus for sbu in sbus):
+    if all(sbu in mof_sbus.all() for sbu in sbus):
         return True
     return False
 
 
 def mof_has_no_sbus(mof, sbus):
     mof_sbus = split(mof)
-    if any(sbu in mof_sbus for sbu in sbus):
+    if any(sbu in mof_sbus.all() for sbu in sbus):
         return False
     return True
 

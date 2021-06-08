@@ -17,19 +17,19 @@ class StrongFindLigandInMofTest(unittest.TestCase):
     def test_atom_in_ligand(self):
         carbon = XyzReader.get_molecule('../ligands/test_resources/SingleCarbon.xyz')
         iron = XyzReader.get_molecule('../ligands/test_resources/SingleIron.xyz')
-        benzene = XyzReader.get_molecule('../ligands/BenzeneBase.xyz')
+        benzene = XyzReader.get_molecule('../ligands/test_resources/BenzeneBase.xyz')
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(carbon, benzene), "Carbon should be subgraph of Benzene")
         self.assertEqual(False, SubGraphMatcher.find_ligand_in_mof(iron, benzene), "Iron should not be subgraph of Benzene")
 
     def test_ligand_in_ligand(self):
-        benzene = XyzReader.get_molecule('../ligands/BenzeneBase.xyz')
+        benzene = XyzReader.get_molecule('../ligands/test_resources/BenzeneBase.xyz')
         solitary_benzene = XyzReader.get_molecule('../ligands/test_resources/Benzene.xyz')
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(benzene, solitary_benzene), "Benzene(6C) should be "
                                                                               "subgraph of Benzene(6C, 6H")
         self.assertEqual(False, SubGraphMatcher.find_ligand_in_mof(solitary_benzene, benzene), "Not other way around")
 
     def test_ligand_in_mof(self):
-        benzene = XyzReader.get_molecule('../ligands/BenzeneBase.xyz')
+        benzene = XyzReader.get_molecule('../ligands/test_resources/BenzeneBase.xyz')
         solitary_benzene = XyzReader.get_molecule('../ligands/test_resources/Benzene.xyz')
         mof_808 = CifReader.get_mof('../mofsForTests/smod7-pos-1.cif')
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(benzene, mof_808), "Benzene(6C) should be in mof")
@@ -37,7 +37,7 @@ class StrongFindLigandInMofTest(unittest.TestCase):
                                                                                "should not be in mof")
 
     def test_requires_single_ligand(self):
-        benzene = XyzReader.get_molecule('../ligands/BenzeneBase.xyz')
+        benzene = XyzReader.get_molecule('../ligands/test_resources/BenzeneBase.xyz')
         six_carbon = XyzReader.get_molecule('../ligands/test_resources/six_disjoint_carbons.xyz')
         with self.assertRaises(Exception):
             SubGraphMatcher.find_ligand_in_mof(six_carbon, benzene)
@@ -113,7 +113,7 @@ class SubGraphMatcherTest(unittest.TestCase):
     def test_dynamic_matching(self):
         smile_benzene = LigandReader.get_mol_from_file('../ligands/Benzene.txt')
         smile_full_benzene = LigandReader.get_mol_from_file('../ligands/FullBenzene.txt')
-        xyz_benzene = LigandReader.get_mol_from_file('../ligands/BenzeneBase.xyz')
+        xyz_benzene = LigandReader.get_mol_from_file('../ligands/test_resources/BenzeneBase.xyz')
         mof_808 = CifReader.get_mof('../mofsForTests/smod7-pos-1.cif')
         self.assertTrue(SubGraphMatcher.match(smile_benzene, xyz_benzene), 'Should find match')
         self.assertTrue(SubGraphMatcher.find_ligand_in_mof(smile_benzene, mof_808), 'Should find match')

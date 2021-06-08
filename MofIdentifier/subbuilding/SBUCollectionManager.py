@@ -95,7 +95,7 @@ def read_sbus_from_files(sbu_names):
                 for l_name in sbu_names:
                     if file_name_in_directory == l_name:
                         sbus.append(
-                            LigandReader.get_mol_from_file(str(Path(__file__).parent / l_name)))
+                            LigandReader.get_mol_from_file(str(Path(__file__).parent / kind / l_name)))
                         sbus_found += 1
     if sbus_found < len(sbu_names):
         raise Exception('Did not find all sbus')

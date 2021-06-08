@@ -29,6 +29,7 @@ class SearchTerms:
         # Add parameters here
 
     def passes(self, MOF):
+        raise Exception
         for element in self.element_symbols:
             if element not in MOF.elementsPresent:
                 return False
@@ -49,9 +50,11 @@ class SearchTerms:
     def __str__(self):
         ligands = [ligand.label for ligand in self.ligands]
         excl_ligands = [ligand.label for ligand in self.excl_ligands]
+        sbus = [sbu.label for sbu in self.sbus]
+        excl_sbus = [sbu.label for sbu in self.excl_sbus]
         return f"ligands:{ligands}-{excl_ligands}, " + \
                f"elements:{self.element_symbols}-{self.excl_element_symbols}" + \
-               f"sbus:{self.sbus}-{self.excl_sbus}"
+               f"sbus:{sbus}-{excl_sbus}"
 
     def __eq__(self, other):
         return str(self) == str(other)
