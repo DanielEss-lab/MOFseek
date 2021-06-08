@@ -1,7 +1,8 @@
 import tkinter as tk
 
+from GUI.Search import Attributes
 from MofIdentifier.fileIO import FileOpen
-from MofIdentifier.subbuilding import SBUCollectionManager
+from MofIdentifier.subbuilding import SBUCollectionManager, SBUIdentifier
 
 
 def format_elements(mof):
@@ -11,6 +12,7 @@ def format_elements(mof):
 
 
 def make_view(parent, mof):
+    sbus = SBUCollectionManager.process_new_mof(mof)
     root = parent.master.master
     view = tk.Frame(parent, height=40, bd=2, relief=tk.SOLID)
     row1 = tk.Frame(master=view, height=20)
@@ -25,26 +27,15 @@ def make_view(parent, mof):
     row1.pack(fill=tk.X)
 
     row2 = tk.Frame(master=view, height=20)
-    attributes = [
-        "Pore Size (mm):",
-        "Surface Area (mm):",
-        "Volume (mL/mol)",
-        "Conductivity (Ohms)",
-        "Fav Food",
-        "Weight (mG)",
-        "Postal Code",
-        "Fictitious val",
-    ]
-    for idx, text in enumerate(attributes):
-        _attribute_view(row2, text, idx).pack(side='left')
+    attributes = Attributes.get_attributes(mof)
+    for text, value in attributes.items():
+        _attribute_view(row2, text, value).pack(side='left')
     _attribute_view(row2, 'Elements', format_elements(mof)).pack(side='left')
     row2.pack(fill=tk.X)
 
     row3 = tk.Frame(master=view, height=20)
     sbu_label = tk.Label(row3, text="SBUs:")
     sbu_label.pack(side='left')
-    (new_sbus, recognized_sbus) = SBUCollectionManager.process_new_mof(mof)
-    sbus = new_sbus + recognized_sbus
 
     def have_root_highlight(clicked_node):
         def fun(*args):

@@ -5,8 +5,10 @@ from MofIdentifier.subbuilding.SBUTools import SBUCollection, SBU, UnitType
 
 
 def split(mof):
-    identifier = SBUIdentifier(mof)
-    return identifier.run_algorithm()
+    if mof.sbu_split is None:
+        identifier = SBUIdentifier(mof)
+        mof.sbu_split = identifier.run_algorithm()
+    return mof.sbu_split
 
 
 def mof_has_all_sbus(mof, sbus):

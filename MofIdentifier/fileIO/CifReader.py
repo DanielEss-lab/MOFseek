@@ -44,6 +44,7 @@ def read_cif(filename):
         cf = ReadCif(io)
         file = open(filename)
         file_string = file.read()
+        file.close()
     cb = cf.first_block()
     file_path = filename
     try:

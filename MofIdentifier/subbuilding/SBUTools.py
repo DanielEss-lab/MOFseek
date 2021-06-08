@@ -9,8 +9,15 @@ from MofIdentifier.bondTools import Distances
 class SBUCollection:
     def __init__(self, clusters, connectors, auxiliaries):
         self.clusters = clusters
+        self.num_cluster_atoms = sum(len(sbu.atoms) * sbu.frequency for sbu in clusters)
         self.connectors = connectors
+        self.num_connector_atoms = sum(len(sbu.atoms) * sbu.frequency for sbu in connectors)
         self.auxiliaries = auxiliaries
+        self.num_auxiliary_atoms = sum(len(sbu.atoms) * sbu.frequency for sbu in auxiliaries)
+        self.avg_node_connectivity = sum(len(sbu.adjacent_connector_ids) * sbu.frequency for sbu in clusters) / \
+            sum(sbu.frequency for sbu in clusters)
+        self.avg_conn_connectivity = sum(len(sbu.adjacent_cluster_ids) * sbu.frequency for sbu in connectors) / \
+            sum(sbu.frequency for sbu in connectors)
 
     def __str__(self):
         string = ""
@@ -38,6 +45,14 @@ class SBUCollection:
         return SBUCollection(self.clusters + other.clusters, self.connectors
                              + other.connectors, self.auxiliaries + other.auxiliaries)
 
+    @classmethod
+    def from_tuples(cls, tuples):
+        clusters, connectors, auxiliaries = [], [], []
+        for tuple in tuples:
+            clusters.extend(tuple[0])
+            connectors.extend(tuple[1])
+            auxiliaries.extend(tuple[2])
+        return SBUCollection(clusters, connectors, auxiliaries)
 
 class UnitType(Enum):
     CLUSTER = 1

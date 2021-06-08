@@ -16,6 +16,7 @@ class MOF(Molecule.Molecule):
         self.angle_beta = be
         self.angle_gamma = ga
         self.cif_content = file_string
+        self.sbu_split = None
         # Convert unit vectors to Cartesian in order to understand how basis set changes. It's a bit of a workaround TBH
         (self.length_x, n, n) = self.conversion_to_Cartesian(Atom('-', '-', 1, 0, 0, True))
         (n, self.length_y, n) = self.conversion_to_Cartesian(Atom('-', '-', 0, 1, 0, True))

@@ -36,7 +36,7 @@ class Root(tk.Tk):
         # for sbu in sbus.clusters + sbus.connectors + sbus.auxiliaries:
         #     SBUView.make_view(self, sbu).pack()
         # self.minsize(100, 100)
-        self.geometry('900x700')
+        self.geometry('1100x700')
         self.set_styles()
 
         self.search_v = SearchView.View(self)
