@@ -29,7 +29,6 @@ class SearchTerms:
         # Add parameters here
 
     def passes(self, MOF):
-        raise Exception
         for element in self.element_symbols:
             if element not in MOF.elementsPresent:
                 return False

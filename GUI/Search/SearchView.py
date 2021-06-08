@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import re
 from pathlib import Path
+import traceback
 
 from GUI.Search import MultipleAutoCompleteSearch, TerminableThread, UploadLigandView
 from GUI.Search.SearchTerms import SearchTerms, search_ligand_names_in_mofsForTests
@@ -78,6 +79,8 @@ class View(tk.Frame):
         self.btn_search.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=12)
         self.btn_cancel = tk.Button(self, text="Cancel", command=self.cancel_search)
 
+        self.lbl_error_text = tk.Label(self, fg='red')
+
     def clear(self):
         for entry in self.attribute_entries:
             entry.max.delete(0, tk.END)
@@ -95,11 +98,19 @@ class View(tk.Frame):
 
     def perform_search(self, search=None):
         def callback():
-            self.progress.start()
-            self.search_from_input(search)
-            self.progress.stop()
-            self.progress.grid_forget()
-            self.btn_cancel.grid_forget()
+            try:
+                self.progress.start()
+                self.search_from_input(search)
+            except InterruptedError:
+                pass
+            except Exception as ex:
+                error_text = traceback.format_exc()
+                self.show_error(ex)
+                print(error_text)
+            finally:
+                self.progress.stop()
+                self.progress.grid_forget()
+                self.btn_cancel.grid_forget()
 
         self.btn_cancel.grid(row=ROW_MAXIMUM - 1, column=4, pady=2, columnspan=1)
         self.progress.grid(row=ROW_MAXIMUM, column=0, pady=2, columnspan=12, sticky=tk.EW)
@@ -163,7 +174,8 @@ class View(tk.Frame):
             forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
             search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols,
                                  sbus, forbidden_sbus)
-        if search in self.search_to_results and self.search_to_results[search] is not None:
+        if search in self.search_to_results and self.search_to_results[search] is not None \
+                and self.search_to_results[search] != 'ongoing':
             self.parent.display_search_results(self.search_to_results[search])
         else:
             self.text_to_search[str(search)] = search
@@ -223,6 +235,14 @@ class View(tk.Frame):
                LigandReader.get_all_mols_from_directory(path_2) + \
                LigandReader.get_all_mols_from_directory(path_3)
         return [sbu.label for sbu in sbus]
+
+    def show_error(self, error):
+        self.lbl_error_text['text'] = 'Error: ' + str(error)
+        self.lbl_error_text.grid(row=ROW_MAXIMUM + 1, column=0, pady=2, columnspan=12, sticky=tk.EW)
+
+        def forget_error():
+            self.lbl_error_text.grid_forget()
+        self.after(5000, forget_error)
 
 
 class AttributeEntry(tk.Frame):
