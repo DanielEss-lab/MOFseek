@@ -87,7 +87,7 @@ def read_sbus_from_files(sbu_names):
                             LigandReader.get_mol_from_file(str(Path(__file__).parent / kind / l_name)))
                         sbus_found += 1
     if sbus_found < len(sbu_names):
-        raise Exception('Did not find all sbus')
+        raise FileNotFoundError('Did not find all sbus')
     return sbus
 
 

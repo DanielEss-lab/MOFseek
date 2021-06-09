@@ -26,7 +26,7 @@ class View(tk.Frame):
         sort_dropdown.pack()
 
         mainBody = tk.Frame(self, height=400, width=800, bd=1, relief=tk.SOLID)
-        self.canvas = tk.Canvas(mainBody, borderwidth=0, background="#ffffff")
+        self.canvas = tk.Canvas(mainBody, borderwidth=0, background="#ffffff", height=400)
         self.frame = tk.Frame(self.canvas, background="#ffffff")
         self.canvas.master = parent
         self.vsb = tk.Scrollbar(mainBody, orient="vertical", command=self.canvas.yview)

@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.font as tkFont
 
 from GUI import Tooltips
 from GUI.Search import Attributes
@@ -45,24 +46,22 @@ def make_view(parent, mof):
             root.highlight_molecule(clicked_node)
         return fun
 
+    def display_sbu_name(sbu, color):
+        text = f"{sbu.frequency}x {sbu.label} ({sbu.connections()}\u00B0)"
+        sbu_label = tk.Label(row3, text=text, fg=color, cursor='hand2', padx=3)
+        f = tkFont.Font(sbu_label, sbu_label["font"])
+        f.configure(underline=True)
+        sbu_label.configure(font=f)
+        event_function = have_root_highlight(sbu)
+        sbu_label.bind('<Button-1>', event_function)
+        sbu_label.pack(side='left')
+
     for node in sbus.clusters:
-        text = f"{node.frequency}x {node.label} (c {node.connections()})"
-        sbu_label = tk.Label(row3, text=text, fg='#0000a0', cursor='hand2', padx=3)
-        event_function = have_root_highlight(node)
-        sbu_label.bind('<Button-1>', event_function)
-        sbu_label.pack(side='left')
+        display_sbu_name(node, '#0000a0')
     for conn in sbus.connectors:
-        text = f"{conn.frequency}x {conn.label} (c {conn.connections()})"
-        sbu_label = tk.Label(row3, text=text, fg='#008100', cursor='hand2', padx=3)
-        event_function = have_root_highlight(conn)
-        sbu_label.bind('<Button-1>', event_function)
-        sbu_label.pack(side='left')
+        display_sbu_name(conn, '#008100')
     for aux in sbus.auxiliaries:
-        text = f"{aux.frequency}x {aux.label} (c {aux.connections()})"
-        sbu_label = tk.Label(row3, text=text, fg='#810000', cursor='hand2', padx=3)
-        event_function = have_root_highlight(aux)
-        sbu_label.bind('<Button-1>', event_function)
-        sbu_label.pack(side='left')
+        display_sbu_name(aux, '#810000')
     row3.pack(fill=tk.X)
 
     row4 = tk.Frame(master=view, height=20)

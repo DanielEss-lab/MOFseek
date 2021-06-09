@@ -42,7 +42,7 @@ class View(tk.Frame):
         self.ent_elements.grid(row=1, column=3, pady=2, sticky=tk.EW)
         self.lbl_sbus = tk.Label(self, text="Required SBUs: ")
         self.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.NE)
-        self.ent_sbus = MultipleAutoCompleteSearch.View(self, self.focus_ligand)
+        self.ent_sbus = MultipleAutoCompleteSearch.View(self, self.focus_sbu)
         self.ent_sbus.set_possible_values(self.all_sbu_names())
         self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
 
@@ -59,7 +59,7 @@ class View(tk.Frame):
         self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.W)
         self.lbl_excl_sbus = tk.Label(self, text="Forbidden Sbus: ", font=small_font)
         self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
-        self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, self.focus_ligand, small_font)
+        self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, self.focus_sbu, small_font)
         self.ent_excl_sbus.set_possible_values(self.all_sbu_names())
         self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
 
@@ -77,18 +77,26 @@ class View(tk.Frame):
         self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
         self.btn_clear = tk.Button(self, text="Clear", command=self.clear)
         self.btn_clear.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=1)
-        self.btn_search = tk.Button(self, text="Search", command=self.perform_search)
+        self.btn_search = tk.Button(self, text="Search", command=self.perform_search, font=('Arial', 16), bd=4)
         self.btn_search.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=12)
         self.btn_cancel = tk.Button(self, text="Cancel", command=self.cancel_search)
 
-        self.lbl_error_text = tk.Label(self, fg='red')
+        self.error_row = tk.Frame(self)
+        self.exit_error_btn = tk.Button(self.error_row, text='X', command=self.exit_error)
+        self.exit_error_btn.pack(side=tk.LEFT)
+        self.lbl_error_text = tk.Label(self.error_row, fg='red')
+        self.lbl_error_text.pack(side=tk.LEFT)
 
     def clear(self):
         for entry in self.attribute_entries:
             entry.max.delete(0, tk.END)
             entry.min.delete(0, tk.END)
         self.ent_ligand.clear()
+        self.ent_excl_ligand.clear()
         self.ent_elements.delete(0, tk.END)
+        self.ent_excl_elements.delete(0, tk.END)
+        self.ent_sbus.clear()
+        self.ent_excl_sbus.clear()
 
     def force_search_for(self, ligand):
         search = SearchTerms(ligands=[ligand])
@@ -149,29 +157,23 @@ class View(tk.Frame):
         ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
         return ligands
 
+    def get_sbus(self, sbu_names):
+        sbus = list()
+        other_sbus = list()
+        for sbu_name in sbu_names:
+            if sbu_name in self.custom_ligands:
+                sbus.append(self.custom_ligands[sbu_name])
+            else:
+                other_sbus.append(sbu_name)
+        sbus.extend(SBUCollectionManager.read_sbus_from_files(other_sbus))
+        return sbus
+
     def search_from_input(self, search):
         if search is None:
-            def get_ligands(multiple_auto_combobox):
-                ligand_names = multiple_auto_combobox.get_values()
-                return self.get_ligands(ligand_names)
-
-            def get_sbus(multiple_auto_combobox):
-                sbu_names = multiple_auto_combobox.get_values()
-
-                sbus = list()
-                other_sbus = list()
-                for sbu_name in sbu_names:
-                    if sbu_name in self.custom_ligands:
-                        sbus.append(self.custom_ligands[sbu_name])
-                    else:
-                        other_sbus.append(sbu_name)
-                sbus.extend(SBUCollectionManager.read_sbus_from_files(other_sbus))
-                return sbus
-
-            ligands = get_ligands(self.ent_ligand)
-            forbidden_ligands = get_ligands(self.ent_excl_ligand)
-            sbus = get_sbus(self.ent_sbus)
-            forbidden_sbus = get_sbus(self.ent_excl_sbus)
+            ligands = self.get_ligands(self.ent_ligand.get_values())
+            forbidden_ligands = self.get_ligands(self.ent_excl_ligand.get_values())
+            sbus = self.get_sbus(self.ent_sbus.get_values())
+            forbidden_sbus = self.get_sbus(self.ent_excl_sbus.get_values())
             element_symbols_text = self.ent_elements.get()
             element_symbols = re.findall(r"[\w']+", element_symbols_text)
             forbidden_element_symbols_text = self.ent_excl_elements.get()
@@ -236,16 +238,26 @@ class View(tk.Frame):
 
     def show_error(self, error):
         self.lbl_error_text['text'] = 'Error: ' + str(error)
-        self.lbl_error_text.grid(row=ROW_MAXIMUM + 1, column=0, pady=2, columnspan=12, sticky=tk.EW)
+        self.error_row.grid(row=ROW_MAXIMUM + 1, column=0, pady=2, columnspan=12, sticky=tk.EW)
 
-        def forget_error():
-            self.lbl_error_text.grid_forget()
-        self.after(5000, forget_error)
+    def exit_error(self):
+        self.error_row.grid_forget()
 
     def focus_ligand(self, ligand_name):
         if ligand_name != '':
-            ligand = self.get_ligands([ligand_name])[0]
-            self.parent.highlight_molecule(ligand)
+            try:
+                ligand = self.get_ligands([ligand_name])[0]
+                self.parent.highlight_molecule(ligand)
+            except FileNotFoundError as ex:
+                self.show_error(ex)
+
+    def focus_sbu(self, sbu_name):
+        if sbu_name != '':
+            try:
+                sbu = self.get_sbus([sbu_name])[0]
+                self.parent.highlight_molecule(sbu)
+            except FileNotFoundError as ex:
+                self.show_error(ex)
 
 
 class AttributeEntry(tk.Frame):

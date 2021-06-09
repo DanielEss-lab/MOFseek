@@ -15,8 +15,11 @@ Some code snippets from stackoverflow.com/questions/58428545/clarify-functionali
 
 class Box(ttk.Combobox):
 
-    def __init__(self, master, my_font):
+    def __init__(self, master, my_font, on_select=None):
         super().__init__(master, font=my_font)
+        self.on_select = on_select
+        if on_select is not None:
+            self.bind("<<ComboboxSelected>>", lambda e: on_select(self.get()))
 
     def set_completion_list(self, completion_list):
         """Use our completion list as our drop down selection menu, arrows move through menu."""
@@ -82,18 +85,20 @@ class Box(ttk.Combobox):
         if event.keysym == "BackSpace":
             self.delete(self.index(tk.INSERT), tk.END)
             self.position = self.index(tk.END)
-        if event.keysym == "Left":
+        elif event.keysym == "Left":
             if self.position < self.index(tk.END):  # delete the selection
                 self.delete(self.position, tk.END)
             else:
                 self.position = self.position - 1  # delete one character
                 self.delete(self.position, tk.END)
-        if event.keysym == "Right":
+        elif event.keysym == "Right":
             self.position = self.index(tk.END)  # go to end (no selection)
-        if event.keysym == "Up":
+        elif event.keysym == "Up":
             self.autocomplete(-1)  # cycle to previous hit
-        if len(event.keysym) == 1:
+        elif len(event.keysym) == 1:
             self.autocomplete()
+        elif event.keysym == "Return":  # Tab doesn't work because it cycles to next entry/button
+            self.on_select(self.get())
 
 
 def test(test_list):
