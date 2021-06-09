@@ -4,16 +4,21 @@ import tkinter as tk
 import tkinter.filedialog as fd
 
 from GUI import MOFView
+from GUI.Search import Attributes
 
-sort_options = ['Sort by: \u25BC', 'blah (max)', 'blah(min)']
 
 class View(tk.Frame):
     def __init__(self, parent):
         self.parent = parent
-        tk.Frame.__init__(self, self.parent, height=450, width=800, bd=2, relief=tk.SOLID)
+        tk.Frame.__init__(self, self.parent, height=450, width=800)
         self.results = []
 
         self.selected_sort = tk.StringVar(self)
+        self.default_sort_string = 'Sort by: \u25BC'
+        sort_options = [self.default_sort_string]
+        for attr in Attributes.attribute_names:
+            sort_options.append(attr + ' | high first')
+            sort_options.append(attr + ' | low first')
         self.selected_sort.set(sort_options[0])
         sort_dropdown = tk.OptionMenu(self, self.selected_sort, *sort_options,
                                       command=lambda _: self.display_results(self.results))
@@ -56,12 +61,13 @@ class View(tk.Frame):
 
     def display_results(self, results):
         sort_name = self.selected_sort.get()
-        # if sort_name == 'Sort by: \u25BC':  # TODO: Uncomment this once MOFS have interesting attributes to sort by
-        #     pass
-        # elif sort_name == 'example_attribute':
-        #     results.sort(key=lambda mof: mof.attribute)
-        # elif sort_name == 'example_attribute_reverse':
-        #     results.sort(key=lambda mof: mof.attribute)
+        if sort_name == self.default_sort_string:
+            pass
+        else:
+            division_index = sort_name.rfind('|')
+            attribute = sort_name[:division_index-1]
+            descending = sort_name[division_index+1:].find('high first') >= 0
+            results.sort(reverse=descending, key=lambda mof: Attributes.get_attributes(mof)[attribute])
         self.results = results
         for widget in self.frame.winfo_children():
             widget.destroy()

@@ -7,7 +7,7 @@ class View(tk.Frame):
     def __init__(self, parent, font=("Arial", 10)):
         self.font = font
         self.parent = parent
-        tk.Frame.__init__(self, self.parent, bd=2, relief=tk.SOLID)
+        tk.Frame.__init__(self, self.parent)
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=4)
         self.initial_combobox = AutoCompleteComboBox.Box(self, self.font)

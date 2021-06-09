@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 import traceback
 
+from GUI import Tooltips
 from GUI.Search import MultipleAutoCompleteSearch, TerminableThread, UploadLigandView, Attributes
 from GUI.Search.SearchTerms import SearchTerms, search_ligand_names_in_mofsForTests
 from MofIdentifier import SearchMOF
@@ -16,7 +17,7 @@ ROW_MAXIMUM = 6
 class View(tk.Frame):
     def __init__(self, parent):
         self.parent = parent
-        tk.Frame.__init__(self, self.parent, height=40, width=300, bd=2, padx=12, relief=tk.SOLID)
+        tk.Frame.__init__(self, self.parent, height=40, width=300, padx=12)
         self.attribute_entries = list()
         self.custom_ligands = dict()
         self.search_to_results = dict()
@@ -24,11 +25,12 @@ class View(tk.Frame):
         for i in range(8 + 1):
             self.grid_columnconfigure(i, weight=1)
         self.grid_columnconfigure(1, weight=2)
+
         self.upload_mof_v = UploadLigandView.View(self)
         self.upload_mof_v.grid(row=0, column=0, pady=2, columnspan=12)
 
         self.lbl_ligand = tk.Label(self, text="Required Ligands: ")
-        self.lbl_ligand.grid(row=1, column=0, pady=2, sticky=tk.E)
+        self.lbl_ligand.grid(row=1, column=0, pady=2, sticky=tk.NE)
         self.ent_ligand = MultipleAutoCompleteSearch.View(self)
         self.ent_ligand.set_possible_values(self.all_ligands_names())
         self.ent_ligand.grid(row=1, column=1, pady=2, sticky=tk.EW)
@@ -39,14 +41,14 @@ class View(tk.Frame):
         self.ent_elements.insert(0, 'C, H')
         self.ent_elements.grid(row=1, column=3, pady=2, sticky=tk.EW)
         self.lbl_sbus = tk.Label(self, text="Required SBUs: ")
-        self.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.E)
+        self.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.NE)
         self.ent_sbus = MultipleAutoCompleteSearch.View(self)
         self.ent_sbus.set_possible_values(self.all_sbu_names())
         self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
 
         small_font = ("Arial", 8)
         self.lbl_excl_ligand = tk.Label(self, text="Forbidden Ligands: ", font=small_font)
-        self.lbl_excl_ligand.grid(row=2, column=0, pady=2, sticky=tk.E)
+        self.lbl_excl_ligand.grid(row=2, column=0, pady=2, sticky=tk.NE)
         self.ent_excl_ligand = MultipleAutoCompleteSearch.View(self, small_font)
         self.ent_excl_ligand.set_possible_values(self.all_ligands_names())
         self.ent_excl_ligand.grid(row=2, column=1, pady=2, sticky=tk.W)
@@ -56,7 +58,7 @@ class View(tk.Frame):
         self.ent_excl_elements.insert(0, '')
         self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.W)
         self.lbl_excl_sbus = tk.Label(self, text="Forbidden Sbus: ", font=small_font)
-        self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.E)
+        self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
         self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, small_font)
         self.ent_excl_sbus.set_possible_values(self.all_sbu_names())
         self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
@@ -196,7 +198,7 @@ class View(tk.Frame):
 
     def add_attribute_search_entries(self):
         def attribute_heading(parent):
-            view = tk.Frame(parent, bd=1, relief=tk.SOLID)
+            view = tk.Frame(parent)
             top = tk.Label(view, text='')
             top.pack()
             middle = tk.Label(view, text='Maximum')
@@ -208,10 +210,10 @@ class View(tk.Frame):
         attribute_row = tk.Frame(self)
         attribute_heading(attribute_row).pack(side='left')
         for text in Attributes.attribute_names:
-            entry = AttributeEntry(attribute_row, text)
+            entry = AttributeEntry(attribute_row, text, Attributes.attribute_descriptions[text])
             self.attribute_entries.append(entry)
             entry.pack(side='left')
-        attribute_row.grid(column=0, row=2, columnspan=12, pady=2)
+        attribute_row.grid(column=0, row=3, columnspan=12, pady=2)
 
     def get_attribute_parameters(self):
         return {entry.name: entry.get() for entry in self.attribute_entries}
@@ -240,11 +242,12 @@ class View(tk.Frame):
 
 
 class AttributeEntry(tk.Frame):
-    def __init__(self, parent, name):
+    def __init__(self, parent, name, description):
         self.parent = parent
         self.name = name
         tk.Frame.__init__(self, self.parent, bd=1, relief=tk.SOLID)
         self.top = tk.Label(self, text=name)
+        Tooltips.create_tool_tip(self.top, description)
         self.top.pack()
         vcmd = (self.register(self.is_numeric_input))
         self.max = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'))

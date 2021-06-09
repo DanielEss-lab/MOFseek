@@ -8,7 +8,7 @@ from MofIdentifier.fileIO import LigandReader
 class View(tk.Frame):
     def __init__(self, parent):
         self.parent = parent
-        tk.Frame.__init__(self, self.parent, bd=2, relief=tk.SOLID)
+        tk.Frame.__init__(self, self.parent)
 
         btn = tk.Button(self, text='Open Ligand', command=lambda: self.open_file())
         btn.pack()

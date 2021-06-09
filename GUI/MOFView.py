@@ -1,5 +1,6 @@
 import tkinter as tk
 
+from GUI import Tooltips
 from GUI.Search import Attributes
 from MofIdentifier.fileIO import FileOpen
 from MofIdentifier.subbuilding import SBUCollectionManager, SBUIdentifier
@@ -14,14 +15,15 @@ def format_elements(mof):
 def make_view(parent, mof):
     sbus = SBUCollectionManager.process_new_mof(mof)
     root = parent.master.master
-    view = tk.Frame(parent, height=40, bd=2, relief=tk.SOLID)
-    row1 = tk.Frame(master=view, height=20)
-    name = tk.Label(row1, text=mof.label)
+    view = tk.Frame(parent, height=40)
+    row1 = tk.Frame(master=view)
+    name = tk.Label(row1, text=mof.label, font=("Arial", 10))
     name.pack(side='left')
-    open = tk.Label(row1, text="Open File", cursor='hand2', padx=8)
+    open = tk.Label(row1, text="\U0001F441", cursor='hand2', padx=2, font=("Arial", 16), height=0)
     open.bind('<Button-1>', lambda e: FileOpen.open_file(mof.filepath))
     open.pack(side='right')
-    see = tk.Label(row1, text="Reveal File", cursor='hand2', padx=8)
+    tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
+    see = tk.Label(row1, text="\U0001f4c1", cursor='hand2', padx=2, font=("Arial", 16), height=0)
     see.bind('<Button-1>', lambda e: FileOpen.see_file(mof.filepath))
     see.pack(side='right')
     row1.pack(fill=tk.X)
@@ -29,8 +31,9 @@ def make_view(parent, mof):
     row2 = tk.Frame(master=view, height=20)
     attributes = Attributes.get_attributes(mof)
     for text, value in attributes.items():
-        _attribute_view(row2, text, value).pack(side='left')
-    _attribute_view(row2, 'Elements', format_elements(mof)).pack(side='left')
+        _attribute_view(row2, text, value, Attributes.attribute_descriptions[text]).pack(side='left')
+    _attribute_view(row2, 'Elements', format_elements(mof),
+                    'Atomic symbols of elements present in MOF').pack(side='left')
     row2.pack(fill=tk.X)
 
     row3 = tk.Frame(master=view, height=20)
@@ -70,9 +73,10 @@ def make_view(parent, mof):
     return view
 
 
-def _attribute_view(parent, name, value):
+def _attribute_view(parent, name, value, description):
     view = tk.Frame(parent, bd=1, relief=tk.SOLID)
     top = tk.Label(view, text=name)
+    Tooltips.create_tool_tip(top, description)
     top.pack()
     bottom = tk.Label(view, text=value)
     bottom.pack()
