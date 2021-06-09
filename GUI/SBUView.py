@@ -4,16 +4,16 @@ from MofIdentifier.fileIO import FileOpen
 
 
 def make_view(parent, sbu):
-    view = tk.Frame(parent, height=40, width=80, bd=1, relief=tk.SOLID)
+    view = tk.Frame(parent, height=40, width=120, bd=1, relief=tk.SOLID)
 
-    row1 = tk.Frame(master=view, height=20)
+    row1 = tk.Frame(master=view)
     name = tk.Label(row1, text=sbu.label)
     name.pack(side='left')
-    open = tk.Label(row1, text="\U0001F441", cursor='hand2', padx=2, font=("Arial", 12), height=0)
+    open = tk.Label(row1, text="\U0001F441", cursor='hand2', padx=2, font=("Arial", 14), height=0)
     open.bind('<Button-1>', lambda e: FileOpen.open_file(sbu.filepath))
     open.pack(side='right')
     tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-    see = tk.Label(row1, text="\U0001f4c1", cursor='hand2', padx=2, font=("Arial", 12), height=0)
+    see = tk.Label(row1, text="\U0001f4c1", cursor='hand2', padx=2, font=("Arial", 14), height=0)
     see.bind('<Button-1>', lambda e: FileOpen.see_file(sbu.filepath))
     see.pack(side='right')
     search = tk.Label(row1, text="Search as Ligand", cursor='hand2', padx=8)

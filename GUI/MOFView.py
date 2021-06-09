@@ -15,7 +15,7 @@ def format_elements(mof):
 def make_view(parent, mof):
     sbus = SBUCollectionManager.process_new_mof(mof)
     root = parent.master.master
-    view = tk.Frame(parent, height=40)
+    view = tk.Frame(parent, height=40, bd=1, relief=tk.SOLID)
     row1 = tk.Frame(master=view)
     name = tk.Label(row1, text=mof.label, font=("Arial", 10))
     name.pack(side='left')

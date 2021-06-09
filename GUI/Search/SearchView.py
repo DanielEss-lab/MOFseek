@@ -31,7 +31,7 @@ class View(tk.Frame):
 
         self.lbl_ligand = tk.Label(self, text="Required Ligands: ")
         self.lbl_ligand.grid(row=1, column=0, pady=2, sticky=tk.NE)
-        self.ent_ligand = MultipleAutoCompleteSearch.View(self)
+        self.ent_ligand = MultipleAutoCompleteSearch.View(self, self.focus_ligand)
         self.ent_ligand.set_possible_values(self.all_ligands_names())
         self.ent_ligand.grid(row=1, column=1, pady=2, sticky=tk.EW)
         self.ent_ligand.initial_combobox.focus_set()
@@ -42,14 +42,14 @@ class View(tk.Frame):
         self.ent_elements.grid(row=1, column=3, pady=2, sticky=tk.EW)
         self.lbl_sbus = tk.Label(self, text="Required SBUs: ")
         self.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.NE)
-        self.ent_sbus = MultipleAutoCompleteSearch.View(self)
+        self.ent_sbus = MultipleAutoCompleteSearch.View(self, self.focus_ligand)
         self.ent_sbus.set_possible_values(self.all_sbu_names())
         self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
 
         small_font = ("Arial", 8)
         self.lbl_excl_ligand = tk.Label(self, text="Forbidden Ligands: ", font=small_font)
         self.lbl_excl_ligand.grid(row=2, column=0, pady=2, sticky=tk.NE)
-        self.ent_excl_ligand = MultipleAutoCompleteSearch.View(self, small_font)
+        self.ent_excl_ligand = MultipleAutoCompleteSearch.View(self, self.focus_ligand, small_font)
         self.ent_excl_ligand.set_possible_values(self.all_ligands_names())
         self.ent_excl_ligand.grid(row=2, column=1, pady=2, sticky=tk.W)
         self.lbl_excl_elements = tk.Label(self, text="Forbidden Elements: ", font=small_font)
@@ -59,7 +59,7 @@ class View(tk.Frame):
         self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.W)
         self.lbl_excl_sbus = tk.Label(self, text="Forbidden Sbus: ", font=small_font)
         self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
-        self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, small_font)
+        self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, self.focus_ligand, small_font)
         self.ent_excl_sbus.set_possible_values(self.all_sbu_names())
         self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
 
@@ -138,20 +138,22 @@ class View(tk.Frame):
         else:
             self.perform_search(search)
 
+    def get_ligands(self, ligand_names):
+        ligands = list()
+        other_ligands = list()
+        for ligand_name in ligand_names:
+            if ligand_name in self.custom_ligands:
+                ligands.append(self.custom_ligands[ligand_name])
+            else:
+                other_ligands.append(ligand_name)
+        ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
+        return ligands
+
     def search_from_input(self, search):
         if search is None:
             def get_ligands(multiple_auto_combobox):
                 ligand_names = multiple_auto_combobox.get_values()
-
-                ligands = list()
-                other_ligands = list()
-                for ligand_name in ligand_names:
-                    if ligand_name in self.custom_ligands:
-                        ligands.append(self.custom_ligands[ligand_name])
-                    else:
-                        other_ligands.append(ligand_name)
-                ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
-                return ligands
+                return self.get_ligands(ligand_names)
 
             def get_sbus(multiple_auto_combobox):
                 sbu_names = multiple_auto_combobox.get_values()
@@ -239,6 +241,11 @@ class View(tk.Frame):
         def forget_error():
             self.lbl_error_text.grid_forget()
         self.after(5000, forget_error)
+
+    def focus_ligand(self, ligand_name):
+        if ligand_name != '':
+            ligand = self.get_ligands([ligand_name])[0]
+            self.parent.highlight_molecule(ligand)
 
 
 class AttributeEntry(tk.Frame):

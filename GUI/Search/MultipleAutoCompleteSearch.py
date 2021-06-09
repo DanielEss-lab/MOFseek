@@ -4,14 +4,19 @@ from GUI.Search import AutoCompleteComboBox
 
 
 class View(tk.Frame):
-    def __init__(self, parent, font=("Arial", 10)):
+    def __init__(self, parent, focus_function=None, font=("Arial", 10)):
         self.font = font
         self.parent = parent
         tk.Frame.__init__(self, self.parent)
+        self.focus_function = focus_function
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=4)
         self.initial_combobox = AutoCompleteComboBox.Box(self, self.font)
         self.initial_combobox.grid(row=0, column=1, pady=2, sticky=tk.NSEW)
+        if focus_function is not None:
+            initial_focus_button = tk.Button(self, text='\U0001F50D', font=self.font,
+                                             command=lambda: focus_function(self.initial_combobox.get()))
+            initial_focus_button.grid(row=0, column=2, pady=2)
         self.box_by_row_index = dict()
         self.values = None
         second_row_button = tk.Button(self, text='+', font=self.font, command=lambda: self.new_combobox(second_row_button))
@@ -42,7 +47,10 @@ class View(tk.Frame):
         self.box_by_row_index[row_index] = combobox
         combobox.grid(row=row_index, column=1, pady=2, sticky=tk.NSEW)
         combobox.focus_set()
-
+        if self.focus_function is not None:
+            focus_button = tk.Button(self, text='\U0001F50D', font=self.font,
+                                     command=lambda: self.focus_function(combobox.get()))
+            focus_button.grid(row=row_index, column=2, pady=2)
         new_row_button = tk.Button(self, text='+', font=self.font, command=lambda: self.new_combobox(new_row_button))
         new_row_button.grid(row=row_index+1, column=0, pady=2)
 

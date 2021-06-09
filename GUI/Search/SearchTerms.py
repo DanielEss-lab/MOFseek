@@ -32,7 +32,7 @@ class SearchTerms:
         if element_symbol_list is None:
             element_symbol_list = []
         if numerical_attr is None:
-            numerical_attr = []
+            numerical_attr = dict()
         self.ligands = ligands
         self.element_symbols = element_symbol_list
         self.excl_ligands = excl_ligands
