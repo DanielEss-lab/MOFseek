@@ -42,7 +42,6 @@ class SearchTerms:
         self.numerical_attr = numerical_attr
 
     def passes(self, MOF):
-        SBUIdentifier.split(MOF)
         for element in self.element_symbols:
             if element not in MOF.elementsPresent:
                 return False

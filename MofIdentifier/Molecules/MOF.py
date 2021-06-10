@@ -1,49 +1,32 @@
-import numpy as np
 import math
 
+import numpy as np
+
 from MofIdentifier.Molecules import Molecule
-from MofIdentifier.Molecules.atom import Atom
+from MofIdentifier.Molecules.atom import Atom, conversion_to_Cartesian
+from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
+from MofIdentifier.subbuilding import SBUIdentifier
 
 
 class MOF(Molecule.Molecule):
-    def __init__(self, filepath, symmetry, a, b, c, al, be, ga, file_string):
-        super().__init__(filepath, None)
+    def __init__(self, filepath, atoms, symmetry, a, b, c, al, be, ga, file_string):
+        super().__init__(filepath, atoms)
         self.symmetry = symmetry
-        self.length_a = a
-        self.length_b = b
-        self.length_c = c
-        self.angle_alpha = al
-        self.angle_beta = be
-        self.angle_gamma = ga
+        self.fractional_lengths = (a, b, c)
+        self.angles = (al, be, ga)
         self.cif_content = file_string
-        self.sbu_split = None
+        self.unit_volume = a * b * c * math.sqrt(1 + 2 * math.cos(np.deg2rad(al)) * math.cos(np.deg2rad(be))
+                                                 * math.cos(np.deg2rad(ga)) - math.cos(np.deg2rad(al)) ** 2 -
+                                                 math.cos(np.deg2rad(be)) ** 2 - math.cos(np.deg2rad(ga)) ** 2)
         # Convert unit vectors to Cartesian in order to understand how basis set changes. It's a bit of a workaround TBH
-        (self.length_x, n, n) = self.conversion_to_Cartesian(Atom('-', '-', 1, 0, 0, True))
-        (n, self.length_y, n) = self.conversion_to_Cartesian(Atom('-', '-', 0, 1, 0, True))
-        (n, n, self.length_z) = self.conversion_to_Cartesian(Atom('-', '-', 0, 0, 1, True))
+        (length_x, n, n) = conversion_to_Cartesian(Atom('-', '-', 1, 0, 0, True), (al, be, ga), (a, b, c))
+        (n, length_y, n) = conversion_to_Cartesian(Atom('-', '-', 0, 1, 0, True), (al, be, ga), (a, b, c))
+        (n, n, length_z) = conversion_to_Cartesian(Atom('-', '-', 0, 0, 1, True), (al, be, ga), (a, b, c))
+        self.cartesian_lengths = (length_x, length_y, length_z)
+
+        bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths)
+        bond_creator.connect_atoms()
+        self.sbu_split = SBUIdentifier.split(self)
 
     def __str__(self):
-        return "{} with fractional dimensions {}, {}, {}".format(self.label,
-                                                                 self.length_a, self.length_b, self.length_c)
-
-    def set_atoms(self, atoms):
-        self.atoms = atoms
-        for atom in atoms:
-            self.elementsPresent.add(atom.type_symbol)
-
-    def conversion_to_Cartesian(self, atom):
-        alpha = np.deg2rad(self.angle_alpha)
-        beta = np.deg2rad(self.angle_beta)
-        gamma = np.deg2rad(self.angle_gamma)
-
-        value_of_trig = (np.cos(alpha) - (np.cos(beta) * np.cos(gamma))) / np.sin(gamma)
-
-        volume_of_cell = self.length_a * self.length_b * self.length_c * math.sqrt(
-            1 - (np.cos(alpha) ** 2) - (np.cos(beta) ** 2) - (np.cos(gamma) ** 2) + (
-                        2 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)))
-
-        matrix = np.array([[self.length_a, (self.length_b * np.cos(gamma)), (self.length_c * np.cos(beta))],
-                           [0, (self.length_b * np.sin(gamma)), self.length_c * value_of_trig],
-                           [0, 0, volume_of_cell / (self.length_a * self.length_b * np.sin(gamma))]])
-
-        return np.matmul(matrix, np.array([atom.a, atom.b, atom.c]))
+        return "{} with fractional dimensions {}".format(self.label, self.fractional_lengths)

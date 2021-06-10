@@ -9,9 +9,8 @@ from MofIdentifier.subbuilding.SBUTools import UnitType, SBUCollection
 
 
 def process_new_mof(mof):
-    sbus = SBUIdentifier.split(mof)
     existing_sbus = get_existing_sbus()
-    (new_sbus, recognized_sbus) = match_to_existing_sbus(existing_sbus, sbus)
+    (new_sbus, recognized_sbus) = match_to_existing_sbus(existing_sbus, mof.sbu_split)
     write_sbus(new_sbus, {UnitType.CLUSTER: len(existing_sbus[0]),
                           UnitType.CONNECTOR: len(existing_sbus[1]),
                           UnitType.AUXILIARY: len(existing_sbus[2])})

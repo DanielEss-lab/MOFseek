@@ -1,13 +1,12 @@
 import unittest
 
 from MofIdentifier.fileIO.CifReader import get_mof
-from MofIdentifier.subbuilding.SBUIdentifier import split
 
 
 class SBUIdentifierTest(unittest.TestCase):
     def test_simple_mof(self):
         mof_abavij = get_mof('../mofsForTests/ABAVIJ_clean.cif')
-        sbu_breakdown = split(mof_abavij)
+        sbu_breakdown = mof_abavij.sbu_split
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 4)
@@ -23,7 +22,7 @@ class SBUIdentifierTest(unittest.TestCase):
 
     def test_complex_mof(self):
         mof_808 = get_mof('../mofsForTests/smod7-pos-1.cif')
-        sbu_breakdown = split(mof_808)
+        sbu_breakdown = mof_808.sbu_split
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 4)
@@ -43,7 +42,7 @@ class SBUIdentifierTest(unittest.TestCase):
 
     def test_small_mof(self):
         mof_abetae = get_mof('../mofsForTests/ABETAE_clean.cif')
-        sbu_breakdown = split(mof_abetae)
+        sbu_breakdown = mof_abetae.sbu_split
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 20)
@@ -61,7 +60,7 @@ class SBUIdentifierTest(unittest.TestCase):
 
     def test_notalladjacent_core(self):
         mof_akoheo = get_mof('../mofsForTests/AKOHEO_clean.cif')
-        sbu_breakdown = split(mof_akoheo)
+        sbu_breakdown = mof_akoheo.sbu_split
 
         assert (len(sbu_breakdown.clusters) == 2)
         iron_node = None
@@ -103,7 +102,7 @@ class SBUIdentifierTest(unittest.TestCase):
 
     def test_abnormal_fractional_coordinates(self):
         mof_ja_007 = get_mof('../mofsForTests/ja500330a_si_007_auto.cif')
-        sbu_breakdown = split(mof_ja_007)
+        sbu_breakdown = mof_ja_007.sbu_split
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (sbu_breakdown.clusters[0].frequency == 16)
@@ -123,7 +122,7 @@ class SBUIdentifierTest(unittest.TestCase):
 
     def test_single_metal_wide_unit_cell(self):
         mof_russaa = get_mof('../mofsForTests/RUSSAA_clean.cif')
-        sbu_breakdown = split(mof_russaa)
+        sbu_breakdown = mof_russaa.sbu_split
         assert (len(sbu_breakdown.auxiliaries) == 0)
         assert (len(sbu_breakdown.clusters) == 2)
         assert (len(sbu_breakdown.clusters[0].atoms) == 1)

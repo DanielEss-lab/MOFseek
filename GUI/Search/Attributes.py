@@ -27,14 +27,15 @@ attribute_descriptions = {
 
 def get_attributes(mof):
     return {
-        attribute_names[0]: round(mof.length_x * mof.length_y * mof.length_z, 0),
-        attribute_names[1]: round(max(mof.length_x, mof.length_y, mof.length_z) -
-                                   min(mof.length_x, mof.length_y, mof.length_z), 2),
-        attribute_names[2]: round(max(mof.angle_alpha, mof.angle_beta, mof.angle_gamma) -
-                                      min(mof.angle_alpha, mof.angle_beta, mof.angle_gamma), 2),
+        attribute_names[0]: round(mof.unit_volume, 0),
+        attribute_names[1]: round(max(mof.cartesian_lengths[0], mof.cartesian_lengths[1], mof.cartesian_lengths[2]) -
+                                  min(mof.cartesian_lengths[0], mof.cartesian_lengths[1], mof.cartesian_lengths[2]), 2),
+        attribute_names[2]: round(max(mof.angles[0], mof.angles[1], mof.angles[2]) -
+                                  min(mof.angles[0], mof.angles[1], mof.angles[2]), 2),
         attribute_names[3]: len(mof.atoms),
         attribute_names[4]: round(mof.sbu_split.num_connector_atoms / mof.sbu_split.num_cluster_atoms, 2),
-        attribute_names[5]: round(len(mof.sbu_split.auxiliaries) / (mof.length_x * mof.length_y * mof.length_z), 5),
+        attribute_names[5]: round(len(mof.sbu_split.auxiliaries) /
+                                  (mof.cartesian_lengths[0] * mof.cartesian_lengths[1] * mof.cartesian_lengths[2]), 5),
         attribute_names[6]: round(mof.sbu_split.avg_conn_connectivity, 1),
         attribute_names[7]: round(mof.sbu_split.avg_node_connectivity, 1),
     }
