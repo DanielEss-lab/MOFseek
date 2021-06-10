@@ -85,7 +85,7 @@ class SearchTerms:
         return hash(str(self))
 
 
-def search_ligand_names_in_mofsForTests(search):
+def search_in_mofsForTests(search):
     path = str(Path(__file__).parent / "../../MofIdentifier/mofsForTests")
     mofs = CifReader.get_all_mofs_in_directory(path)
     good_mofs = [mof for mof in mofs if search.passes(mof)]

@@ -29,32 +29,7 @@ class Box(ttk.Combobox):
         self.position = 0
         self.detect_pressed_filled = False
         self.bind('<KeyRelease>', self.handle_keyrelease)
-        # self.bind('<Key>', self.detect_pressed)
         self['values'] = self._completion_list  # Setup our popup menu
-
-    # def match_string(self):
-    #     hits = []
-    #     got = self.get()
-    #     for item in self._completion_list:
-    #         if item.startswith(got):
-    #             hits.append(item)
-    #     return hits
-    #
-    # def get_typed(self, event):
-    #     if len(event.keysym) == 1:
-    #         hits = self.match_string()
-    #         self.show_hit(hits)
-    #
-    # def show_hit(self, lst):
-    #     if len(lst) == 1:
-    #         self.set(lst[0])
-    #         self.detect_pressed_filled = True
-    #
-    # def detect_pressed(self, event):
-    #     key = event.keysym
-    #     if len(key) == 1 and self.detect_pressed_filled is True:
-    #         pos = self.index(tk.INSERT)
-    #         self.delete(pos, tk.END)
 
     def autocomplete(self, delta=0):
         """autocomplete the Combobox, delta may be 0/1/-1 to cycle through possible hits"""

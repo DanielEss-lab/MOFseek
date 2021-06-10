@@ -17,6 +17,7 @@ def make_view(parent, mof):
     sbus = SBUCollectionManager.process_new_mof(mof)
     root = parent.master.master
     view = tk.Frame(parent, height=40, bd=1, relief=tk.SOLID)
+
     row1 = tk.Frame(master=view)
     name = tk.Label(row1, text=mof.label, font=("Arial", 10))
     name.pack(side='left')
@@ -40,12 +41,10 @@ def make_view(parent, mof):
     row3 = tk.Frame(master=view, height=20)
     sbu_label = tk.Label(row3, text="SBUs:")
     sbu_label.pack(side='left')
-
     def have_root_highlight(clicked_node):
         def fun(*args):
             root.highlight_molecule(clicked_node)
         return fun
-
     def display_sbu_name(sbu, color):
         text = f"{sbu.frequency}x {sbu.label} ({sbu.connections()}\u00B0)"
         sbu_label = tk.Label(row3, text=text, fg=color, cursor='hand2', padx=3)
@@ -55,7 +54,6 @@ def make_view(parent, mof):
         event_function = have_root_highlight(sbu)
         sbu_label.bind('<Button-1>', event_function)
         sbu_label.pack(side='left')
-
     for node in sbus.clusters:
         display_sbu_name(node, '#0000a0')
     for conn in sbus.connectors:

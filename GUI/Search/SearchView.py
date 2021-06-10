@@ -6,7 +6,7 @@ import traceback
 
 from GUI import Tooltips
 from GUI.Search import MultipleAutoCompleteSearch, TerminableThread, UploadLigandView, Attributes
-from GUI.Search.SearchTerms import SearchTerms, search_ligand_names_in_mofsForTests
+from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForTests
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUCollectionManager
@@ -169,6 +169,7 @@ class View(tk.Frame):
         return sbus
 
     def search_from_input(self, search):
+        # Generate SearchTerms object from entries if needed
         if search is None:
             ligands = self.get_ligands(self.ent_ligand.get_values())
             forbidden_ligands = self.get_ligands(self.ent_excl_ligand.get_values())
@@ -181,6 +182,7 @@ class View(tk.Frame):
             attributes = self.get_attribute_parameters()
             search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols,
                                  sbus, forbidden_sbus, attributes)
+        # Shortcut evaluation if possible
         if search in self.search_to_results and self.search_to_results[search] is not None \
                 and self.search_to_results[search] != 'ongoing':
             self.parent.display_search_results(self.search_to_results[search])
@@ -189,7 +191,7 @@ class View(tk.Frame):
             self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
                                                             self.redo_search_selected.set(value))
             self.search_to_results[search] = 'ongoing'
-            results = search_ligand_names_in_mofsForTests(search)
+            results = search_in_mofsForTests(search) #TODO: this will change with db integration
             self.search_to_results[search] = results
             self.parent.display_search_results(results)
 
