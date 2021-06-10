@@ -11,6 +11,8 @@ class Molecule:
             self.label = filepath
         self.atoms = atoms
         self.elementsPresent = set()
+        for atom in atoms:
+            self.elementsPresent.add(atom.type_symbol)
         self.graph = igraph
         self.no_h_graph = None
         self.should_use_weak_comparison = weak_comparison_enabled
