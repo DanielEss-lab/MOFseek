@@ -32,7 +32,7 @@ def read_ligands_from_files(ligand_names):
             for l_name in ligand_names:
                 if file_name_in_directory == l_name:
                     ligands.append(
-                        LigandReader.get_mol_from_file(str(Path(__file__).parent / "ligands") + "/" + l_name))
+                        LigandReader.get_mol_from_file(str(Path(__file__).parent / "ligands" / l_name)))
                     ligands_found += 1
     if ligands_found < len(ligand_names):
         raise Exception('Did not find all ligands')

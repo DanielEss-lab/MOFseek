@@ -1,3 +1,7 @@
+import math
+
+import numpy as np
+
 metals = {'Li', 'Be', 'Na', 'Mg', 'Al', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga',
           'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Cs', 'Ba', 'La', 'Ce',
           'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os',
@@ -6,37 +10,56 @@ metals = {'Li', 'Be', 'Na', 'Mg', 'Al', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 
           'Mc', 'Lv'}
 
 
-def isMetal(type_symbol):
+def is_metal(type_symbol):
     return type_symbol in metals
 
 
+def conversion_to_Cartesian(atom_a, atom_b, atom_c, angles, lengths):
+    alpha = np.deg2rad(angles[0])
+    beta = np.deg2rad(angles[1])
+    gamma = np.deg2rad(angles[2])
+    length_a = lengths[0]
+    length_b = lengths[1]
+    length_c = lengths[2]
+
+    value_of_trig = (np.cos(alpha) - (np.cos(beta) * np.cos(gamma))) / np.sin(gamma)
+
+    volume_of_cell = length_a * length_b * length_c * math.sqrt(
+        1 - (np.cos(alpha) ** 2) - (np.cos(beta) ** 2) - (np.cos(gamma) ** 2) + (
+                    2 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)))
+
+    matrix = np.array([[length_a, (length_b * np.cos(gamma)), (length_c * np.cos(beta))],
+                       [0, (length_b * np.sin(gamma)), length_c * value_of_trig],
+                       [0, 0, volume_of_cell / (length_a * length_b * np.sin(gamma))]])
+
+    return np.matmul(matrix, np.array([atom_a, atom_b, atom_c]))
+
+
 class Atom:
-    def __init__(self, label, type_symbol, x, y, z, is_fractional=False):
+    def __init__(self, label, type_symbol, x, y, z, a, b, c):
         self.label = label
         self.type_symbol = type_symbol
-        if is_fractional:
-            self.a = x
-            self.b = y
-            self.c = z
-        else:
-            self.x = x
-            self.y = y
-            self.z = z
+        self.a = a
+        self.b = b
+        self.c = c
+        self.x = x
+        self.y = y
+        self.z = z
         self.bondedAtoms = list(())
         self.original = None  # Used when an atom is copied outside of unit cell
 
     @classmethod
     def from_cartesian(cls, label, type_symbol, x, y, z):
-        return cls(label, type_symbol, x, y, z)
+        return cls(label, type_symbol, x, y, z, float('inf'), float('inf'), float('inf'))
 
     @classmethod
-    def from_fractional(cls, label, type_symbol, a, b, c, mof):
-        atom = cls(label, type_symbol, a, b, c, is_fractional=True)
-        atom.set_xyz_within_mof(mof)
-        return atom
+    def from_fractional(cls, label, type_symbol, a, b, c, angles, lengths):
+        (x, y, z) = conversion_to_Cartesian(a, b, c, angles, lengths)
+        return cls(label, type_symbol, x, y, z, a, b, c)
 
-    def set_xyz_within_mof(self, mof):
-        (self.x, self.y, self.z) = mof.conversion_to_Cartesian(self)
+    @classmethod
+    def without_location(cls, label, type_symbol):
+        return cls(label, type_symbol, float('inf'), float('inf'), float('inf'), float('inf'), float('inf'), float('inf'))
 
     def __str__(self):
         bonds_string = ''
@@ -54,8 +77,9 @@ class Atom:
     def is_in_unit_cell(self):
         return self.original is None
 
-    def copy_to_relative_position(self, da, db, dc, mof):
-        atom = Atom.from_fractional(self.label, self.type_symbol, self.a + da, self.b + db, self.c + dc, mof)
+    def copy_to_relative_position(self, da, db, dc, angles, lengths):
+        atom = Atom.from_fractional(self.label, self.type_symbol, self.a + da, self.b + db, self.c + dc,
+                                    angles, lengths)
         atom.original = self
         atom.bondedAtoms = self.bondedAtoms
         return atom

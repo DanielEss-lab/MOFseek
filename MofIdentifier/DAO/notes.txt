@@ -1,0 +1,32 @@
+========================================================================================================================
+Actions that the database should support:
+========================================================================================================================
+
+Retrieve all ligand names from database
+Retrieve specific ligand from database (by name)
+Add ligand from xyz or txt file (and thus add name to all MOFs which contain it)
+Rename ligand (and thus rename all references to it)
+
+Retrieve all sbu names from database
+Retrieve specific sbu from database (by name)
+Rename sbu (and thus rename all references to it)
+Add sbu to system (this only happens as part of the Add MOF action, see below)
+
+Retrieve all MOFs from database
+Retrieve MOFs for which f(MOF) is true ==> does PyMongo have a built-in way to do this?
+Retrieve average values ==> does PyMongo have a built-in way to do this?
+Add MOF from cif file (and thus split into SBUs, and record names (ex mof.sbu_names.add() or .append()) if they match
+         SBUs already in system, or add to system and give unique name (ex connector_375) if they don't match existing
+         SBUs. Also compare to all ligands, to see which ones are in it, and record names (ex
+         mof.identified_ligand_names))
+Update MOF with pore sizes, surface area, etc. that we will calculate using Zeo++)
+
+Retrieve from database: ideally, retrieve custom data object, eg a new MOF class that contains important info from
+                        Molecules.MOF as well as cif_content, values from excel sheet, and pore sizes (which we will
+                        calculate eventually)
+
+========================================================================================================================
+Actions that database currently supports:
+========================================================================================================================
+Add MOFs from excel sheet
+Update existing MOFs with cif_content

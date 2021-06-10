@@ -15,8 +15,11 @@ Some code snippets from stackoverflow.com/questions/58428545/clarify-functionali
 
 class Box(ttk.Combobox):
 
-    def __init__(self, master, my_font):
+    def __init__(self, master, my_font, on_select=None):
         super().__init__(master, font=my_font)
+        self.on_select = on_select
+        if on_select is not None:
+            self.bind("<<ComboboxSelected>>", lambda e: on_select(self.get()))
 
     def set_completion_list(self, completion_list):
         """Use our completion list as our drop down selection menu, arrows move through menu."""
@@ -26,32 +29,7 @@ class Box(ttk.Combobox):
         self.position = 0
         self.detect_pressed_filled = False
         self.bind('<KeyRelease>', self.handle_keyrelease)
-        # self.bind('<Key>', self.detect_pressed)
         self['values'] = self._completion_list  # Setup our popup menu
-
-    # def match_string(self):
-    #     hits = []
-    #     got = self.get()
-    #     for item in self._completion_list:
-    #         if item.startswith(got):
-    #             hits.append(item)
-    #     return hits
-    #
-    # def get_typed(self, event):
-    #     if len(event.keysym) == 1:
-    #         hits = self.match_string()
-    #         self.show_hit(hits)
-    #
-    # def show_hit(self, lst):
-    #     if len(lst) == 1:
-    #         self.set(lst[0])
-    #         self.detect_pressed_filled = True
-    #
-    # def detect_pressed(self, event):
-    #     key = event.keysym
-    #     if len(key) == 1 and self.detect_pressed_filled is True:
-    #         pos = self.index(tk.INSERT)
-    #         self.delete(pos, tk.END)
 
     def autocomplete(self, delta=0):
         """autocomplete the Combobox, delta may be 0/1/-1 to cycle through possible hits"""
@@ -82,18 +60,20 @@ class Box(ttk.Combobox):
         if event.keysym == "BackSpace":
             self.delete(self.index(tk.INSERT), tk.END)
             self.position = self.index(tk.END)
-        if event.keysym == "Left":
+        elif event.keysym == "Left":
             if self.position < self.index(tk.END):  # delete the selection
                 self.delete(self.position, tk.END)
             else:
                 self.position = self.position - 1  # delete one character
                 self.delete(self.position, tk.END)
-        if event.keysym == "Right":
+        elif event.keysym == "Right":
             self.position = self.index(tk.END)  # go to end (no selection)
-        if event.keysym == "Up":
+        elif event.keysym == "Up":
             self.autocomplete(-1)  # cycle to previous hit
-        if len(event.keysym) == 1:
+        elif len(event.keysym) == 1:
             self.autocomplete()
+        elif event.keysym == "Return":  # Tab doesn't work because it cycles to next entry/button
+            self.on_select(self.get())
 
 
 def test(test_list):

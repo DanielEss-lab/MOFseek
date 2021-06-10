@@ -8,13 +8,14 @@ max_bond_length = 4
 
 
 class MofBondCreator:
-    def __init__(self, mof):
-        self.mof = mof
+    def __init__(self, atoms, angles, fractional_lengths, cartesian_lengths):
+        self.angles = angles
+        self.lengths = fractional_lengths
         # Floor the number of buckets to overestimate the size of buckets
         # to ensure we're comparing at all viable distances
-        self.num_x_buckets = floor(mof.length_x / max_bond_length) if mof.length_x > max_bond_length else 1
-        self.num_y_buckets = floor(mof.length_y / max_bond_length) if mof.length_y > max_bond_length else 1
-        self.num_z_buckets = floor(mof.length_z / max_bond_length) if mof.length_z > max_bond_length else 1
+        self.num_x_buckets = floor(cartesian_lengths[0] / max_bond_length) if cartesian_lengths[0] > max_bond_length else 1
+        self.num_y_buckets = floor(cartesian_lengths[1] / max_bond_length) if cartesian_lengths[1] > max_bond_length else 1
+        self.num_z_buckets = floor(cartesian_lengths[2] / max_bond_length) if cartesian_lengths[2] > max_bond_length else 1
         self.cellSpace = [[[list(()) for _ in range(self.num_x_buckets)] for _ in range(self.num_y_buckets)]
                           for _ in range(self.num_z_buckets)]
         # To calculate accurate distances, and therefore to calculate the number of partitions in the 3D space,
@@ -22,7 +23,7 @@ class MofBondCreator:
         # However, to assign atoms to buckets, and to copy buckets over to simulate atoms outside the unit cell,
         # the math remains simpler to use fractional coordinates (usually a, b, and c). Unfortunately, we refer to the
         # index of buckets by x y and z instead of a b and c
-        for atom in mof.atoms:
+        for atom in atoms:
             x_bucket = floor(atom.a * self.num_x_buckets)
             y_bucket = floor(atom.b * self.num_y_buckets)
             z_bucket = floor(atom.c * self.num_z_buckets)
@@ -58,7 +59,7 @@ class MofBondCreator:
         else:
             bucket_copy = list(())
             for atom in bucket:
-                bucket_copy.append(atom.copy_to_relative_position(da, db, dc, self.mof))
+                bucket_copy.append(atom.copy_to_relative_position(da, db, dc, self.angles, self.lengths))
             return bucket_copy
 
     def connect_atoms(self):

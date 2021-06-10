@@ -1,6 +1,5 @@
 import MofIdentifier
 from MofIdentifier.bondTools import Distances
-from MofIdentifier.fileIO.CifReader import get_mof
 from MofIdentifier.subbuilding.SBUTools import SBUCollection, SBU, UnitType
 
 
@@ -10,15 +9,13 @@ def split(mof):
 
 
 def mof_has_all_sbus(mof, sbus):
-    mof_sbus = split(mof)
-    if all(sbu in mof_sbus.all() for sbu in sbus):
+    if all(sbu in mof.sbus().all() for sbu in sbus):
         return True
     return False
 
 
 def mof_has_no_sbus(mof, sbus):
-    mof_sbus = split(mof)
-    if any(sbu in mof_sbus.all() for sbu in sbus):
+    if any(sbu in mof.sbus().all() for sbu in sbus):
         return False
     return True
 
@@ -46,7 +43,7 @@ def check_for_infinite_band(cluster):
     for starting_atom in cluster.atoms:
         if check_for_inf_recurse(cluster, set(), starting_atom, starting_atom, 0):
             cluster.frequency = float('inf')
-        break
+            break
 
 
 def check_for_inf_recurse(cluster, visited, target_atom, atom, panes_crossed):
@@ -124,7 +121,7 @@ class SBUIdentifier:
         connectors = list(())
         auxiliaries = list(())
         for atom in self.atoms:
-            if MofIdentifier.Molecules.atom.isMetal(atom.type_symbol) and not self.been_visited(atom):
+            if MofIdentifier.Molecules.atom.is_metal(atom.type_symbol) and not self.been_visited(atom):
                 sbu = self.identify_cluster(atom)
                 if sbu.frequency == float('inf') and self.allow_two_steps:
                     # Try algorithm again, from the top, but with stricter cluster definition
@@ -169,7 +166,7 @@ class SBUIdentifier:
         cluster.add_atom(metal_atom)
         self.mark_group(metal_atom, self.next_group_id)
         for neighbor in metal_atom.bondedAtoms:
-            if MofIdentifier.Molecules.atom.isMetal(neighbor.type_symbol) and not self.been_visited(neighbor):
+            if MofIdentifier.Molecules.atom.is_metal(neighbor.type_symbol) and not self.been_visited(neighbor):
                 self.identify_cluster_recurse(neighbor, cluster)
         # The following section helps to identify more complex nodes by including metal atoms two steps away
         # It does this only when the intermediate molecule (usually Oxygen) ONLY connects to metals.
@@ -181,7 +178,7 @@ class SBUIdentifier:
         if not self.been_visited(possible_in_node_link):
             has_been_added = False
             for second_neighbor in possible_in_node_link.bondedAtoms:
-                if not MofIdentifier.Molecules.atom.isMetal(second_neighbor.type_symbol):
+                if not MofIdentifier.Molecules.atom.is_metal(second_neighbor.type_symbol):
                     return
             for second_neighbor in possible_in_node_link.bondedAtoms:
                 if second_neighbor not in cluster.atoms:
@@ -207,7 +204,7 @@ class SBUIdentifier:
         for neighbor in nonmetal_atom.bondedAtoms:
             if not self.been_visited(neighbor):
                 self.identify_ligand_recurse(neighbor, ligand)
-            elif MofIdentifier.Molecules.atom.isMetal(neighbor.type_symbol):
+            elif MofIdentifier.Molecules.atom.is_metal(neighbor.type_symbol):
                 ligand.adjacent_cluster_ids.add(
                     self.group_id_of(neighbor))
 
@@ -278,10 +275,3 @@ class SBUIdentifier:
         for starting_atom in ligand.atoms:
             self.correct_adjacent_recurse(ligand, set(), dict(), starting_atom, 0, dict())
             break
-
-
-if __name__ == '__main__':
-    mof = get_mof('../mofsForTests/RUSSAA_clean.cif')
-    print(mof)
-    split_mof = split(mof)
-    print(split_mof)
