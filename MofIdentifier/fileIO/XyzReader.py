@@ -19,11 +19,11 @@ def read_xyz(file):
     atoms = list(())
     index = 0
     for atomData in molecule.values:
-        atom = Atom(atomData[0] + str(index),
-                    atomData[0],
-                    float(atomData[1]),
-                    float(atomData[2]),
-                    float(atomData[3]))
+        atom = Atom.from_cartesian(atomData[0] + str(index),
+                                   atomData[0],
+                                   float(atomData[1]),
+                                   float(atomData[2]),
+                                   float(atomData[3]))
         atoms.append(atom)
         index += 1
     return Ligand(file, atoms)

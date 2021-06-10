@@ -94,21 +94,25 @@ class SBU(Molecule.Molecule):
             for neighbor in (n for n in atom.bondedAtoms if n in atoms and n not in visited):
                 d = Distances.distance(atom, neighbor)
                 if not Distances.is_bond_distance(d, atom, neighbor):
+                    da = db = dc = 0
                     if neighbor.a - atom.a > 0.5:
-                        neighbor.a -= 1.0
+                        da -= 1.0
                     elif neighbor.a - atom.a < -0.5:
-                        neighbor.a += 1.0
+                        da += 1.0
                     if neighbor.b - atom.b > 0.5:
-                        neighbor.b -= 1.0
+                        db -= 1.0
                     elif neighbor.b - atom.b < -0.5:
-                        neighbor.b += 1.0
+                        db += 1.0
                     if neighbor.c - atom.c > 0.5:
-                        neighbor.c -= 1.0
+                        dc -= 1.0
                     elif neighbor.c - atom.c < -0.5:
-                        neighbor.c += 1.0
-                    neighbor.set_xyz_within_mof(mof)
-                visited.add(neighbor)
-                queue.append(neighbor)
+                        dc += 1.0
+                    neighbor_in_right_place = neighbor.copy_to_relative_position(da, db, dc, mof.angles,
+                                                                                 mof.fractional_lengths)
+                else:
+                    neighbor_in_right_place = neighbor
+                visited.add(neighbor_in_right_place)
+                queue.append(neighbor_in_right_place)
         self.atoms = visited
 
     def __str__(self):

@@ -14,7 +14,7 @@ def is_metal(type_symbol):
     return type_symbol in metals
 
 
-def conversion_to_Cartesian(atom, angles, lengths):
+def conversion_to_Cartesian(atom_a, atom_b, atom_c, angles, lengths):
     alpha = np.deg2rad(angles[0])
     beta = np.deg2rad(angles[1])
     gamma = np.deg2rad(angles[2])
@@ -32,36 +32,34 @@ def conversion_to_Cartesian(atom, angles, lengths):
                        [0, (length_b * np.sin(gamma)), length_c * value_of_trig],
                        [0, 0, volume_of_cell / (length_a * length_b * np.sin(gamma))]])
 
-    return np.matmul(matrix, np.array([atom.a, atom.b, atom.c]))
+    return np.matmul(matrix, np.array([atom_a, atom_b, atom_c]))
 
 
 class Atom:
-    def __init__(self, label, type_symbol, x, y, z, is_fractional=False):
+    def __init__(self, label, type_symbol, x, y, z, a, b, c):
         self.label = label
         self.type_symbol = type_symbol
-        if is_fractional:
-            self.a = x
-            self.b = y
-            self.c = z
-        else:
-            self.x = x
-            self.y = y
-            self.z = z
+        self.a = a
+        self.b = b
+        self.c = c
+        self.x = x
+        self.y = y
+        self.z = z
         self.bondedAtoms = list(())
         self.original = None  # Used when an atom is copied outside of unit cell
 
     @classmethod
     def from_cartesian(cls, label, type_symbol, x, y, z):
-        return cls(label, type_symbol, x, y, z)
+        return cls(label, type_symbol, x, y, z, float('inf'), float('inf'), float('inf'))
 
     @classmethod
     def from_fractional(cls, label, type_symbol, a, b, c, angles, lengths):
-        atom = cls(label, type_symbol, a, b, c, is_fractional=True)
-        (atom.x, atom.y, atom.z) = conversion_to_Cartesian(atom, angles, lengths)
-        return atom
+        (x, y, z) = conversion_to_Cartesian(a, b, c, angles, lengths)
+        return cls(label, type_symbol, x, y, z, a, b, c)
 
-    def set_xyz_within_mof(self, mof):
-        (self.x, self.y, self.z) = conversion_to_Cartesian(self, mof.angles, mof.fractional_lengths)
+    @classmethod
+    def without_location(cls, label, type_symbol):
+        return cls(label, type_symbol, float('inf'), float('inf'), float('inf'), float('inf'), float('inf'), float('inf'))
 
     def __str__(self):
         bonds_string = ''

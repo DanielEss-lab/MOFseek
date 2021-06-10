@@ -48,7 +48,7 @@ def mol_from_networkx_graph(graph, mol_name):
     atoms = {}
     for node in networkx_nodes:
         name = str(node[1]) + str(node[0])
-        atoms[name] = Atom(str(name), str(node[1]), float('inf'), float('inf'), float('inf'))
+        atoms[name] = Atom.without_location(str(name), str(node[1]))
     for node in networkx_nodes:
         name = str(node[1]) + str(node[0])
         atom = atoms[name]

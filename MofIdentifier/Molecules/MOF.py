@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 from MofIdentifier.Molecules import Molecule
-from MofIdentifier.Molecules.atom import Atom, conversion_to_Cartesian
+from MofIdentifier.Molecules.atom import conversion_to_Cartesian
 from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
 from MofIdentifier.subbuilding import SBUIdentifier
 
@@ -19,9 +19,9 @@ class MOF(Molecule.Molecule):
                                                  * math.cos(np.deg2rad(ga)) - math.cos(np.deg2rad(al)) ** 2 -
                                                  math.cos(np.deg2rad(be)) ** 2 - math.cos(np.deg2rad(ga)) ** 2)
         # Convert unit vectors to Cartesian in order to understand how basis set changes. It's a bit of a workaround TBH
-        (length_x, n, n) = conversion_to_Cartesian(Atom('-', '-', 1, 0, 0, True), (al, be, ga), (a, b, c))
-        (n, length_y, n) = conversion_to_Cartesian(Atom('-', '-', 0, 1, 0, True), (al, be, ga), (a, b, c))
-        (n, n, length_z) = conversion_to_Cartesian(Atom('-', '-', 0, 0, 1, True), (al, be, ga), (a, b, c))
+        (length_x, n, n) = conversion_to_Cartesian(1, 0, 0, (al, be, ga), (a, b, c))
+        (n, length_y, n) = conversion_to_Cartesian(0, 1, 0, (al, be, ga), (a, b, c))
+        (n, n, length_z) = conversion_to_Cartesian(0, 0, 1, (al, be, ga), (a, b, c))
         self.cartesian_lengths = (length_x, length_y, length_z)
 
         bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths)
