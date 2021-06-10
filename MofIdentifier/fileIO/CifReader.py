@@ -74,6 +74,7 @@ def read_cif(filename):
 
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-    MOF = get_mof(r'C:\Users\mdavid4\Desktop\CIFs\structure_10143\SOTXEG_neutral.cif')
+    MOF = get_mof(r'C:\Users\mdavid4\Desktop\CIFs\structure_10143\ABAVIJ_clean.cif')
 
-    print(MOF)
+    print(MOF.unit_volume)
+    print(MOF.cartesian_lengths[0] * MOF.cartesian_lengths[1] * MOF.cartesian_lengths[2])
