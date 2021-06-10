@@ -15,7 +15,6 @@ class MOF(Molecule.Molecule):
         self.fractional_lengths = (a, b, c)
         self.angles = (al, be, ga)
         self.cif_content = file_string
-        # Convert unit vectors to Cartesian in order to understand how basis set changes. It's a bit of a workaround TBH
         (length_x, n, n) = conversion_to_Cartesian(1, 0, 0, (al, be, ga), (a, b, c))
         (n, length_y, n) = conversion_to_Cartesian(0, 1, 0, (al, be, ga), (a, b, c))
         (n, n, length_z) = conversion_to_Cartesian(0, 0, 1, (al, be, ga), (a, b, c))
@@ -25,6 +24,9 @@ class MOF(Molecule.Molecule):
         bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths)
         bond_creator.connect_atoms()
         self._sbus = None
+
+        # self.sbu_names
+        # self.identified_ligand_names
 
     def sbus(self):
         if self._sbus is None:
