@@ -33,9 +33,9 @@ def get_attributes(mof):
         attribute_names[2]: round(max(mof.angles[0], mof.angles[1], mof.angles[2]) -
                                   min(mof.angles[0], mof.angles[1], mof.angles[2]), 2),
         attribute_names[3]: len(mof.atoms),
-        attribute_names[4]: round(mof.sbu_split.num_connector_atoms / mof.sbu_split.num_cluster_atoms, 2),
-        attribute_names[5]: round(len(mof.sbu_split.auxiliaries) /
+        attribute_names[4]: round(mof.sbus().num_connector_atoms / mof.sbus().num_cluster_atoms, 2),
+        attribute_names[5]: round(len(mof.sbus().auxiliaries) /
                                   (mof.cartesian_lengths[0] * mof.cartesian_lengths[1] * mof.cartesian_lengths[2]), 5),
-        attribute_names[6]: round(mof.sbu_split.avg_conn_connectivity, 1),
-        attribute_names[7]: round(mof.sbu_split.avg_node_connectivity, 1),
+        attribute_names[6]: round(mof.sbus().avg_conn_connectivity, 1),
+        attribute_names[7]: round(mof.sbus().avg_node_connectivity, 1),
     }

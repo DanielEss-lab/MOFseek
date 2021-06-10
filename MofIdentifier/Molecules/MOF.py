@@ -26,7 +26,12 @@ class MOF(Molecule.Molecule):
 
         bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths)
         bond_creator.connect_atoms()
-        self.sbu_split = SBUIdentifier.split(self)
+        self._sbus = None
+
+    def sbus(self):
+        if self._sbus is None:
+            self._sbus = SBUIdentifier.split(self)
+        return self._sbus
 
     def __str__(self):
         return "{} with fractional dimensions {}".format(self.label, self.fractional_lengths)
