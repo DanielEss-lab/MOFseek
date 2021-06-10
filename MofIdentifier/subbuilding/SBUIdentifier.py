@@ -43,7 +43,7 @@ def check_for_infinite_band(cluster):
     for starting_atom in cluster.atoms:
         if check_for_inf_recurse(cluster, set(), starting_atom, starting_atom, 0):
             cluster.frequency = float('inf')
-        break
+            break
 
 
 def check_for_inf_recurse(cluster, visited, target_atom, atom, panes_crossed):
