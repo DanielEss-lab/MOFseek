@@ -41,22 +41,26 @@ def check_for_infinite_band(cluster):
     # If any molecule can traverse the cluster and get to itself by crossing cell boundary panes an odd number of times,
     # then all molecules can, and then they are an infinite band.
     for starting_atom in cluster.atoms:
-        if check_for_inf_recurse(cluster, set(), starting_atom, starting_atom, 0):
-            cluster.frequency = float('inf')
-            break
+        if len(in_cluster_neighbors(starting_atom, cluster)) > 1:  # If it only has one neighbor, algorithm won't work
+            if check_for_inf_recurse(cluster, set(), starting_atom, starting_atom, 0):
+                cluster.frequency = float('inf')
+                break
+
+
+def in_cluster_neighbors(atom, cluster):
+    return [neighbor for neighbor in atom.bondedAtoms if neighbor in cluster.atoms]
 
 
 def check_for_inf_recurse(cluster, visited, target_atom, atom, panes_crossed):
     visited.add(atom)
-    for neighbor in atom.bondedAtoms:
-        if neighbor in cluster.atoms:  # Only look within the cluster
-            if neighbor == target_atom and panes_crossed + panes_crossed_in_bond(atom, neighbor) % 2 == 1:
-                # if panes_crossed (plus possible pane in traversal from atom to neighbor) is odd:
+    for neighbor in in_cluster_neighbors(atom, cluster):
+        if neighbor == target_atom and panes_crossed + panes_crossed_in_bond(atom, neighbor) % 2 == 1:
+            # if panes_crossed (plus possible pane in traversal from atom to neighbor) is odd:
+            return True
+        if neighbor not in visited:
+            crosses_pane = panes_crossed_in_bond(atom, neighbor)
+            if check_for_inf_recurse(cluster, visited, target_atom, neighbor, panes_crossed + crosses_pane):
                 return True
-            if neighbor not in visited:
-                crosses_pane = panes_crossed_in_bond(atom, neighbor)
-                if check_for_inf_recurse(cluster, visited, target_atom, neighbor, panes_crossed + crosses_pane):
-                    return True
     return False
 
 
