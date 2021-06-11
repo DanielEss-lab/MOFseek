@@ -6,9 +6,9 @@ from GUI.Search import TerminableThread
 
 
 class Frame(tk.Frame):
-    def __init__(self, parent, process):
+    def __init__(self, parent, process, **args):
         self.process = process
-        tk.Frame.__init__(self, parent)
+        tk.Frame.__init__(self, parent, **args)
 
         self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
 
@@ -29,7 +29,7 @@ class Frame(tk.Frame):
     def add_cancel_to_layout(self, btn_cancel):
         btn_cancel.pack()
 
-    def start_process(self, arg):
+    def start_process(self, arg=None):
         def process():
             try:
                 self.progress.start()

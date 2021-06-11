@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 import traceback
 
-from GUI import Tooltips
+from GUI import Tooltips, FrameWithProcess
 from GUI.Search import MultipleAutoCompleteSearch, TerminableThread, Attributes
 from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForTests
 from MofIdentifier import SearchMOF
@@ -14,10 +14,10 @@ from MofIdentifier.subbuilding import SBUCollectionManager
 ROW_MAXIMUM = 6
 
 
-class View(tk.Frame):
+class View(FrameWithProcess.Frame):
     def __init__(self, parent):
         self.parent = parent
-        tk.Frame.__init__(self, self.parent, height=40, width=300, padx=12)
+        super().__init__(self.parent, lambda search: self.search_from_input(search), height=40, width=300, padx=12)
         self.attribute_entries = list()
         self.custom_ligands = dict()
         self.search_to_results = dict()
@@ -71,18 +71,11 @@ class View(tk.Frame):
         self.btn_redo_search = tk.Button(self, text="Redo", command=self.redo_search)
         self.btn_redo_search.grid(row=4, column=5, pady=2)
 
-        self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
         self.btn_clear = tk.Button(self, text="Clear", command=self.clear)
         self.btn_clear.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=1)
-        self.btn_search = tk.Button(self, text="Search", command=self.perform_search, font=('Arial', 16), bd=4)
+        self.btn_search = tk.Button(self, text="Search", command=self.start_process, font=('Arial', 16), bd=4)
         self.btn_search.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=12)
-        self.btn_cancel = tk.Button(self, text="Cancel", command=self.cancel_search)
 
-        self.error_row = tk.Frame(self)
-        self.exit_error_btn = tk.Button(self.error_row, text='X', command=self.exit_error)
-        self.exit_error_btn.pack(side=tk.LEFT)
-        self.lbl_error_text = tk.Label(self.error_row, fg='red')
-        self.lbl_error_text.pack(side=tk.LEFT)
 
     def clear(self):
         for entry in self.attribute_entries:
@@ -97,41 +90,11 @@ class View(tk.Frame):
 
     def force_search_for(self, ligand):
         search = SearchTerms(ligands=[ligand])
-        self.perform_search(search)
+        self.start_process(search)
 
     def force_search_sbu(self, sbu):
         search = SearchTerms(sbus=[sbu])
-        self.perform_search(search)
-
-    def perform_search(self, search=None):
-        def callback():
-            try:
-                self.progress.start()
-                self.search_from_input(search)
-            except InterruptedError:
-                pass
-            except Exception as ex:
-                error_text = traceback.format_exc()
-                self.show_error(ex)
-                print(error_text)
-            finally:
-                self.progress.stop()
-                self.progress.grid_forget()
-                self.btn_cancel.grid_forget()
-
-        self.btn_cancel.grid(row=ROW_MAXIMUM - 1, column=4, pady=2, columnspan=1)
-        self.progress.grid(row=ROW_MAXIMUM, column=0, pady=2, columnspan=12, sticky=tk.EW)
-        self.thread = TerminableThread.ThreadWithExc(target=callback)
-        self.thread.start()
-
-    def cancel_search(self):
-        try:
-            self.thread.raiseExc(InterruptedError)
-        except AssertionError as e:
-            print(e)
-        self.progress.stop()
-        self.progress.grid_forget()
-        self.btn_cancel.grid_forget()
+        self.start_process(search)
 
     def redo_search(self):
         search_text = self.redo_search_selected.get()
@@ -141,7 +104,7 @@ class View(tk.Frame):
         if self.search_to_results[search] is not None:
             self.parent.display_search_results(self.search_to_results[search])
         else:
-            self.perform_search(search)
+            self.start_process(search)
 
     def get_ligands(self, ligand_names):
         ligands = list()
@@ -235,12 +198,14 @@ class View(tk.Frame):
                LigandReader.get_all_mols_from_directory(path_3)
         return [sbu.label for sbu in sbus]
 
-    def show_error(self, error):
-        self.lbl_error_text['text'] = 'Error: ' + str(error)
-        self.error_row.grid(row=ROW_MAXIMUM + 1, column=0, pady=2, columnspan=12, sticky=tk.EW)
+    def add_error_to_layout(self, error_row):
+        error_row.grid(row=ROW_MAXIMUM + 1, column=0, pady=2, columnspan=12, sticky=tk.EW)
 
-    def exit_error(self):
-        self.error_row.grid_forget()
+    def add_progress_to_layout(self, progress):
+        progress.grid(row=ROW_MAXIMUM, column=0, pady=2, columnspan=12, sticky=tk.EW)
+
+    def add_cancel_to_layout(self, btn_cancel):
+        btn_cancel.grid(row=ROW_MAXIMUM - 1, column=4, pady=2, columnspan=1)
 
     def focus_ligand(self, ligand_name):
         if ligand_name != '':
@@ -248,7 +213,7 @@ class View(tk.Frame):
                 ligand = self.get_ligands([ligand_name])[0]
                 self.parent.highlight_molecule(ligand)
             except FileNotFoundError as ex:
-                self.show_error(ex)
+                self._show_error(ex)
 
     def focus_sbu(self, sbu_name):
         if sbu_name != '':
@@ -256,7 +221,7 @@ class View(tk.Frame):
                 sbu = self.get_sbus([sbu_name])[0]
                 self.parent.highlight_molecule(sbu)
             except FileNotFoundError as ex:
-                self.show_error(ex)
+                self._show_error(ex)
 
 
 class AttributeEntry(tk.Frame):
