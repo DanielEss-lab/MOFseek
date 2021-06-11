@@ -78,7 +78,10 @@ class SBU(Molecule.Molecule):
 
     def add_atom(self, atom):
         self.atoms.add(atom)
-        self.elementsPresent.add(atom.type_symbol)
+        if atom.type_symbol in self.elementsPresent:
+            self.elementsPresent[atom.type_symbol] += 1
+        else:
+            self.elementsPresent[atom.type_symbol] = 1
 
     def normalize_atoms(self, mof):
         atoms = []
@@ -116,19 +119,10 @@ class SBU(Molecule.Molecule):
         self.atoms = visited
 
     def __str__(self):
-        elements = dict()
-        for atom in self.atoms:
-            if atom.type_symbol in elements:
-                elements[atom.type_symbol] += 1
-            else:
-                elements[atom.type_symbol] = 1
-        atoms_string = ''
-        for element in elements:
-            atoms_string = atoms_string + str(elements[element]) + element + ' '
         unit = str(self.type)
         return "{freq}x {label}: {atoms}({atom_n} atom {unittype}) each bonded to {cluster} clusters, {connector} " \
                "connectors, and {aux} auxiliary groups".format(label=self.label, freq=self.frequency,
-                                                               atoms=atoms_string, atom_n=len(self.atoms),
+                                                               atoms=self.atoms_string(), atom_n=len(self.atoms),
                                                                unittype=unit, cluster=len(self.adjacent_cluster_ids),
                                                                connector=len(self.adjacent_connector_ids),
                                                                aux=len(self.adjacent_auxiliary_ids))

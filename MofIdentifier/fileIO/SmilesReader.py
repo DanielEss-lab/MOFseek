@@ -3,7 +3,7 @@ from pysmiles import read_smiles
 from MofIdentifier.Molecules.Ligand import Ligand
 from MofIdentifier.Molecules.atom import Atom
 
-replacement = 'Rpl'
+REPLACEMENT = 'Rpl'
 
 
 def mol_from_file(filepath):
@@ -13,16 +13,16 @@ def mol_from_file(filepath):
 
 
 def convert_smiles_to_no_h(string):
-    return string.replace('H', replacement)
+    return string.replace('H', REPLACEMENT)
 
 
 def convert_mol_to_h(mol):
     for atom in mol.atoms:
-        if atom.type_symbol == replacement:
+        if atom.type_symbol == REPLACEMENT:
             atom.type_symbol = 'H'
-            atom.label = atom.label.replace(replacement, 'H')
-    mol.elementsPresent.add('H')
-    mol.elementsPresent.remove(replacement)
+            atom.label = atom.label.replace(REPLACEMENT, 'H')
+    mol.elementsPresent['H'] = mol.elementsPresent[REPLACEMENT]
+    mol.elementsPresent.pop(REPLACEMENT)
 
 
 def mol_from_str(string, mol_name=None):

@@ -8,7 +8,7 @@ from MofIdentifier.subbuilding import SBUCollectionManager, SBUIdentifier
 
 
 def format_elements(mof):
-    elements = list(mof.elementsPresent)
+    elements = list(mof.elementsPresent.keys())
     elements.sort()
     return ' '.join(elements)
 

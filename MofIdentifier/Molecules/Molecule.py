@@ -10,12 +10,21 @@ class Molecule:
         else:
             self.label = filepath
         self.atoms = atoms
-        self.elementsPresent = set()
+        self.elementsPresent = dict()
         for atom in atoms:
-            self.elementsPresent.add(atom.type_symbol)
+            if atom.type_symbol in self.elementsPresent:
+                self.elementsPresent[atom.type_symbol] += 1
+            else:
+                self.elementsPresent[atom.type_symbol] = 1
         self.graph = igraph
         self.no_h_graph = None
         self.should_use_weak_comparison = weak_comparison_enabled
+
+    def atoms_string(self):
+        string = ''
+        for element in self.elementsPresent:
+            string = string + str(self.elementsPresent[element]) + element + ' '
+        return string[0:-1]
 
     def get_graph(self):
         if self.should_use_weak_comparison:

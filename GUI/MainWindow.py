@@ -36,3 +36,4 @@ class Root(tk.Tk):
 
     def add_custom_ligand(self, mol):  # To change when connecting to DB
         self.search_page.search_v.add_custom_ligand(mol)
+        self.tabControl.select(0)

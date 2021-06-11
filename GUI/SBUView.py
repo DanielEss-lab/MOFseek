@@ -21,19 +21,24 @@ def make_view(parent, sbu):
     search.pack(side='right')
     row1.pack(fill=tk.X)
 
-    row2 = tk.Frame(master=view, height=10)
-    sbu_label = tk.Label(row2, text=str(sbu.frequency) + " Occurrences in DB")
-    sbu_label.pack(side='left')
-    type = tk.Label(row2, text=str(sbu.type))
-    type.pack(side='right')
+    row2 = tk.Frame(master=view)
+    elements = tk.Label(row2, text=sbu.atoms_string())
+    elements.pack(side='left')
     row2.pack(fill=tk.X)
 
-    row3 = tk.Frame(master=view, height=20)
-    mof_label = tk.Label(row3, text="MOFs:")
+    row3 = tk.Frame(master=view, height=10)
+    sbu_label = tk.Label(row3, text=str(sbu.frequency) + " Occurrences in DB")
+    sbu_label.pack(side='left')
+    type = tk.Label(row3, text=str(sbu.type))
+    type.pack(side='right')
+    row3.pack(fill=tk.X)
+
+    row4 = tk.Frame(master=view, height=20)
+    mof_label = tk.Label(row4, text="MOFs:")
     mof_label.pack(side='left')
-    sbu_search = tk.Label(row3, text="See Details", cursor='hand2', padx=8)
+    sbu_search = tk.Label(row4, text="See Details", cursor='hand2', padx=8)
     sbu_search.bind('<Button-1>', lambda e: parent.search_v.force_search_sbu(sbu))
     sbu_search.pack(side='right')
-    row3.pack(fill=tk.X)
+    row4.pack(fill=tk.X)
 
     return view
