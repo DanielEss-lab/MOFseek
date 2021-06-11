@@ -1,4 +1,5 @@
 import tkinter as tk
+from pathlib import Path
 from tkinter.filedialog import askopenfilename
 from tkinter import messagebox
 
@@ -17,8 +18,8 @@ class View(tk.Frame):
         filename = askopenfilename(filetypes=[('XYZ Files', '*.xyz'), ('SMILES Files', '*.txt')])
         if filename is not None and len(filename) > 0:
             try:
-                mol = LigandReader.get_mol_from_file(filename)
+                mol = LigandReader.get_mol_from_file(str(Path(filename)))
             except:
                 messagebox.showerror("Bad File", "Unable to extract a molecule from this file")
                 return
-            self.parent.add_custom_ligand(mol)
+            self.parent.start_process(mol)

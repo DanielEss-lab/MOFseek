@@ -5,7 +5,7 @@ from pathlib import Path
 import traceback
 
 from GUI import Tooltips
-from GUI.Search import MultipleAutoCompleteSearch, TerminableThread, UploadLigandView, Attributes
+from GUI.Search import MultipleAutoCompleteSearch, TerminableThread, Attributes
 from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForTests
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader
@@ -25,9 +25,6 @@ class View(tk.Frame):
         for i in range(8 + 1):
             self.grid_columnconfigure(i, weight=1)
         self.grid_columnconfigure(1, weight=2)
-
-        self.upload_mof_v = UploadLigandView.View(self)
-        self.upload_mof_v.grid(row=0, column=0, pady=2, columnspan=12)
 
         self.lbl_ligand = tk.Label(self, text="Required Ligands: ")
         self.lbl_ligand.grid(row=1, column=0, pady=2, sticky=tk.NE)
