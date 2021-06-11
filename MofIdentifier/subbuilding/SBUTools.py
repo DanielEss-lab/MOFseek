@@ -45,14 +45,6 @@ class SBUCollection:
         return SBUCollection(self.clusters + other.clusters, self.connectors
                              + other.connectors, self.auxiliaries + other.auxiliaries)
 
-    @classmethod
-    def from_tuples(cls, tuples):
-        clusters, connectors, auxiliaries = [], [], []
-        for tuple in tuples:
-            clusters.extend(tuple[0])
-            connectors.extend(tuple[1])
-            auxiliaries.extend(tuple[2])
-        return SBUCollection(clusters, connectors, auxiliaries)
 
 class UnitType(Enum):
     CLUSTER = 1
@@ -63,7 +55,7 @@ class UnitType(Enum):
         return "cluster" if self == UnitType.CLUSTER else "connector" if self == UnitType.CONNECTOR else "auxiliary"
 
 
-class SBU(Molecule.Molecule):
+class changeableSBU(Molecule.Molecule):
     def __init__(self, sbu_id, unit_type, atoms, frequency=1, adjacent_cluster_ids=None):
         super().__init__('No Filepath/Unlabeled', atoms)
         # Right now, SBUs are constructed with atoms as sets; a refactor to lists wouldn't break much though
@@ -132,7 +124,7 @@ class SBU(Molecule.Molecule):
 
     def __eq__(self, other):
         is_isomorphic = SubGraphMatcher.match(self, other)
-        if isinstance(other, SBU):
+        if isinstance(other, changeableSBU):
             return is_isomorphic and len(self.adjacent_connector_ids) == len(other.adjacent_connector_ids) \
                 and len(self.adjacent_cluster_ids) == len(other.adjacent_cluster_ids) \
                 and len(self.adjacent_auxiliary_ids) == len(other.adjacent_auxiliary_ids)

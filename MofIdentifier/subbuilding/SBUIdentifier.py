@@ -1,6 +1,6 @@
 import MofIdentifier
 from MofIdentifier.bondTools import Distances
-from MofIdentifier.subbuilding.SBUTools import SBUCollection, SBU, UnitType
+from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
 
 
 def split(mof):
@@ -164,9 +164,9 @@ class SBUIdentifier:
         atoms = set()
         self.identify_cluster_recurse(metal_atom, atoms)
         if check_for_infinite_band(atoms):
-            return SBU(self.next_group_id, UnitType.CLUSTER, atoms, float('inf'))
+            return changeableSBU(self.next_group_id, UnitType.CLUSTER, atoms, float('inf'))
         else:
-            return SBU(self.next_group_id, UnitType.CLUSTER, atoms)
+            return changeableSBU(self.next_group_id, UnitType.CLUSTER, atoms)
 
     def identify_cluster_recurse(self, metal_atom, atoms):
         atoms.add(metal_atom)
@@ -203,7 +203,7 @@ class SBUIdentifier:
             ligand_type = UnitType.CONNECTOR
         else:
             ligand_type = UnitType.AUXILIARY
-        return SBU(self.next_group_id, ligand_type, atoms, 1, adjacent_cluster_ids)
+        return changeableSBU(self.next_group_id, ligand_type, atoms, 1, adjacent_cluster_ids)
 
     def identify_ligand_recurse(self, nonmetal_atom, ligand_atoms, adjacent_cluster_ids):
         ligand_atoms.add(nonmetal_atom)

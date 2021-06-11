@@ -2,9 +2,10 @@ import glob
 import os
 from pathlib import Path
 
+from MofIdentifier.Molecules import SBU
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import XyzReader, XyzWriter, CifReader, LigandReader
-from MofIdentifier.subbuilding import SBUTools, SBUIdentifier
+from MofIdentifier.subbuilding import SBUIdentifier
 from MofIdentifier.subbuilding.SBUTools import UnitType, SBUCollection
 
 
@@ -14,7 +15,10 @@ def process_new_mof(mof):
     write_sbus(new_sbus, {UnitType.CLUSTER: len(existing_sbus[0]),
                           UnitType.CONNECTOR: len(existing_sbus[1]),
                           UnitType.AUXILIARY: len(existing_sbus[2])})
-    return SBUCollection.from_tuples([new_sbus, recognized_sbus])
+    clusters = [SBU.SBU(sbu) for sbu in new_sbus[0] + recognized_sbus[0]]
+    connectors = [SBU.SBU(sbu) for sbu in new_sbus[1] + recognized_sbus[1]]
+    aux = [SBU.SBU(sbu) for sbu in new_sbus[2] + recognized_sbus[2]]
+    return SBUCollection(clusters, connectors, aux)
 
 
 def get_existing_sbus():  # NOTE: right now this just returns a SBUCollection of Ligand objects, not sbus
