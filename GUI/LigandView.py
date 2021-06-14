@@ -1,6 +1,7 @@
 import tkinter as tk
 
 from MofIdentifier.fileIO import FileOpen
+import tkinter.font as tkFont
 
 
 def make_view(parent, ligand):
@@ -17,6 +18,9 @@ def make_view(parent, ligand):
     see.bind('<Button-1>', lambda e: FileOpen.see_file(ligand.filepath))
     see.pack(side='right')
     search = tk.Label(row1, text="Search as SBU", cursor='hand2', padx=8)
+    f = tkFont.Font(search, search["font"])
+    f.configure(underline=True)
+    search.configure(font=f)
     search.bind('<Button-1>', lambda e: parent.search_v.force_search_sbu(ligand))
     search.pack(side='right')
     row1.pack(fill=tk.X)
@@ -34,7 +38,10 @@ def make_view(parent, ligand):
     row4 = tk.Frame(master=view, height=20)
     mof_label = tk.Label(row4, text="MOFs:")
     mof_label.pack(side='left')
-    sbu_search = tk.Label(row4, text="See Details", cursor='hand2', padx=8)
+    sbu_search = tk.Label(row4, text="Search", cursor='hand2', padx=8)
+    f = tkFont.Font(sbu_search, sbu_search["font"])
+    f.configure(underline=True)
+    sbu_search.configure(font=f)
     sbu_search.bind('<Button-1>', lambda e: parent.search_v.force_search_for(ligand))
     sbu_search.pack(side='right')
     row4.pack(fill=tk.X)

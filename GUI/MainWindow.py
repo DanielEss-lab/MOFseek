@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from GUI import SearchPage, AddLigandPage
+from GUI import SearchPage, AddLigandPage, RenameLigandPage
 
 
 class Root(tk.Tk):
@@ -16,7 +16,7 @@ class Root(tk.Tk):
 
         self.search_page = SearchPage.SearchPage(self.tabControl)
         self.add_ligand_page = AddLigandPage.AddLigandPage(self.tabControl)
-        self.rename_ligand_page = ttk.Frame(self.tabControl)  # Todo
+        self.rename_ligand_page = RenameLigandPage.Page(self.tabControl)
         self.rename_sbu_page = ttk.Frame(self.tabControl)  # Todo
         self.add_MOFs = ttk.Frame(self.tabControl)  # Todo
         self.edit_MOF = ttk.Frame(self.tabControl)  # Todo
@@ -36,4 +36,5 @@ class Root(tk.Tk):
 
     def add_custom_ligand(self, mol):  # To change when connecting to DB
         self.search_page.search_v.add_custom_ligand(mol)
+        self.rename_ligand_page.add_custom_ligand(mol)
         self.tabControl.select(0)
