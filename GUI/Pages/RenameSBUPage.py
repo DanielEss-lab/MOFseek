@@ -13,7 +13,7 @@ class Page(FrameWithProcess.Frame):
     def __init__(self, parent):
         self.parent = parent
         self.custom_sbus = dict()
-        super().__init__(self.parent, lambda new_name: self.rename(new_name))  # Does it pass self?
+        super().__init__(self.parent, lambda new_name: self.rename(new_name))
         instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
         instructions.pack()
         self.combobox = AutoCompleteComboBox.Box(self, ("Arial", 10), self.focus_sbu)

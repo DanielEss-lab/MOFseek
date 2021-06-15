@@ -10,7 +10,7 @@ time (expect 20-60 minutes), so please be patient."""
 class AddLigandPage(FrameWithProcess.Frame):
     def __init__(self, parent):
         self.parent = parent
-        super().__init__(self.parent, lambda mol: self.winfo_toplevel().add_custom_ligand(mol))  # Does it pass self?
+        super().__init__(self.parent, lambda mol: self.winfo_toplevel().add_custom_ligand(mol))
         instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
         instructions.pack()
         self.upload_ligand_v = UploadLigandView.View(self)
