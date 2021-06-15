@@ -42,6 +42,7 @@ class View(tk.Frame):
             descending = sort_name[division_index+1:].find('high first') >= 0
             results.sort(reverse=descending, key=lambda mof: Attributes.get_attributes(mof)[attribute])
         self.results = results
+        self.btn_export['state'] = "normal"
         self.main_body.display_results(results)
 
     def export(self):

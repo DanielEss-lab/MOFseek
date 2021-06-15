@@ -21,8 +21,9 @@ class Page(FrameWithProcess.Frame):
         self.mofs = []
         self.mof_preview = MultiMofView.View(self)
         self.mof_preview.pack(fill=tk.X)
-        add_btn = tk.Button(self, text='Upload to DB', command=lambda: self.start_process(self.mofs))
-        add_btn.pack()
+        self.add_btn = tk.Button(self, text='Upload to DB', command=lambda: self.start_process(self.mofs))
+        self.add_btn['state'] = "disabled"
+        self.add_btn.pack()
 
     def open_mofs(self):
         filenames = askopenfilenames(filetypes=[('CIF Files', '*.cif')])
@@ -36,7 +37,12 @@ class Page(FrameWithProcess.Frame):
                     self._show_error('Unable to extract MOF from ' + filename)
         self.mofs = mofs
         self.mof_preview.display_results(self.mofs)
+        if len(mofs) > 0:
+            self.add_btn['state'] = "normal"
 
     def add_mofs_to_db(self, mofs):
+        self.add_btn['state'] = "disabled"
+        self.mofs = []
+        self.mof_preview.display_results(self.mofs)
         print(*mofs)
         pass  # TODO: hook this up to DB
