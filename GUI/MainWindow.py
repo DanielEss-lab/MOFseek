@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage
+from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage, EditMOFPage
 
 
 class Root(tk.Tk):
@@ -19,7 +19,7 @@ class Root(tk.Tk):
         self.rename_ligand_page = RenameLigandPage.Page(self.tabControl)
         self.rename_sbu_page = RenameSBUPage.Page(self.tabControl)
         self.add_MOFs = AddMofPage.Page(self.tabControl)
-        self.edit_MOF = ttk.Frame(self.tabControl)  # Todo
+        self.edit_MOF = EditMOFPage.Page(self.tabControl)
 
         self.tabControl.add(self.search_page, text='Search')
         self.tabControl.add(self.add_ligand_page, text='Add Ligand')
@@ -29,6 +29,17 @@ class Root(tk.Tk):
         self.tabControl.add(self.edit_MOF, text='Edit MOF')
         self.tabControl.pack(expand=1, fill="both")
 
+    def select_mof_for_edit(self, mof):
+        self.edit_MOF.select_mof(mof)
+        self.tabControl.select(5)
+
+    def select_ligand_for_edit(self, ligand):
+        self.rename_ligand_page.select_ligand(ligand)
+        self.tabControl.select(2)
+
+    def select_sbu_for_edit(self, sbu):
+        self.rename_sbu_page.select_sbu(sbu)
+        self.tabControl.select(3)
 
     def set_styles(self):
         s = ttk.Style()

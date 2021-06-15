@@ -4,6 +4,10 @@ from MofIdentifier.fileIO import FileOpen
 import tkinter.font as tkFont
 
 
+def select_for_edit(parent, sbu):
+    parent.winfo_toplevel().select_sbu_for_edit(sbu)
+
+
 def make_view(parent, sbu):
     view = tk.Frame(parent, height=40, width=120, bd=1, relief=tk.SOLID)
 
@@ -17,6 +21,10 @@ def make_view(parent, sbu):
     see = tk.Label(row1, text="\U0001f4c1", cursor='hand2', padx=2, font=("Arial", 14), height=0)
     see.bind('<Button-1>', lambda e: FileOpen.see_file(sbu.filepath))
     see.pack(side='right')
+    tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
+    edit = tk.Label(row1, text="\U0001F589", cursor='hand2', padx=2, font=("Arial", 16), height=0)
+    edit.bind('<Button-1>', lambda e: select_for_edit(parent, sbu))
+    edit.pack(side='right')
     search = tk.Label(row1, text="Search as Ligand", cursor='hand2', padx=8)
     f = tkFont.Font(search, search["font"])
     f.configure(underline=True)

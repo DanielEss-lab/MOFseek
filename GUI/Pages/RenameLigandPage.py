@@ -46,12 +46,8 @@ class Page(FrameWithProcess.Frame):
     def focus_ligand(self, ligand_name):
         if ligand_name != '':
             try:
-                self.mol = self.get_ligands([ligand_name])[0]
-                if self.molecule_v is not None:
-                    self.molecule_v.destroy()
-                self.molecule_v = MoleculeView.make_view(self, self.mol)
-                self.extension_text.config(text='.' + self.mol.label[-3:])
-                self.molecule_v.pack(side=tk.BOTTOM)
+                mol = self.get_ligands([ligand_name])[0]
+                self.set_mol_in_view(mol)
             except FileNotFoundError as ex:
                 self._show_error(ex)
 
@@ -75,3 +71,15 @@ class Page(FrameWithProcess.Frame):
         self.values.append('* ' + mol.label)
         self.combobox.set_completion_list(self.values)
         self.custom_ligands['* ' + mol.label] = mol
+
+    def select_ligand(self, ligand):
+        self.set_mol_in_view(ligand)
+        self.combobox.set(ligand.label)
+
+    def set_mol_in_view(self, mol):
+        self.mol = mol
+        if self.molecule_v is not None:
+            self.molecule_v.destroy()
+        self.molecule_v = MoleculeView.make_view(self, self.mol)
+        self.extension_text.config(text='.' + self.mol.label[-3:])
+        self.molecule_v.pack(side=tk.BOTTOM)

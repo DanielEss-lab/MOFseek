@@ -13,6 +13,10 @@ def format_elements(mof):
     return ' '.join(elements)
 
 
+def select_for_edit(parent, mof):
+    parent.winfo_toplevel().select_mof_for_edit(mof)
+
+
 def make_view(parent, mof):
     sbus = SBUCollectionManager.process_new_mof(mof)
     page = parent.master.master.master
@@ -28,6 +32,10 @@ def make_view(parent, mof):
     see = tk.Label(row1, text="\U0001f4c1", cursor='hand2', padx=2, font=("Arial", 16), height=0)
     see.bind('<Button-1>', lambda e: FileOpen.see_file(mof.filepath))
     see.pack(side='right')
+    tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
+    edit = tk.Label(row1, text="\U0001F589", cursor='hand2', padx=2, font=("Arial", 16), height=0)
+    edit.bind('<Button-1>', lambda e: select_for_edit(parent, mof))
+    edit.pack(side='right')
     row1.pack(fill=tk.X)
 
     row2 = tk.Frame(master=view, height=20)

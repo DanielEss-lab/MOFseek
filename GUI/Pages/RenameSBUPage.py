@@ -46,11 +46,8 @@ class Page(FrameWithProcess.Frame):
     def focus_sbu(self, sbu_name):
         if sbu_name != '':
             try:
-                self.mol = self.get_sbus([sbu_name])[0]
-                if self.molecule_v is not None:
-                    self.molecule_v.destroy()
-                self.molecule_v = MoleculeView.make_view(self, self.mol)
-                self.molecule_v.pack(side=tk.BOTTOM)
+                mol = self.get_sbus([sbu_name])[0]
+                self.set_mol_in_view(mol)
             except FileNotFoundError as ex:
                 self._show_error(ex)
 
@@ -73,3 +70,14 @@ class Page(FrameWithProcess.Frame):
                 other_sbus.append(sbu_name)
         sbus.extend(SBUCollectionManager.read_sbus_from_files(other_sbus))
         return sbus
+
+    def select_sbu(self, sbu):
+        self.set_mol_in_view(sbu)
+        self.combobox.set(sbu.label)
+
+    def set_mol_in_view(self, mol):
+        self.mol = mol
+        if self.molecule_v is not None:
+            self.molecule_v.destroy()
+        self.molecule_v = MoleculeView.make_view(self, self.mol)
+        self.molecule_v.pack(side=tk.BOTTOM)
