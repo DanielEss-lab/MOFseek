@@ -3,8 +3,8 @@ import tkinter.ttk as ttk
 import re
 from pathlib import Path
 
-from GUI import Tooltips, FrameWithProcess
-from GUI.Search import MultipleAutoCompleteSearch, Attributes
+from GUI.Search import Attributes
+from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips
 from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForTests
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader

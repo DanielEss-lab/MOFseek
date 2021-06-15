@@ -1,10 +1,10 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
-from GUI import Tooltips
+from GUI.Utility import Tooltips
 from GUI.Search import Attributes
 from MofIdentifier.fileIO import FileOpen
-from MofIdentifier.subbuilding import SBUCollectionManager, SBUIdentifier
+from MofIdentifier.subbuilding import SBUCollectionManager
 
 
 def format_elements(mof):
@@ -15,7 +15,7 @@ def format_elements(mof):
 
 def make_view(parent, mof):
     sbus = SBUCollectionManager.process_new_mof(mof)
-    root = parent.master.master
+    page = parent.master.master.master
     view = tk.Frame(parent, height=40, bd=1, relief=tk.SOLID)
 
     row1 = tk.Frame(master=view)
@@ -41,9 +41,9 @@ def make_view(parent, mof):
     row3 = tk.Frame(master=view, height=20)
     sbu_label = tk.Label(row3, text="SBUs:")
     sbu_label.pack(side='left')
-    def have_root_highlight(clicked_node):
+    def have_page_highlight(clicked_node):
         def fun(*args):
-            root.highlight_molecule(clicked_node)
+            page.highlight_molecule(clicked_node)
         return fun
     def display_sbu_name(sbu, color):
         text = f"{sbu.frequency}x {sbu.label} ({sbu.connections()}\u00B0)"
@@ -51,7 +51,7 @@ def make_view(parent, mof):
         f = tkFont.Font(sbu_label, sbu_label["font"])
         f.configure(underline=True)
         sbu_label.configure(font=f)
-        event_function = have_root_highlight(sbu)
+        event_function = have_page_highlight(sbu)
         sbu_label.bind('<Button-1>', event_function)
         sbu_label.pack(side='left')
     for node in sbus.clusters:

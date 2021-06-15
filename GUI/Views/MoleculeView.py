@@ -1,4 +1,4 @@
-from GUI import LigandView, SBUView
+from GUI.Views import LigandView, SBUView
 from MofIdentifier.Molecules import Ligand, SBU
 
 

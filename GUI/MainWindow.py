@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from GUI import SearchPage, AddLigandPage, RenameLigandPage, RenameSBUPage, AddMofPage
+from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage
 
 
 class Root(tk.Tk):

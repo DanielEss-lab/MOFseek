@@ -1,7 +1,7 @@
 import tkinter as tk
 
-from GUI import SearchResultsView, MoleculeView
-from GUI.Search import SearchView
+from GUI.Views import MoleculeView
+from GUI.Search import SearchView, SearchResultsView
 
 
 class SearchPage(tk.Frame):

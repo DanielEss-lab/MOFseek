@@ -2,7 +2,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter.filedialog import askopenfilenames
 
-from GUI import UploadLigandView, FrameWithProcess, SearchResultsView, MultiMofView
+from GUI.Utility import FrameWithProcess, MultiMofView
 from MofIdentifier.fileIO import CifReader
 
 instruction_text = """Choose one or more .cif files from your computer. The MOFs will be loaded onto the database, and 

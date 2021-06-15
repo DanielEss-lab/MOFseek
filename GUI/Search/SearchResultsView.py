@@ -3,7 +3,7 @@ import time
 import tkinter as tk
 import tkinter.filedialog as fd
 
-from GUI import MultiMofView
+from GUI.Utility import MultiMofView
 from GUI.Search import Attributes
 
 

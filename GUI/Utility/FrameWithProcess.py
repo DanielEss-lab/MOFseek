@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import traceback
 
-from GUI.Search import TerminableThread
+from GUI.Utility import TerminableThread
 
 
 class Frame(tk.Frame):

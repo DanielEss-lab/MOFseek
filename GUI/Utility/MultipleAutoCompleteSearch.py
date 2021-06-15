@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from GUI.Search import AutoCompleteComboBox
+from GUI.Utility import AutoCompleteComboBox
 
 
 class View(tk.Frame):

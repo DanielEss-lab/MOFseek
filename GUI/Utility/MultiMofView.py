@@ -1,6 +1,7 @@
 import tkinter as tk
 
-from GUI import MOFView
+from GUI.Views import MOFView
+
 
 class View(tk.Frame):
     def __init__(self, parent):

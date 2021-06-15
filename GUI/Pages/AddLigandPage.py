@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from GUI import UploadLigandView, FrameWithProcess
+from GUI.Utility import FrameWithProcess, UploadLigandView
 
 instruction_text = """Choose from your computer a .xyz file or a .txt file whose first line is a SMILES string. It will 
 be loaded onto the database and added to the ligand list of all MOFs that contain it. The calculations will take some 
