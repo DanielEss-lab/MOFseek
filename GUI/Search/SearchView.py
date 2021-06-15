@@ -25,6 +25,11 @@ class View(FrameWithProcess.Frame):
             self.grid_columnconfigure(i, weight=1)
         self.grid_columnconfigure(1, weight=2)
 
+        self.lbl_label = tk.Label(self, text="Name must contain: ")
+        self.lbl_label.grid(row=0, column=0, pady=2, sticky=tk.NE)
+        self.ent_label = tk.Entry(self)
+        self.ent_label.grid(row=0, column=1, pady=2, sticky=tk.NW)
+
         self.lbl_ligand = tk.Label(self, text="Required Ligands: ")
         self.lbl_ligand.grid(row=1, column=0, pady=2, sticky=tk.NE)
         self.ent_ligand = MultipleAutoCompleteSearch.View(self, self.focus_ligand)
@@ -87,7 +92,7 @@ class View(FrameWithProcess.Frame):
         self.ent_sbus.clear()
         self.ent_excl_sbus.clear()
 
-    def force_search_for(self, ligand):
+    def force_search_ligand(self, ligand):
         search = SearchTerms(ligands=[ligand])
         self.start_process(search)
 
@@ -139,8 +144,9 @@ class View(FrameWithProcess.Frame):
             forbidden_element_symbols_text = self.ent_excl_elements.get()
             forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
             attributes = self.get_attribute_parameters()
+            label_substring = self.ent_label.get()
             search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols,
-                                 sbus, forbidden_sbus, attributes)
+                                 sbus, forbidden_sbus, attributes, label_substring)
         # Shortcut evaluation if possible
         if search in self.search_to_results and self.search_to_results[search] is not None \
                 and self.search_to_results[search] != 'ongoing':

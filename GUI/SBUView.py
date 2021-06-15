@@ -21,7 +21,7 @@ def make_view(parent, sbu):
     f = tkFont.Font(search, search["font"])
     f.configure(underline=True)
     search.configure(font=f)
-    search.bind('<Button-1>', lambda e: parent.search_v.force_search_for(sbu))
+    search.bind('<Button-1>', lambda e: parent.search_v.force_search_ligand(sbu))
     search.pack(side='right')
     row1.pack(fill=tk.X)
 

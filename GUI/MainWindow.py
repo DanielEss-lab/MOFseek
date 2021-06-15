@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from GUI import SearchPage, AddLigandPage, RenameLigandPage, RenameSBUPage
+from GUI import SearchPage, AddLigandPage, RenameLigandPage, RenameSBUPage, AddMofPage
 
 
 class Root(tk.Tk):
@@ -18,7 +18,7 @@ class Root(tk.Tk):
         self.add_ligand_page = AddLigandPage.AddLigandPage(self.tabControl)
         self.rename_ligand_page = RenameLigandPage.Page(self.tabControl)
         self.rename_sbu_page = RenameSBUPage.Page(self.tabControl)
-        self.add_MOFs = ttk.Frame(self.tabControl)  # Todo
+        self.add_MOFs = AddMofPage.Page(self.tabControl)
         self.edit_MOF = ttk.Frame(self.tabControl)  # Todo
 
         self.tabControl.add(self.search_page, text='Search')
