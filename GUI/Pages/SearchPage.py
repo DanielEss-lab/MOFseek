@@ -23,4 +23,4 @@ class SearchPage(tk.Frame):
         self.molecule_v.pack(side=tk.BOTTOM)
 
     def display_search_results(self, results):
-        self.search_results_v.display_results(results)
+        self.search_results_v.start_process(results)

@@ -15,7 +15,7 @@ class View(FrameWithProcess.Frame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=10)
         self.grid_columnconfigure(2, weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(3, weight=1)
 
         self.selected_sort = tk.StringVar(self)
         self.default_sort_string = 'Sort by: \u25BC'
@@ -26,25 +26,25 @@ class View(FrameWithProcess.Frame):
         self.selected_sort.set(sort_options[0])
 
         sort_dropdown = tk.OptionMenu(self, self.selected_sort, *sort_options,
-                                      command=self.start_process())
+                                      command=lambda _: self.start_process(self.results))
         sort_dropdown.config(indicatoron=0)
-        sort_dropdown.grid(row=0, column=1, padx=2)
+        sort_dropdown.grid(row=2, column=1, padx=2)
         self.lbl_num_results = tk.Label(self, width=11)
-        self.lbl_num_results.grid(row=0, column=0, padx=2, sticky=tk.W)
+        self.lbl_num_results.grid(row=2, column=0, padx=2, sticky=tk.W)
         self.main_body = MultiMofView.View(self)
-        self.main_body.grid(row=1, column=0, columnspan=3, sticky=tk.NSEW)
-        self.btn_export = tk.Button(self, text='Export Results', command=lambda: self.export())
+        self.main_body.grid(row=3, column=0, columnspan=3, sticky=tk.NSEW)
+        self.btn_export = tk.Button(self, text='Export Results', command=self.export)
         self.btn_export['state'] = "disabled"
-        self.btn_export.grid(row=0, column=2, padx=2, sticky=tk.E)
+        self.btn_export.grid(row=2, column=2, padx=2, sticky=tk.E)
 
     def add_error_to_layout(self, error_row):
-        error_row.grid()#(row=ROW_MAXIMUM + 1, column=0, pady=2, columnspan=12, sticky=tk.EW)
+        error_row.grid(row=1, column=1, padx=2)
 
     def add_progress_to_layout(self, progress):
-        progress.grid()#(row=ROW_MAXIMUM, column=0, pady=2, columnspan=12, sticky=tk.EW)
+        progress.grid(row=0, column=1, padx=2, sticky=tk.EW)
 
     def add_cancel_to_layout(self, btn_cancel):
-        btn_cancel.grid()#(row=ROW_MAXIMUM - 1, column=4, pady=2, columnspan=1)
+        btn_cancel.grid(row=0, column=0, padx=2)
 
     def display_results(self, results):
         sort_name = self.selected_sort.get()
