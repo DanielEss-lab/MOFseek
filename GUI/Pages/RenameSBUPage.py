@@ -35,9 +35,12 @@ class Page(FrameWithProcess.Frame):
     def rename(self, new_name):
         if self.mol is not None and self.mol.label == self.combobox.get():
             if new_name != '':
-                new_name = new_name + self.extension_text['text']
-                # TODO: link to DAO
-                pass
+                if new_name.find(' ') < 0 and new_name.find('.') < 0:
+                    new_name = new_name + self.extension_text['text']
+                    # TODO: link to DAO
+                    pass
+                else:
+                    self._show_error('Name cannot contain a period or a space')
             else:
                 self._show_error('Cannot rename to an empty string')
         else:

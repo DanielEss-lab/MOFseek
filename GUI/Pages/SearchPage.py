@@ -12,7 +12,7 @@ class SearchPage(tk.Frame):
         self.search_v = SearchView.View(self)
         self.search_v.pack()
         self.search_results_v = SearchResultsView.View(self)
-        self.search_results_v.pack(fill=tk.X)
+        self.search_results_v.pack(fill=tk.BOTH, expand=True)
 
         self.molecule_v = None
 

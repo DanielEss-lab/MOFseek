@@ -44,8 +44,6 @@ class View(tk.Frame):
             widget.destroy()
         self.frame.focus_set()
         self.canvas.yview_moveto(0)
-        lbl_num_results = tk.Label(self.frame, text=f"{len(results)} Results")
-        lbl_num_results.grid(sticky=("N", "S", "W"))
         for mof in results:
             mof_v = MOFView.make_view(self.frame, mof)
             mof_v.grid(sticky=("N", "S", "E", "W"))
