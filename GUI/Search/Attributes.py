@@ -5,8 +5,8 @@ attribute_names = [
             "Num Atoms",
             "conn atms/node atm",
             "Aux/\u212B\u00B3",
-            "avg conn\u00B0",  # degree
-            "avg node\u00B0",
+            "avg conn *",  # degree
+            "avg node *",
         ]
 
 

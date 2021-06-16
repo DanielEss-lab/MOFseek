@@ -7,9 +7,9 @@ from GUI.Utility import FrameWithProcess
 from GUI.Views import LigandView
 from MofIdentifier.fileIO import LigandReader
 
-instruction_text = """Choose from your computer a .xyz file or a .txt file whose first line is a SMILES string. It will 
-be loaded onto the database and added to the ligand list of all MOFs that contain it. The calculations will take some 
-time (expect 20-60 minutes), so please be patient."""
+instruction_text = """Choose from your computer a .xyz file or a .smiles plaintext file whose first line 
+is a SMILES string. It will be loaded onto the database and added to the ligand list of all MOFs that 
+contain it. The calculations will take some time (expect 20-60 minutes), so please be patient."""
 
 
 class AddLigandPage(FrameWithProcess.Frame):
@@ -37,7 +37,7 @@ class AddLigandPage(FrameWithProcess.Frame):
             self.winfo_toplevel().add_custom_ligand(mol)  # TODO: hook up to DB
 
     def open_file(self):
-        filename = askopenfilename(filetypes=[('XYZ Files', '*.xyz'), ('SMILES Files', '*.txt')])
+        filename = askopenfilename(filetypes=[('XYZ Files', '*.xyz'), ('SMILES Files', '*.smiles')])
         if filename is not None and len(filename) > 0:
             if self.molecule_v is not None:
                 self.molecule_v.destroy()

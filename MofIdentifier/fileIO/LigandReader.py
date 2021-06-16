@@ -7,7 +7,7 @@ from MofIdentifier.fileIO import XyzReader, SmilesReader
 def get_mol_from_file(filepath):
     if filepath.endswith(".xyz"):
         return XyzReader.get_molecule(filepath)
-    elif filepath.endswith(".txt"):
+    elif filepath.endswith(".smiles"):
         return SmilesReader.mol_from_file(filepath)
     else:
         return None
@@ -20,7 +20,7 @@ def get_all_mols_from_directory(filepath):
 
     for file in os.listdir(filepath):
         # Check whether file is in valid format
-        if file.endswith(".xyz") or file.endswith(".txt"):
+        if file.endswith(".xyz") or file.endswith(".smiles"):
             try:
                 mol_filepath = Path(file).resolve()
                 mol = get_mol_from_file(str(mol_filepath))

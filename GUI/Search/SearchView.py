@@ -58,7 +58,7 @@ class View(FrameWithProcess.Frame):
         self.ent_excl_elements = tk.Entry(self, width=10, font=small_font)
         self.ent_excl_elements.insert(0, '')
         self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.W)
-        self.lbl_excl_sbus = tk.Label(self, text="Forbidden Sbus: ", font=small_font)
+        self.lbl_excl_sbus = tk.Label(self, text="Forbidden SBUs: ", font=small_font)
         self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
         self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, self.focus_sbu, small_font)
         self.ent_excl_sbus.set_possible_values(self.all_sbu_names())

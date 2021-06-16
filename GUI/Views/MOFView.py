@@ -49,12 +49,14 @@ def make_view(parent, mof):
     row3 = tk.Frame(master=view, height=20)
     sbu_label = tk.Label(row3, text="SBUs:")
     sbu_label.pack(side='left')
+
     def have_page_highlight(clicked_node):
         def fun(*args):
             page.highlight_molecule(clicked_node)
         return fun
+
     def display_sbu_name(sbu, color):
-        text = f"{sbu.frequency}x {sbu.label} ({sbu.connections()}\u00B0)"
+        text = f"{sbu.frequency}x {sbu.label} ({sbu.connections()}*)"
         sbu_label = tk.Label(row3, text=text, fg=color, cursor='hand2', padx=3)
         f = tkFont.Font(sbu_label, sbu_label["font"])
         f.configure(underline=True)

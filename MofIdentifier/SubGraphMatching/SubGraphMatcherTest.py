@@ -102,8 +102,8 @@ class WeakSubGraphMatcherTest(unittest.TestCase):
         self.assertEqual(False, SubGraphMatcher.mol_are_isomorphic(all_bonds_present, most_bonds_present), "Should not find match in structures")
 
     def test_counting_hydrogen(self):
-        bare_benzene = LigandReader.get_mol_from_file('../ligands/Benzene.txt')
-        benzene_with_h = LigandReader.get_mol_from_file('../ligands/FullBenzene.txt')
+        bare_benzene = LigandReader.get_mol_from_file('../ligands/Benzene.smiles')
+        benzene_with_h = LigandReader.get_mol_from_file('../ligands/test_resources/FullBenzene.smiles')
         self.assertEqual(True, SubGraphMatcher.mol_near_isomorphic(bare_benzene, benzene_with_h), "Should find match in structures")
         self.assertEqual(False, SubGraphMatcher.mol_are_isomorphic(bare_benzene, benzene_with_h), "Should not find match in structures")
 
@@ -111,8 +111,8 @@ class WeakSubGraphMatcherTest(unittest.TestCase):
 class SubGraphMatcherTest(unittest.TestCase):
 
     def test_dynamic_matching(self):
-        smile_benzene = LigandReader.get_mol_from_file('../ligands/Benzene.txt')
-        smile_full_benzene = LigandReader.get_mol_from_file('../ligands/FullBenzene.txt')
+        smile_benzene = LigandReader.get_mol_from_file('../ligands/Benzene.smiles')
+        smile_full_benzene = LigandReader.get_mol_from_file('../ligands/test_resources/FullBenzene.smiles')
         xyz_benzene = LigandReader.get_mol_from_file('../ligands/test_resources/BenzeneBase.xyz')
         mof_808 = CifReader.get_mof('../mofsForTests/smod7-pos-1.cif')
         self.assertTrue(SubGraphMatcher.match(smile_benzene, xyz_benzene), 'Should find match')

@@ -83,7 +83,7 @@ def read_sbus_from_files(sbu_names):
     sbus_found = 0
     for kind in ["cluster", "connector", "auxiliary"]:
         for file_name_in_directory in os.listdir(Path(__file__).parent / kind):
-            if file_name_in_directory.endswith(".xyz") or file_name_in_directory.endswith(".txt"):
+            if file_name_in_directory.endswith(".xyz") or file_name_in_directory.endswith(".smiles"):
                 for l_name in sbu_names:
                     if file_name_in_directory == l_name:
                         sbus.append(
