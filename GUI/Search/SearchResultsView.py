@@ -60,6 +60,7 @@ class View(FrameWithProcess.Frame):
             self.lbl_num_results['text'] = f"{len(results)} Results"
             self.btn_export['state'] = "normal"
         else:
+            self.lbl_num_results['text'] = f"No Results"
             self.lbl_num_results['text'] = ''
         self.main_body.display_results(results)
 

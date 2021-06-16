@@ -36,6 +36,8 @@ class Page(FrameWithProcess.Frame):
         if self.mol is not None and self.mol.label == self.combobox.get():
             if new_name != '':
                 if new_name.find(' ') < 0 and new_name.find('.') < 0:
+                    self.combobox.set('')
+                    self.new_name_ent.delete(0,tk.END)
                     new_name = new_name + self.extension_text['text']
                     # TODO: link to DAO
                     pass

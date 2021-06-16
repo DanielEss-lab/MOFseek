@@ -15,7 +15,7 @@ class View(tk.Frame):
         self.initial_combobox.grid(row=0, column=1, pady=2, sticky=tk.NSEW)
         if focus_function is not None:
             self.focus_button_by_row_index = dict()
-            initial_focus_button = tk.Button(self, text='\U0001F50D', font=self.font,
+            initial_focus_button = tk.Button(self, text='i', font=('Consolas', self.font[1]),
                                              command=lambda: focus_function(self.initial_combobox.get()))
             initial_focus_button.grid(row=0, column=2, pady=2)
         self.box_by_row_index = dict()
@@ -56,7 +56,7 @@ class View(tk.Frame):
         combobox.grid(row=row_index, column=1, pady=2, sticky=tk.NSEW)
         combobox.focus_set()
         if self.focus_function is not None:
-            focus_button = tk.Button(self, text='\U0001F50D', font=self.font,
+            focus_button = tk.Button(self, text='i', font=('Consolas', self.font[1]),
                                      command=lambda: self.focus_function(combobox.get()))
             self.focus_button_by_row_index[row_index] = focus_button
             focus_button.grid(row=row_index, column=2, pady=2)
