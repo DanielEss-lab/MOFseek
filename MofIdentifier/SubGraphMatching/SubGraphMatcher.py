@@ -63,6 +63,7 @@ def does_assign_label_from_set(molecule, mol_set):
             molecule.no_h_graph = mol_from_set.no_h_graph  # more general graph using wildcards
             molecule.label = mol_from_set.label
             molecule.filepath = mol_from_set.filepath
+            molecule.file_content = mol_from_set.file_content
             return True
     return False
 

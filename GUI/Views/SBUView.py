@@ -34,8 +34,11 @@ def make_view(parent, sbu):
     row1.pack(fill=tk.X)
 
     row2 = tk.Frame(master=view)
+    file_first_line = sbu.file_content.partition('\n')[0]
+    first_line_label = tk.Label(row2, text=file_first_line)
+    first_line_label.pack(side=tk.RIGHT)
     elements = tk.Label(row2, text=sbu.atoms_string())
-    elements.pack(side='left')
+    elements.pack(side=tk.LEFT)
     row2.pack(fill=tk.X)
 
     row3 = tk.Frame(master=view, height=10)

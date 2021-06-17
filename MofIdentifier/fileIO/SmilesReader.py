@@ -32,7 +32,7 @@ def mol_from_str(string, mol_name=None):
     if manually_specified_h:
         string = convert_smiles_to_no_h(string)
     networkx_mol = networkx_graph_from_smiles(string, not manually_specified_h)
-    molecule = mol_from_networkx_graph(networkx_mol, mol_name)
+    molecule = mol_from_networkx_graph(networkx_mol, mol_name, string)
     if manually_specified_h:
         convert_mol_to_h(molecule)
     molecule.should_use_weak_comparison = not manually_specified_h
@@ -43,7 +43,7 @@ def networkx_graph_from_smiles(smiles_string, should_add_all_h_around_structure)
     return read_smiles(smiles_string, explicit_hydrogen=should_add_all_h_around_structure)
 
 
-def mol_from_networkx_graph(graph, mol_name):
+def mol_from_networkx_graph(graph, mol_name, file_string):
     networkx_nodes = list(graph.nodes(data='element'))
     atoms = {}
     for node in networkx_nodes:
@@ -56,7 +56,7 @@ def mol_from_networkx_graph(graph, mol_name):
             adj = networkx_nodes[adj_node]
             adj_name = str(adj[1]) + str(adj[0])
             atom.bondedAtoms.append(atoms[adj_name])
-    molecule = Ligand(mol_name, list(atoms.values()))
+    molecule = Ligand(mol_name, list(atoms.values()), file_string)
     return molecule
 
 

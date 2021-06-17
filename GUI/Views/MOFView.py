@@ -19,7 +19,7 @@ def select_for_edit(parent, mof):
 
 def make_view(parent, mof):
     sbus = SBUCollectionManager.process_new_mof(mof)
-    page = parent.master.master.master
+    page = parent.winfo_toplevel()
     view = tk.Frame(parent, height=40, bd=1, relief=tk.SOLID)
 
     row1 = tk.Frame(master=view)

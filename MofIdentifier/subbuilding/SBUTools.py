@@ -56,11 +56,12 @@ class UnitType(Enum):
 
 
 class changeableSBU(Molecule.Molecule):
-    def __init__(self, sbu_id, unit_type, atoms, frequency=1, adjacent_cluster_ids=None):
+    def __init__(self, sbu_id, unit_type, atoms, frequency=1, adjacent_cluster_ids=None, file_content=''):
         super().__init__('No Filepath/Unlabeled', atoms)
         # Right now, SBUs are constructed with atoms as sets; a refactor to lists wouldn't break much though
         if adjacent_cluster_ids is None:
             adjacent_cluster_ids = set()
+        self.file_content = file_content
         self.sbu_id = sbu_id
         self.adjacent_cluster_ids = adjacent_cluster_ids
         self.adjacent_connector_ids = set(())

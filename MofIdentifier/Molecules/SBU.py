@@ -5,6 +5,7 @@ from MofIdentifier.SubGraphMatching import SubGraphMatcher
 class SBU(Molecule.Molecule):
     def __init__(self, changeable_sbu):
         super().__init__(changeable_sbu.filepath, list(changeable_sbu.atoms))
+        self.file_content = changeable_sbu.file_content
         self.adjacent_cluster_ids = changeable_sbu.adjacent_cluster_ids
         self.adjacent_connector_ids = changeable_sbu.adjacent_connector_ids
         self.adjacent_auxiliary_ids = changeable_sbu.adjacent_auxiliary_ids

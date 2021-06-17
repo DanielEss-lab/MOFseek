@@ -1,4 +1,7 @@
 import time
+from io import FileIO
+from pathlib import Path
+
 import pandas as pd
 from MofIdentifier.Molecules.Ligand import Ligand
 from MofIdentifier.fileIO.XyzBondCreator import XyzBondCreator
@@ -16,6 +19,7 @@ def get_molecule(filename):
 def read_xyz(file):
     molecule = pd.read_table(file, skiprows=2, delim_whitespace=True,
                              names=['atom', 'x', 'y', 'z'])
+    file_str = Path(file).read_text()
     atoms = list(())
     index = 0
     for atomData in molecule.values:
@@ -26,7 +30,7 @@ def read_xyz(file):
                                    float(atomData[3]))
         atoms.append(atom)
         index += 1
-    return Ligand(file, atoms)
+    return Ligand(file, atoms, file_str)
 
 
 if __name__ == '__main__':
