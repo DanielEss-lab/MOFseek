@@ -49,13 +49,12 @@ class SearchTerms:
         for element in self.excl_element_symbols:
             if element in MOF.elementsPresent:
                 return False
-        mof_attributes = Attributes.get_attributes(MOF)
-        for key in self.numerical_attr:
-            if self.numerical_attr[key][0] is not None:
-                if mof_attributes[key] < self.numerical_attr[key][0]:
+        for attr_name in self.numerical_attr:
+            if self.numerical_attr[attr_name][0] is not None:
+                if Attributes.attributes[attr_name].calculate(MOF) < self.numerical_attr[attr_name][0]:
                     return False  # Less than the minimum
-            if self.numerical_attr[key][1] is not None:
-                if mof_attributes[key] > self.numerical_attr[key][1]:
+            if self.numerical_attr[attr_name][1] is not None:
+                if Attributes.attributes[attr_name].calculate(MOF) > self.numerical_attr[attr_name][1]:
                     return False  # More than the maximum
         if MOF.label.find(self.label_substring) < 0:
             return False

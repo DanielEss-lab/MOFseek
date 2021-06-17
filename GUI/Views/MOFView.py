@@ -39,9 +39,9 @@ def make_view(parent, mof):
     row1.pack(fill=tk.X)
 
     row2 = tk.Frame(master=view, height=20)
-    attributes = Attributes.get_attributes(mof)
-    for text, value in attributes.items():
-        _attribute_view(row2, text, value, Attributes.attribute_descriptions[text]).pack(side='left')
+    for text, attr in Attributes.attributes.items():
+        if attr.enabled:
+            _attribute_view(row2, text, attr.calculate(mof), attr.description).pack(side='left')
     _attribute_view(row2, 'Elements', format_elements(mof),
                     'Atomic symbols of elements present in MOF').pack(side='left')
     row2.pack(fill=tk.X)

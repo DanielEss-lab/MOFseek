@@ -20,9 +20,10 @@ class View(FrameWithProcess.Frame):
         self.selected_sort = tk.StringVar(self)
         self.default_sort_string = 'Sort by: \u25BC'
         sort_options = [self.default_sort_string]
-        for attr in Attributes.attribute_names:
-            sort_options.append(attr + ' | high first')
-            sort_options.append(attr + ' | low first')
+        for attr in Attributes.attributes:
+            if Attributes.attributes[attr].enabled:
+                sort_options.append(attr + ' | high first')
+                sort_options.append(attr + ' | low first')
         self.selected_sort.set(sort_options[0])
 
         sort_dropdown = tk.OptionMenu(self, self.selected_sort, *sort_options,
@@ -59,7 +60,7 @@ class View(FrameWithProcess.Frame):
             division_index = sort_name.rfind('|')
             attribute = sort_name[:division_index-1]
             descending = sort_name[division_index+1:].find('high first') >= 0
-            results.sort(reverse=descending, key=lambda mof: Attributes.get_attributes(mof)[attribute])
+            results.sort(reverse=descending, key=lambda mof: Attributes.attributes[attribute].calculate(mof))
         self.results = results
         if len(self.results) > 0:
             self.lbl_num_results['text'] = f"{len(results)} Results"

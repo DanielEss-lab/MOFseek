@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage, EditMOFPage
+from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage, EditMOFPage, SettingsPage
 
 
 class Root(tk.Tk):
@@ -19,20 +19,22 @@ class Root(tk.Tk):
         self.add_ligand_page = AddLigandPage.AddLigandPage(self.tabControl)
         self.rename_ligand_page = RenameLigandPage.Page(self.tabControl)
         self.rename_sbu_page = RenameSBUPage.Page(self.tabControl)
-        self.add_MOFs = AddMofPage.Page(self.tabControl)
-        self.edit_MOF = EditMOFPage.Page(self.tabControl)
+        self.add_MOFs_page = AddMofPage.Page(self.tabControl)
+        self.edit_MOF_page = EditMOFPage.Page(self.tabControl)
+        self.settings_page = SettingsPage.Page(self.tabControl)
 
         self.tabControl.add(self.search_page, text='Search')
         self.tabControl.add(self.add_ligand_page, text='Add Ligand')
         self.tabControl.add(self.rename_ligand_page, text='Rename Ligand')
         self.tabControl.add(self.rename_sbu_page, text='Rename SBU')
-        self.tabControl.add(self.add_MOFs, text='Add MOFs')
-        self.tabControl.add(self.edit_MOF, text='Edit MOF')
+        self.tabControl.add(self.add_MOFs_page, text='Add MOFs')
+        self.tabControl.add(self.edit_MOF_page, text='Edit MOF')
+        self.tabControl.add(self.settings_page, text='Settings')
         self.tabControl.pack(expand=1, fill="both")
 
     def select_mof_for_edit(self, mof):
         if self.tabControl.index('current') != 5:
-            self.edit_MOF.select_mof(mof)
+            self.edit_MOF_page.select_mof(mof)
             self.tabControl.select(5)
 
     def select_ligand_for_edit(self, ligand):
@@ -54,3 +56,9 @@ class Root(tk.Tk):
     def highlight_molecule(self, mol):
         self.search_page.highlight_molecule(mol)
         self.tabControl.select(0)
+
+    def enable_attribute(self, attr_name):
+        pass
+
+    def disable_attribute(self, attr_name):
+        pass

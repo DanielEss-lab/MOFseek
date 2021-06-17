@@ -180,10 +180,11 @@ class View(FrameWithProcess.Frame):
 
         attribute_row = tk.Frame(self)
         attribute_heading(attribute_row).pack(side='left')
-        for text in Attributes.attribute_names:
-            entry = AttributeEntry(attribute_row, text, Attributes.attribute_descriptions[text])
-            self.attribute_entries.append(entry)
-            entry.pack(side='left')
+        for attr in Attributes.attributes:
+            if Attributes.attributes[attr].enabled:
+                entry = AttributeEntry(attribute_row, attr, Attributes.attributes[attr].description)
+                self.attribute_entries.append(entry)
+                entry.pack(side='left')
         attribute_row.grid(column=0, row=3, columnspan=12, pady=2)
 
     def get_attribute_parameters(self):
