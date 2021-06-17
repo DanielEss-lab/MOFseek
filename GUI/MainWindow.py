@@ -31,8 +31,9 @@ class Root(tk.Tk):
         self.tabControl.pack(expand=1, fill="both")
 
     def select_mof_for_edit(self, mof):
-        self.edit_MOF.select_mof(mof)
-        self.tabControl.select(5)
+        if self.tabControl.index('current') != 5:
+            self.edit_MOF.select_mof(mof)
+            self.tabControl.select(5)
 
     def select_ligand_for_edit(self, ligand):
         self.rename_ligand_page.select_ligand(ligand)

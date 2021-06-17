@@ -46,3 +46,5 @@ class Page(FrameWithProcess.Frame):
         self.mof_preview.display_results(self.mofs)
         print(*mofs)
         pass  # TODO: hook this up to DB
+        # Once I upload the mof to the DB, I also need to get the sbus from the DB in case some were added
+        # And make sure that new searches will also search the newly added MOFs

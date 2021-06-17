@@ -29,13 +29,18 @@ class View(FrameWithProcess.Frame):
                                       command=lambda _: self.start_process(self.results))
         sort_dropdown.config(indicatoron=0)
         sort_dropdown.grid(row=2, column=1, padx=2)
-        self.lbl_num_results = tk.Label(self, width=11)
+        self.lbl_num_results = tk.Label(self, width=32)
         self.lbl_num_results.grid(row=2, column=0, padx=2, sticky=tk.W)
         self.main_body = MultiMofView.View(self)
         self.main_body.grid(row=3, column=0, columnspan=3, sticky=tk.NSEW)
-        self.btn_export = tk.Button(self, text='Export Results', command=self.export)
-        self.btn_export['state'] = "disabled"
-        self.btn_export.grid(row=2, column=2, padx=2, sticky=tk.E)
+        self.export_frm = tk.Frame(self)
+        self.btn_export_txt = tk.Button(self.export_frm, text='Export names as .txt', command=self.export_txt)
+        self.btn_export_txt['state'] = "disabled"
+        self.btn_export_txt.pack(side=tk.LEFT)
+        self.btn_export_cifs = tk.Button(self.export_frm, text='Export MOF CIFs', command=self.export_cifs)
+        self.btn_export_cifs['state'] = "disabled"
+        self.btn_export_cifs.pack(side=tk.LEFT)
+        self.export_frm.grid(row=2, column=2, padx=2, sticky=tk.E)
 
     def add_error_to_layout(self, error_row):
         error_row.grid(row=1, column=1, padx=2)
@@ -58,13 +63,24 @@ class View(FrameWithProcess.Frame):
         self.results = results
         if len(self.results) > 0:
             self.lbl_num_results['text'] = f"{len(results)} Results"
-            self.btn_export['state'] = "normal"
+            self.btn_export_txt['state'] = "normal"
+            self.btn_export_cifs['state'] = "normal"
         else:
             self.lbl_num_results['text'] = f"No Results"
             self.lbl_num_results['text'] = ''
         self.main_body.display_results(results)
 
-    def export(self):
+    def export_cifs(self):
+        if len(self.results) == 0:
+            return
+        path = fd.askdirectory()
+        if path is None:
+            return
+        for mof in self.results:
+            with open(os.path.join(path, mof.label), "w") as f:
+                f.write(mof.cif_content)
+
+    def export_txt(self):
         if len(self.results) == 0:
             return
         f = fd.asksaveasfile(mode='w', defaultextension=".txt", title="Export results",
