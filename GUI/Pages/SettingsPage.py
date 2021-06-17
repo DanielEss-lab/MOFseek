@@ -28,10 +28,7 @@ class Page(tk.Frame):
 
             def change_settings():
                 Attributes.attributes[self.name].enabled = self.is_enabled.get()
-                if self.is_enabled.get():
-                    self.winfo_toplevel().enable_attribute(self.name)
-                else:
-                    self.winfo_toplevel().disable_attribute(self.name)
+                self.winfo_toplevel().toggle_attribute()
 
             btn = tk.Checkbutton(self, text=self.name, variable=self.is_enabled, onvalue=1, offvalue=0,
                                  command=change_settings)

@@ -77,7 +77,7 @@ class SearchTerms:
         return f"lig:{ligands}-{excl_ligands}, " + \
                f"elem:{self.element_symbols}-{self.excl_element_symbols}" + \
                f"sbus:{sbus}-{excl_sbus}" + \
-               f"attr:{[condense_t(tup) for tup in self.numerical_attr.values()]}" + \
+               f"attr:{[str(Attributes.attributes[item[0]].index) + condense_t(item[1]) for item in self.numerical_attr.items()]}" + \
                f"n:{self.label_substring}"
 
     def __eq__(self, other):

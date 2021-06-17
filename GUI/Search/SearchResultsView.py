@@ -30,7 +30,7 @@ class View(FrameWithProcess.Frame):
                                       command=lambda _: self.start_process(self.results))
         sort_dropdown.config(indicatoron=0)
         sort_dropdown.grid(row=2, column=1, padx=2)
-        self.lbl_num_results = tk.Label(self, width=32)
+        self.lbl_num_results = tk.Label(self, width=30, anchor=tk.W)
         self.lbl_num_results.grid(row=2, column=0, padx=2, sticky=tk.W)
         self.main_body = MultiMofView.View(self)
         self.main_body.grid(row=3, column=0, columnspan=3, sticky=tk.NSEW)
@@ -67,8 +67,9 @@ class View(FrameWithProcess.Frame):
             self.btn_export_txt['state'] = "normal"
             self.btn_export_cifs['state'] = "normal"
         else:
-            self.lbl_num_results['text'] = f"No Results"
-            self.lbl_num_results['text'] = ''
+            self.lbl_num_results['text'] = "No Results"
+            self.btn_export_txt['state'] = "disabled"
+            self.btn_export_cifs['state'] = "disabled"
         self.main_body.display_results(results)
 
     def export_cifs(self):

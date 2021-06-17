@@ -57,8 +57,7 @@ class Root(tk.Tk):
         self.search_page.highlight_molecule(mol)
         self.tabControl.select(0)
 
-    def enable_attribute(self, attr_name):
-        pass
-
-    def disable_attribute(self, attr_name):
-        pass
+    def toggle_attribute(self):
+        self.search_page.refresh_attributes_shown()
+        self.add_MOFs_page.refresh_attributes_shown()
+        self.edit_MOF_page.refresh_attributes_shown()

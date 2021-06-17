@@ -64,6 +64,7 @@ class View(FrameWithProcess.Frame):
         self.ent_excl_sbus.set_possible_values(self.all_sbu_names())
         self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
 
+        self.attribute_row = None
         self.add_attribute_search_entries()  # Row 3
 
         self.lbl_redo_search = tk.Label(self, text="Previous searches: ")
@@ -178,17 +179,17 @@ class View(FrameWithProcess.Frame):
             bottom.pack()
             return view
 
-        attribute_row = tk.Frame(self)
-        attribute_heading(attribute_row).pack(side='left')
+        self.attribute_row = tk.Frame(self)
+        attribute_heading(self.attribute_row).pack(side='left')
         for attr in Attributes.attributes:
             if Attributes.attributes[attr].enabled:
-                entry = AttributeEntry(attribute_row, attr, Attributes.attributes[attr].description)
+                entry = AttributeEntry(self.attribute_row, attr, Attributes.attributes[attr].description)
                 self.attribute_entries.append(entry)
                 entry.pack(side='left')
-        attribute_row.grid(column=0, row=3, columnspan=12, pady=2)
+        self.attribute_row.grid(column=0, row=3, columnspan=12, pady=2)
 
     def get_attribute_parameters(self):
-        return {entry.name: entry.get() for entry in self.attribute_entries}
+        return {entry.name: entry.get() for entry in self.attribute_entries}  # FIXME: don't use deselected attributes
 
     def all_ligands_names(self):  # Will change with adding DB
         path = str(Path(__file__).parent / "../../MofIdentifier/ligands")
@@ -228,6 +229,11 @@ class View(FrameWithProcess.Frame):
                 self.parent.highlight_molecule(sbu)
             except FileNotFoundError as ex:
                 self._show_error(ex)
+
+    def regenerate_attribute_row(self):
+        self.attribute_row.grid_forget()
+        self.attribute_entries = list()
+        self.add_attribute_search_entries()
 
 
 class AttributeEntry(tk.Frame):

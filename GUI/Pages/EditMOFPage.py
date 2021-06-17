@@ -16,16 +16,18 @@ class Page(FrameWithProcess.Frame):
         instructions.pack()
         self.mof_frame = tk.Frame(self)
         self.mof_frame.pack()
-        self.molecule_v = None
+        self.mofView = None
         self.edit_button = tk.Button(self, text="Save Edits",
                                        command=lambda: self.start_process(self.assemble_new_mof()))
         self.edit_button.pack()
         self.mof = None
 
     def select_mof(self, mof):
+        if self.mofView is not None:
+            self.mofView.pack_forget()
         self.mof = mof
-        mofView = MOFView.make_view(self.mof_frame, mof)
-        mofView.pack()
+        self.mofView = MOFView.make_view(self.mof_frame, mof)
+        self.mofView.pack()
 
     def edit_mof_in_db(self, new_mof):
         if self.mof is not None:
@@ -39,3 +41,7 @@ class Page(FrameWithProcess.Frame):
 
     def assemble_new_mof(self):
         return None  # DatabaseMOFPojo(self.entry.get())
+
+    def refresh_attributes_shown(self):
+        if self.mof is not None:
+            self.select_mof(self.mof)

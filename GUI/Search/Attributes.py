@@ -1,20 +1,26 @@
+import itertools
+
+
 class Attribute:
+    id_iter = itertools.count()
+
     def __init__(self, description, calculate, enabled):
         self.description = description
         self.calculate = calculate
         self.enabled = enabled
+        self.index = next(Attribute.id_iter)
 
 
 attributes = {
     "Volume (\u212B\u00B3)": Attribute("The volume of the MOF's unit cell, measured in Angstroms cubed",
-                                       lambda mof: round(mof.unit_volume, 0), True),
+                                       lambda mof: round(mof.unit_volume, 0), False),
     "\u0394Length (\u212B):": Attribute("The difference between the MOF's unit cell's longest length and shortest "
                                         "length (measured in Angstroms, in cartesian coordinates)",
                                         lambda mof: round(max(mof.cartesian_lengths) - min(mof.cartesian_lengths), 2),
-                                        True),
+                                        False),
     "\u0394Angle (\u00B0)": Attribute("The difference between the MOF's unit cell's greatest angle and shortest angle "
                                       "(in degrees)",
-                                      lambda mof: round(max(mof.angles) - min(mof.angles), 2), True),
+                                      lambda mof: round(max(mof.angles) - min(mof.angles), 2), False),
     "Num Atoms": Attribute("The number of atoms in the MOF's unit cell",
                            lambda mof: len(mof.atoms), True),
     "conn atms/node atm": Attribute("The ratio within the MOF of atoms in connecting ligands vs atoms in metal nodes",
