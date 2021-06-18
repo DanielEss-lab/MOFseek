@@ -245,9 +245,9 @@ class AttributeEntry(tk.Frame):
         Tooltips.create_tool_tip(self.top, description)
         self.top.grid()
         vcmd = (self.register(self.is_numeric_input))
-        self.max = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=8)
+        self.max = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=max(7, len(name)))
         self.max.grid(padx=4)
-        self.min = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=8)
+        self.min = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=max(7, len(name)))
         self.min.grid(padx=4)
 
     def is_numeric_input(self, P):

@@ -33,13 +33,13 @@ attributes = {
                                         "length (measured in Angstroms, in cartesian coordinates)",
                                         lambda mof: round(max(mof.cartesian_lengths) - min(mof.cartesian_lengths), 2),
                                         True),
-    "\u2220 \u03B1(\u212B)": Attribute("The angle, measured in degrees, of the MOF's unit cell's angle designated as "
+    "\u2220 \u03B1(\u00B0)": Attribute("The angle, measured in degrees, of the MOF's unit cell's angle designated as "
                                        "'alpha'",
                                        lambda mof: round(mof.angles[0], 2), False),
-    "\u2220 \u03B2(\u212B)": Attribute("The angle, measured in degrees, of the MOF's unit cell's angle designated as "
+    "\u2220 \u03B2(\u00B0)": Attribute("The angle, measured in degrees, of the MOF's unit cell's angle designated as "
                                        "'beta'",
                                        lambda mof: round(mof.angles[1], 2), False),
-    "\u2220 \u03B3(\u212B)": Attribute("The angle, measured in degrees, of the MOF's unit cell's angle designated as "
+    "\u2220 \u03B3(\u00B0)": Attribute("The angle, measured in degrees, of the MOF's unit cell's angle designated as "
                                        "'gamma'",
                                        lambda mof: round(mof.angles[2], 2), False),
     "\u0394\u2220 (\u00B0)": Attribute("The difference between the MOF's unit cell's greatest angle and shortest angle "
