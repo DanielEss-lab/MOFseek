@@ -12,15 +12,39 @@ class Attribute:
 
 
 attributes = {
+    "\u2113 x(\u212B)": Attribute("The length, measured in Angstroms, of the MOF's 'x' dimension in cartesian "
+                                  "coordinates",
+                                  lambda mof: round(mof.cartesian_lengths[0], 1), False),
+    "\u2113 y(\u212B)": Attribute("The length, measured in Angstroms, of the MOF's 'y' dimension in cartesian "
+                                  "coordinates",
+                                  lambda mof: round(mof.cartesian_lengths[1], 1), False),
+    "\u2113 z(\u212B)": Attribute("The length, measured in Angstroms, of the MOF's 'z' dimension in cartesian "
+                                  "coordinates",
+                                  lambda mof: round(mof.cartesian_lengths[2], 1), False),
     "Volume (\u212B\u00B3)": Attribute("The volume of the MOF's unit cell, measured in Angstroms cubed",
-                                       lambda mof: round(mof.unit_volume, 0), False),
-    "\u0394Length (\u212B):": Attribute("The difference between the MOF's unit cell's longest length and shortest "
+                                       lambda mof: round(mof.unit_volume, 0), True),
+    "\u2113 a(\u212B)": Attribute("The length, measured in Angstroms, of the MOF's unit cell's edge labelled 'a'",
+                                  lambda mof: round(mof.fractional_lengths[0], 1), False),
+    "\u2113 b(\u212B)": Attribute("The length, measured in Angstroms, of the MOF's unit cell's edge labelled 'b'",
+                                  lambda mof: round(mof.fractional_lengths[1], 1), False),
+    "\u2113 c(\u212B)": Attribute("The length, measured in Angstroms, of the MOF's unit cell's edge labelled 'c'",
+                                  lambda mof: round(mof.fractional_lengths[2], 1), False),
+    "\u0394\u2113 (\u212B):": Attribute("The difference between the MOF's unit cell's longest length and shortest "
                                         "length (measured in Angstroms, in cartesian coordinates)",
                                         lambda mof: round(max(mof.cartesian_lengths) - min(mof.cartesian_lengths), 2),
-                                        False),
-    "\u0394Angle (\u00B0)": Attribute("The difference between the MOF's unit cell's greatest angle and shortest angle "
-                                      "(in degrees)",
-                                      lambda mof: round(max(mof.angles) - min(mof.angles), 2), False),
+                                        True),
+    "\u2220 \u03B1(\u212B)": Attribute("The angle, measured in degrees, of the MOF's unit cell's angle designated as "
+                                       "'alpha'",
+                                       lambda mof: round(mof.angles[0], 2), False),
+    "\u2220 \u03B2(\u212B)": Attribute("The angle, measured in degrees, of the MOF's unit cell's angle designated as "
+                                       "'beta'",
+                                       lambda mof: round(mof.angles[1], 2), False),
+    "\u2220 \u03B3(\u212B)": Attribute("The angle, measured in degrees, of the MOF's unit cell's angle designated as "
+                                       "'gamma'",
+                                       lambda mof: round(mof.angles[2], 2), False),
+    "\u0394\u2220 (\u00B0)": Attribute("The difference between the MOF's unit cell's greatest angle and shortest angle "
+                                       "(in degrees)",
+                                       lambda mof: round(max(mof.angles) - min(mof.angles), 2), True),
     "Num Atoms": Attribute("The number of atoms in the MOF's unit cell",
                            lambda mof: len(mof.atoms), True),
     "conn atms/node atm": Attribute("The ratio within the MOF of atoms in connecting ligands vs atoms in metal nodes",
