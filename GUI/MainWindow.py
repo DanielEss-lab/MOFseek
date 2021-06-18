@@ -10,7 +10,7 @@ class Root(tk.Tk):
         self.title("Ess lab | P66 | GUI WIP")
 
         self.geometry('1100x900')
-        self.minsize(1050, 500)
+        self.minsize(720, 500)
         self.set_styles()
 
         self.tabControl = ttk.Notebook(self)

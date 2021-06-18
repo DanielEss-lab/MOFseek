@@ -47,14 +47,14 @@ attributes = {
                                        lambda mof: round(max(mof.angles) - min(mof.angles), 2), True),
     "Num Atoms": Attribute("The number of atoms in the MOF's unit cell",
                            lambda mof: len(mof.atoms), True),
-    "conn atms/node atm": Attribute("The ratio within the MOF of atoms in connecting ligands vs atoms in metal nodes",
+    "Conn/Node A": Attribute("The ratio within the MOF of atoms in connecting ligands vs atoms in metal nodes",
                                     lambda mof: round(mof.sbus().num_connector_atoms / mof.sbus().num_cluster_atoms, 2),
                                     True),
     "Aux/\u212B\u00B3": Attribute("The density of auxiliary groups in the MOF, measured in groups/Angstroms cubed",
                                   lambda mof: round(len(mof.sbus().auxiliaries) / mof.unit_volume, 5), True),
-    "avg conn *": Attribute("The MOF's average connectivity of connecting ligands, ie how many nodes each one connects",
+    "Avg Conn *": Attribute("The MOF's average connectivity of connecting ligands, ie how many nodes each one connects",
                             lambda mof: round(mof.sbus().avg_conn_connectivity, 1), True),
-    "avg node *": Attribute("The MOF's average connectivity of metal nodes, ie how many connecting ligands each one "
+    "Avg Node *": Attribute("The MOF's average connectivity of metal nodes, ie how many connecting ligands each one "
                             "touches",
                             lambda mof: round(mof.sbus().avg_node_connectivity, 1), True),
 }

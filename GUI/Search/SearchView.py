@@ -243,12 +243,12 @@ class AttributeEntry(tk.Frame):
         tk.Frame.__init__(self, self.parent, bd=1, relief=tk.SOLID)
         self.top = tk.Label(self, text=name)
         Tooltips.create_tool_tip(self.top, description)
-        self.top.pack()
+        self.top.grid()
         vcmd = (self.register(self.is_numeric_input))
-        self.max = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'))
-        self.max.pack()
-        self.min = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'))
-        self.min.pack()
+        self.max = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=8)
+        self.max.grid(padx=4)
+        self.min = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=8)
+        self.min.grid(padx=4)
 
     def is_numeric_input(self, P):
         if len(P) == 0:
