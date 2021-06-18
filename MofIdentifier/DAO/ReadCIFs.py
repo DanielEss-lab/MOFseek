@@ -4,7 +4,7 @@ from pymongo import MongoClient
 cluster = MongoClient(
     "mongodb+srv://db_admin:EHfbvgmVEJ9g0Mgk@cluster0.r0otj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
 database = cluster["Database"]
-cif_collection = database["CIFs"]
+cif_collection = database["test"]
 
 
 def read_all_cifs_in_directory(cifs_path):
@@ -12,6 +12,14 @@ def read_all_cifs_in_directory(cifs_path):
     print("Starting reading cif files...")
     mofs = CifReader.get_all_mofs_in_directory(cifs_path)
     print("Finished reading cif files")
+
+    return mofs
+
+
+def add_cifs_to_database(cifs_path):
+
+    # get mofs from read all cifs in directory
+    mofs = read_all_cifs_in_directory(cifs_path)
 
     print("Adding cif_content to database...")
     for mof in mofs:
@@ -23,7 +31,7 @@ def read_all_cifs_in_directory(cifs_path):
 
 
 if __name__ == '__main__':
-    read_all_cifs_in_directory("\\Users\\shers\\Desktop\\Chem\\structure_10143")
+    add_cifs_to_database("\\Users\\shers\\Desktop\\Chem\\test")
     # MOF = CifReader.get_mof('../mofsForTests/SOTXEG_neutral.cif')
     # cif_collection.update_one({"filename": "SOTXEG_neutral"}, {"$set": {'cif_content': MOF.cif_content}})
     # user_path = read_all_cifs_in_directory("f")
