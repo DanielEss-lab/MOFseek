@@ -73,7 +73,8 @@ class Box(ttk.Combobox):
         elif len(event.keysym) == 1:
             self.autocomplete()
         elif event.keysym == "Return":  # Tab doesn't work because it cycles to next entry/button
-            self.on_select(self.get())
+            if self.on_select is not None:
+                self.on_select(self.get())
 
 
 def test(test_list):

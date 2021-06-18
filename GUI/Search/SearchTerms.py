@@ -18,7 +18,7 @@ def condense_t(tup):
 
 class SearchTerms:
     def __init__(self, ligands=None, element_symbol_list=None, excl_ligands=None, excl_elements=None, sbus=None,
-                 excl_sbus=None, numerical_attr=None):
+                 excl_sbus=None, numerical_attr=None, label=''):
         if excl_sbus is None:
             excl_sbus = []
         if sbus is None:
@@ -40,6 +40,7 @@ class SearchTerms:
         self.sbus = sbus
         self.excl_sbus = excl_sbus
         self.numerical_attr = numerical_attr
+        self.label_substring = label
 
     def passes(self, MOF):
         for element in self.element_symbols:
@@ -48,14 +49,15 @@ class SearchTerms:
         for element in self.excl_element_symbols:
             if element in MOF.elementsPresent:
                 return False
-        mof_attributes = Attributes.get_attributes(MOF)
-        for key in self.numerical_attr:
-            if self.numerical_attr[key][0] is not None:
-                if mof_attributes[key] < self.numerical_attr[key][0]:
+        for attr_name in self.numerical_attr:
+            if self.numerical_attr[attr_name][0] is not None:
+                if Attributes.attributes[attr_name].calculate(MOF) < self.numerical_attr[attr_name][0]:
                     return False  # Less than the minimum
-            if self.numerical_attr[key][1] is not None:
-                if mof_attributes[key] > self.numerical_attr[key][1]:
+            if self.numerical_attr[attr_name][1] is not None:
+                if Attributes.attributes[attr_name].calculate(MOF) > self.numerical_attr[attr_name][1]:
                     return False  # More than the maximum
+        if MOF.label.find(self.label_substring) < 0:
+            return False
         if SBUIdentifier.mof_has_all_sbus(MOF, self.sbus) and SBUIdentifier.mof_has_no_sbus(MOF, self.excl_sbus):
             pass
         else:
@@ -72,10 +74,11 @@ class SearchTerms:
         excl_ligands = [ligand.label for ligand in self.excl_ligands]
         sbus = [sbu.label for sbu in self.sbus]
         excl_sbus = [sbu.label for sbu in self.excl_sbus]
-        return f"ligands:{ligands}-{excl_ligands}, " + \
-               f"elements:{self.element_symbols}-{self.excl_element_symbols}" + \
+        return f"lig:{ligands}-{excl_ligands}, " + \
+               f"elem:{self.element_symbols}-{self.excl_element_symbols}" + \
                f"sbus:{sbus}-{excl_sbus}" + \
-               f"attr:{[condense_t(tup) for tup in self.numerical_attr.values()]}"
+               f"attr:{[str(Attributes.attributes[item[0]].index) + condense_t(item[1]) for item in self.numerical_attr.items()]}" + \
+               f"n:{self.label_substring}"
 
     def __eq__(self, other):
         return str(self) == str(other)

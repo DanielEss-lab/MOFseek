@@ -28,7 +28,7 @@ def read_ligands_from_files(ligand_names):
     ligands = []
     ligands_found = 0
     for file_name_in_directory in os.listdir(Path(__file__).parent / "ligands"):
-        if file_name_in_directory.endswith(".xyz") or file_name_in_directory.endswith(".txt"):
+        if file_name_in_directory.endswith(".xyz") or file_name_in_directory.endswith(".smiles"):
             for l_name in ligand_names:
                 if file_name_in_directory == l_name:
                     ligands.append(

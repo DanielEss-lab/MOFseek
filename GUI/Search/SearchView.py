@@ -2,10 +2,9 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import re
 from pathlib import Path
-import traceback
 
-from GUI import Tooltips
-from GUI.Search import MultipleAutoCompleteSearch, TerminableThread, UploadLigandView, Attributes
+from GUI.Search import Attributes
+from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips
 from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForTests
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader
@@ -14,10 +13,10 @@ from MofIdentifier.subbuilding import SBUCollectionManager
 ROW_MAXIMUM = 6
 
 
-class View(tk.Frame):
+class View(FrameWithProcess.Frame):
     def __init__(self, parent):
         self.parent = parent
-        tk.Frame.__init__(self, self.parent, height=40, width=300, padx=12)
+        super().__init__(self.parent, lambda search: self.search_from_input(search), height=40, width=300, padx=12)
         self.attribute_entries = list()
         self.custom_ligands = dict()
         self.search_to_results = dict()
@@ -26,8 +25,10 @@ class View(tk.Frame):
             self.grid_columnconfigure(i, weight=1)
         self.grid_columnconfigure(1, weight=2)
 
-        self.upload_mof_v = UploadLigandView.View(self)
-        self.upload_mof_v.grid(row=0, column=0, pady=2, columnspan=12)
+        self.lbl_label = tk.Label(self, text="Name must contain: ")
+        self.lbl_label.grid(row=0, column=0, pady=2, sticky=tk.NE)
+        self.ent_label = tk.Entry(self)
+        self.ent_label.grid(row=0, column=1, pady=2, sticky=tk.NW)
 
         self.lbl_ligand = tk.Label(self, text="Required Ligands: ")
         self.lbl_ligand.grid(row=1, column=0, pady=2, sticky=tk.NE)
@@ -57,12 +58,13 @@ class View(tk.Frame):
         self.ent_excl_elements = tk.Entry(self, width=10, font=small_font)
         self.ent_excl_elements.insert(0, '')
         self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.W)
-        self.lbl_excl_sbus = tk.Label(self, text="Forbidden Sbus: ", font=small_font)
+        self.lbl_excl_sbus = tk.Label(self, text="Forbidden SBUs: ", font=small_font)
         self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
         self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, self.focus_sbu, small_font)
         self.ent_excl_sbus.set_possible_values(self.all_sbu_names())
         self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
 
+        self.attribute_row = None
         self.add_attribute_search_entries()  # Row 3
 
         self.lbl_redo_search = tk.Label(self, text="Previous searches: ")
@@ -74,18 +76,11 @@ class View(tk.Frame):
         self.btn_redo_search = tk.Button(self, text="Redo", command=self.redo_search)
         self.btn_redo_search.grid(row=4, column=5, pady=2)
 
-        self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
         self.btn_clear = tk.Button(self, text="Clear", command=self.clear)
         self.btn_clear.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=1)
-        self.btn_search = tk.Button(self, text="Search", command=self.perform_search, font=('Arial', 16), bd=4)
+        self.btn_search = tk.Button(self, text="Search", command=self.start_process, font=('Arial', 16), bd=4)
         self.btn_search.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=12)
-        self.btn_cancel = tk.Button(self, text="Cancel", command=self.cancel_search)
 
-        self.error_row = tk.Frame(self)
-        self.exit_error_btn = tk.Button(self.error_row, text='X', command=self.exit_error)
-        self.exit_error_btn.pack(side=tk.LEFT)
-        self.lbl_error_text = tk.Label(self.error_row, fg='red')
-        self.lbl_error_text.pack(side=tk.LEFT)
 
     def clear(self):
         for entry in self.attribute_entries:
@@ -98,43 +93,13 @@ class View(tk.Frame):
         self.ent_sbus.clear()
         self.ent_excl_sbus.clear()
 
-    def force_search_for(self, ligand):
+    def force_search_ligand(self, ligand):
         search = SearchTerms(ligands=[ligand])
-        self.perform_search(search)
+        self.start_process(search)
 
     def force_search_sbu(self, sbu):
         search = SearchTerms(sbus=[sbu])
-        self.perform_search(search)
-
-    def perform_search(self, search=None):
-        def callback():
-            try:
-                self.progress.start()
-                self.search_from_input(search)
-            except InterruptedError:
-                pass
-            except Exception as ex:
-                error_text = traceback.format_exc()
-                self.show_error(ex)
-                print(error_text)
-            finally:
-                self.progress.stop()
-                self.progress.grid_forget()
-                self.btn_cancel.grid_forget()
-
-        self.btn_cancel.grid(row=ROW_MAXIMUM - 1, column=4, pady=2, columnspan=1)
-        self.progress.grid(row=ROW_MAXIMUM, column=0, pady=2, columnspan=12, sticky=tk.EW)
-        self.thread = TerminableThread.ThreadWithExc(target=callback)
-        self.thread.start()
-
-    def cancel_search(self):
-        try:
-            self.thread.raiseExc(InterruptedError)
-        except AssertionError as e:
-            print(e)
-        self.progress.stop()
-        self.progress.grid_forget()
-        self.btn_cancel.grid_forget()
+        self.start_process(search)
 
     def redo_search(self):
         search_text = self.redo_search_selected.get()
@@ -144,7 +109,7 @@ class View(tk.Frame):
         if self.search_to_results[search] is not None:
             self.parent.display_search_results(self.search_to_results[search])
         else:
-            self.perform_search(search)
+            self.start_process(search)
 
     def get_ligands(self, ligand_names):
         ligands = list()
@@ -180,8 +145,9 @@ class View(tk.Frame):
             forbidden_element_symbols_text = self.ent_excl_elements.get()
             forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
             attributes = self.get_attribute_parameters()
+            label_substring = self.ent_label.get()
             search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols,
-                                 sbus, forbidden_sbus, attributes)
+                                 sbus, forbidden_sbus, attributes, label_substring)
         # Shortcut evaluation if possible
         if search in self.search_to_results and self.search_to_results[search] is not None \
                 and self.search_to_results[search] != 'ongoing':
@@ -191,7 +157,7 @@ class View(tk.Frame):
             self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
                                                             self.redo_search_selected.set(value))
             self.search_to_results[search] = 'ongoing'
-            results = search_in_mofsForTests(search) #TODO: this will change with db integration
+            results = search_in_mofsForTests(search)  # TODO: this will change with db integration
             self.search_to_results[search] = results
             self.parent.display_search_results(results)
 
@@ -213,16 +179,17 @@ class View(tk.Frame):
             bottom.pack()
             return view
 
-        attribute_row = tk.Frame(self)
-        attribute_heading(attribute_row).pack(side='left')
-        for text in Attributes.attribute_names:
-            entry = AttributeEntry(attribute_row, text, Attributes.attribute_descriptions[text])
-            self.attribute_entries.append(entry)
-            entry.pack(side='left')
-        attribute_row.grid(column=0, row=3, columnspan=12, pady=2)
+        self.attribute_row = tk.Frame(self)
+        attribute_heading(self.attribute_row).pack(side='left')
+        for attr in Attributes.attributes:
+            if Attributes.attributes[attr].enabled:
+                entry = AttributeEntry(self.attribute_row, attr, Attributes.attributes[attr].description)
+                self.attribute_entries.append(entry)
+                entry.pack(side='left')
+        self.attribute_row.grid(column=0, row=3, columnspan=12, pady=2)
 
     def get_attribute_parameters(self):
-        return {entry.name: entry.get() for entry in self.attribute_entries}
+        return {entry.name: entry.get() for entry in self.attribute_entries}  # FIXME: don't use deselected attributes
 
     def all_ligands_names(self):  # Will change with adding DB
         path = str(Path(__file__).parent / "../../MofIdentifier/ligands")
@@ -238,12 +205,14 @@ class View(tk.Frame):
                LigandReader.get_all_mols_from_directory(path_3)
         return [sbu.label for sbu in sbus]
 
-    def show_error(self, error):
-        self.lbl_error_text['text'] = 'Error: ' + str(error)
-        self.error_row.grid(row=ROW_MAXIMUM + 1, column=0, pady=2, columnspan=12, sticky=tk.EW)
+    def add_error_to_layout(self, error_row):
+        error_row.grid(row=ROW_MAXIMUM + 1, column=0, pady=2, columnspan=12, sticky=tk.EW)
 
-    def exit_error(self):
-        self.error_row.grid_forget()
+    def add_progress_to_layout(self, progress):
+        progress.grid(row=ROW_MAXIMUM, column=0, pady=2, columnspan=12, sticky=tk.EW)
+
+    def add_cancel_to_layout(self, btn_cancel):
+        btn_cancel.grid(row=ROW_MAXIMUM - 1, column=4, pady=2, columnspan=1)
 
     def focus_ligand(self, ligand_name):
         if ligand_name != '':
@@ -251,7 +220,7 @@ class View(tk.Frame):
                 ligand = self.get_ligands([ligand_name])[0]
                 self.parent.highlight_molecule(ligand)
             except FileNotFoundError as ex:
-                self.show_error(ex)
+                self._show_error(ex)
 
     def focus_sbu(self, sbu_name):
         if sbu_name != '':
@@ -259,7 +228,12 @@ class View(tk.Frame):
                 sbu = self.get_sbus([sbu_name])[0]
                 self.parent.highlight_molecule(sbu)
             except FileNotFoundError as ex:
-                self.show_error(ex)
+                self._show_error(ex)
+
+    def regenerate_attribute_row(self):
+        self.attribute_row.grid_forget()
+        self.attribute_entries = list()
+        self.add_attribute_search_entries()
 
 
 class AttributeEntry(tk.Frame):
@@ -269,12 +243,12 @@ class AttributeEntry(tk.Frame):
         tk.Frame.__init__(self, self.parent, bd=1, relief=tk.SOLID)
         self.top = tk.Label(self, text=name)
         Tooltips.create_tool_tip(self.top, description)
-        self.top.pack()
+        self.top.grid()
         vcmd = (self.register(self.is_numeric_input))
-        self.max = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'))
-        self.max.pack()
-        self.min = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'))
-        self.min.pack()
+        self.max = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=max(7, len(name)))
+        self.max.grid(padx=4)
+        self.min = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=max(7, len(name)))
+        self.min.grid(padx=4)
 
     def is_numeric_input(self, P):
         if len(P) == 0:

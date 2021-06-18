@@ -1,6 +1,6 @@
 import MofIdentifier
 from MofIdentifier.bondTools import Distances
-from MofIdentifier.subbuilding.SBUTools import SBUCollection, SBU, UnitType
+from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
 
 
 def split(mof):
@@ -37,26 +37,30 @@ def reduce_duplicates(sbu_list, is_duplicate):
     return new_sbu_list
 
 
-def check_for_infinite_band(cluster):
+def check_for_infinite_band(cluster_atoms):
     # If any molecule can traverse the cluster and get to itself by crossing cell boundary panes an odd number of times,
     # then all molecules can, and then they are an infinite band.
-    for starting_atom in cluster.atoms:
-        if check_for_inf_recurse(cluster, set(), starting_atom, starting_atom, 0):
-            cluster.frequency = float('inf')
-            break
-
-
-def check_for_inf_recurse(cluster, visited, target_atom, atom, panes_crossed):
-    visited.add(atom)
-    for neighbor in atom.bondedAtoms:
-        if neighbor in cluster.atoms:  # Only look within the cluster
-            if neighbor == target_atom and panes_crossed + panes_crossed_in_bond(atom, neighbor) % 2 == 1:
-                # if panes_crossed (plus possible pane in traversal from atom to neighbor) is odd:
+    for starting_atom in cluster_atoms:
+        if len(in_cluster_neighbors(starting_atom, cluster_atoms)) > 1:  # If it only has one neighbor, algorithm won't work
+            if check_for_inf_recurse(cluster_atoms, set(), starting_atom, starting_atom, 0):
                 return True
-            if neighbor not in visited:
-                crosses_pane = panes_crossed_in_bond(atom, neighbor)
-                if check_for_inf_recurse(cluster, visited, target_atom, neighbor, panes_crossed + crosses_pane):
-                    return True
+    return False
+
+
+def in_cluster_neighbors(atom, cluster_atoms):
+    return [neighbor for neighbor in atom.bondedAtoms if neighbor in cluster_atoms]
+
+
+def check_for_inf_recurse(cluster_atoms, visited, target_atom, atom, panes_crossed):
+    visited.add(atom)
+    for neighbor in in_cluster_neighbors(atom, cluster_atoms):
+        if neighbor == target_atom and panes_crossed + panes_crossed_in_bond(atom, neighbor) % 2 == 1:
+            # if panes_crossed (plus possible pane in traversal from atom to neighbor) is odd:
+            return True
+        if neighbor not in visited:
+            crosses_pane = panes_crossed_in_bond(atom, neighbor)
+            if check_for_inf_recurse(cluster_atoms, visited, target_atom, neighbor, panes_crossed + crosses_pane):
+                return True
     return False
 
 
@@ -157,55 +161,58 @@ class SBUIdentifier:
         return SBUCollection(clusters, connectors, auxiliaries)
 
     def identify_cluster(self, metal_atom):
-        cluster = SBU(self.next_group_id, UnitType.CLUSTER, set())
-        self.identify_cluster_recurse(metal_atom, cluster)
-        check_for_infinite_band(cluster)
-        return cluster
+        atoms = set()
+        self.identify_cluster_recurse(metal_atom, atoms)
+        if check_for_infinite_band(atoms):
+            return changeableSBU(self.next_group_id, UnitType.CLUSTER, atoms, float('inf'))
+        else:
+            return changeableSBU(self.next_group_id, UnitType.CLUSTER, atoms)
 
-    def identify_cluster_recurse(self, metal_atom, cluster):
-        cluster.add_atom(metal_atom)
+    def identify_cluster_recurse(self, metal_atom, atoms):
+        atoms.add(metal_atom)
         self.mark_group(metal_atom, self.next_group_id)
         for neighbor in metal_atom.bondedAtoms:
             if MofIdentifier.Molecules.atom.is_metal(neighbor.type_symbol) and not self.been_visited(neighbor):
-                self.identify_cluster_recurse(neighbor, cluster)
+                self.identify_cluster_recurse(neighbor, atoms)
         # The following section helps to identify more complex nodes by including metal atoms two steps away
         # It does this only when the intermediate molecule (usually Oxygen) ONLY connects to metals.
         if self.allow_two_steps:
             for neighbor in metal_atom.bondedAtoms:
-                self.check_for_including_distant_metals(neighbor, cluster)
+                self.check_for_including_distant_metals(neighbor, atoms)
 
-    def check_for_including_distant_metals(self, possible_in_node_link, cluster):
+    def check_for_including_distant_metals(self, possible_in_node_link, atoms):
         if not self.been_visited(possible_in_node_link):
             has_been_added = False
             for second_neighbor in possible_in_node_link.bondedAtoms:
                 if not MofIdentifier.Molecules.atom.is_metal(second_neighbor.type_symbol):
                     return
             for second_neighbor in possible_in_node_link.bondedAtoms:
-                if second_neighbor not in cluster.atoms:
+                if second_neighbor not in atoms:
                     if not has_been_added:
-                        cluster.add_atom(possible_in_node_link)
+                        atoms.add(possible_in_node_link)
                         self.mark_group(possible_in_node_link, self.next_group_id)
                         has_been_added = True
-                    self.identify_cluster_recurse(second_neighbor, cluster)
+                    self.identify_cluster_recurse(second_neighbor, atoms)
 
     def identify_ligand(self, nonmetal_atom):
-        ligand = SBU(self.next_group_id, None, set(()))
-        self.identify_ligand_recurse(nonmetal_atom, ligand)
-        self.correct_adjacent_cluster_ids(ligand)
-        if len(ligand.adjacent_cluster_ids) > 1:
-            ligand.type = UnitType.CONNECTOR
+        atoms = set()
+        adjacent_cluster_ids = set()
+        self.identify_ligand_recurse(nonmetal_atom, atoms, adjacent_cluster_ids)
+        self.correct_adjacent_cluster_ids(atoms, adjacent_cluster_ids)
+        if len(adjacent_cluster_ids) > 1:
+            ligand_type = UnitType.CONNECTOR
         else:
-            ligand.type = UnitType.AUXILIARY
-        return ligand
+            ligand_type = UnitType.AUXILIARY
+        return changeableSBU(self.next_group_id, ligand_type, atoms, 1, adjacent_cluster_ids)
 
-    def identify_ligand_recurse(self, nonmetal_atom, ligand):
-        ligand.add_atom(nonmetal_atom)
+    def identify_ligand_recurse(self, nonmetal_atom, ligand_atoms, adjacent_cluster_ids):
+        ligand_atoms.add(nonmetal_atom)
         self.mark_group(nonmetal_atom, self.next_group_id)
         for neighbor in nonmetal_atom.bondedAtoms:
             if not self.been_visited(neighbor):
-                self.identify_ligand_recurse(neighbor, ligand)
+                self.identify_ligand_recurse(neighbor, ligand_atoms, adjacent_cluster_ids)
             elif MofIdentifier.Molecules.atom.is_metal(neighbor.type_symbol):
-                ligand.adjacent_cluster_ids.add(
+                adjacent_cluster_ids.add(
                     self.group_id_of(neighbor))
 
     def successfully_adds_to_cluster(self, atom):
@@ -247,15 +254,15 @@ class SBUIdentifier:
                     else:
                         cluster.adjacent_auxiliary_ids.add(neighbor_id)
 
-    def correct_adjacent_recurse(self, ligand, visited, num_panes_to_neighbor,
+    def correct_adjacent_recurse(self, ligand_atoms, adjacent_cluster_ids, visited, num_panes_to_neighbor,
                                  atom, panes_crossed, representative_atom_of_cluster):
         visited.add(atom)
         for neighbor in atom.bondedAtoms:
-            if neighbor in ligand.atoms:
+            if neighbor in ligand_atoms:
                 if neighbor not in visited:
                     crosses_pane = panes_crossed_in_bond(atom, neighbor)
-                    self.correct_adjacent_recurse(ligand, visited, num_panes_to_neighbor, neighbor,
-                                                  panes_crossed + crosses_pane, representative_atom_of_cluster)
+                    self.correct_adjacent_recurse(ligand_atoms, adjacent_cluster_ids, visited, num_panes_to_neighbor,
+                                                  neighbor, panes_crossed+crosses_pane, representative_atom_of_cluster)
             else:  # must belong to a cluster
                 cluster_id = self.atom_to_SBU[neighbor.label]
                 if cluster_id in representative_atom_of_cluster:
@@ -263,15 +270,15 @@ class SBUIdentifier:
                     num_panes_to_repr_atom = panes_between(neighbor, repr_atom, self.groups[cluster_id]) \
                         + panes_crossed + panes_crossed_in_bond(atom, neighbor)
                     if abs(num_panes_to_repr_atom - num_panes_to_neighbor[repr_atom.label]) % 2 == 1:  # Off by 1,3,etc
-                        ligand.adjacent_cluster_ids.add(-1*cluster_id)
+                        adjacent_cluster_ids.add(-1 * cluster_id)
                 else:
                     representative_atom_of_cluster[cluster_id] = neighbor
                     panes_crossed_to_neighbor = panes_crossed + panes_crossed_in_bond(atom, neighbor)
                     num_panes_to_neighbor[neighbor.label] = panes_crossed_to_neighbor
 
-    def correct_adjacent_cluster_ids(self, ligand):
+    def correct_adjacent_cluster_ids(self, ligand_atoms, adjacent_cluster_ids):
         # If it can touch an atom (ie part of a cluster) by going through both odd and even numbers of panes,
         # then it actually touches that atom twice, in two different copies of the unit cell- so, another connection
-        for starting_atom in ligand.atoms:
-            self.correct_adjacent_recurse(ligand, set(), dict(), starting_atom, 0, dict())
+        for starting_atom in ligand_atoms:
+            self.correct_adjacent_recurse(ligand_atoms, adjacent_cluster_ids, set(), dict(), starting_atom, 0, dict())
             break

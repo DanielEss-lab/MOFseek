@@ -1,8 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from GUI import SearchResultsView, MoleculeView
-from GUI.Search import SearchView
+from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage, EditMOFPage, SettingsPage
 
 
 class Root(tk.Tk):
@@ -11,24 +10,54 @@ class Root(tk.Tk):
         self.title("Ess lab | P66 | GUI WIP")
 
         self.geometry('1100x900')
+        self.minsize(720, 500)
         self.set_styles()
 
-        self.search_v = SearchView.View(self)
-        self.search_v.pack()
-        self.search_results_v = SearchResultsView.View(self)
-        self.search_results_v.pack(fill=tk.X)
+        self.tabControl = ttk.Notebook(self)
 
-        self.molecule_v = None
+        self.search_page = SearchPage.SearchPage(self.tabControl)
+        self.add_ligand_page = AddLigandPage.AddLigandPage(self.tabControl)
+        self.rename_ligand_page = RenameLigandPage.Page(self.tabControl)
+        self.rename_sbu_page = RenameSBUPage.Page(self.tabControl)
+        self.add_MOFs_page = AddMofPage.Page(self.tabControl)
+        self.edit_MOF_page = EditMOFPage.Page(self.tabControl)
+        self.settings_page = SettingsPage.Page(self.tabControl)
 
-    def display_search_results(self, results):
-        self.search_results_v.display_results(results)
+        self.tabControl.add(self.search_page, text='Search')
+        self.tabControl.add(self.add_ligand_page, text='Add Ligand')
+        self.tabControl.add(self.rename_ligand_page, text='Rename Ligand')
+        self.tabControl.add(self.rename_sbu_page, text='Rename SBU')
+        self.tabControl.add(self.add_MOFs_page, text='Add MOFs')
+        self.tabControl.add(self.edit_MOF_page, text='Edit MOF')
+        self.tabControl.add(self.settings_page, text='Settings')
+        self.tabControl.pack(expand=1, fill="both")
+
+    def select_mof_for_edit(self, mof):
+        if self.tabControl.index('current') != 5:
+            self.edit_MOF_page.select_mof(mof)
+            self.tabControl.select(5)
+
+    def select_ligand_for_edit(self, ligand):
+        self.rename_ligand_page.select_ligand(ligand)
+        self.tabControl.select(2)
+
+    def select_sbu_for_edit(self, sbu):
+        self.rename_sbu_page.select_sbu(sbu)
+        self.tabControl.select(3)
 
     def set_styles(self):
         s = ttk.Style()
         s.configure("TMenubutton", background="#ffffff")
 
+    def add_custom_ligand(self, mol):  # To change when connecting to DB
+        self.search_page.search_v.add_custom_ligand(mol)
+        self.rename_ligand_page.add_custom_ligand(mol)
+
     def highlight_molecule(self, mol):
-        if self.molecule_v is not None:
-            self.molecule_v.destroy()
-        self.molecule_v = MoleculeView.make_view(self, mol)
-        self.molecule_v.pack(side=tk.BOTTOM)
+        self.search_page.highlight_molecule(mol)
+        self.tabControl.select(0)
+
+    def toggle_attribute(self):
+        self.search_page.refresh_attributes_shown()
+        self.add_MOFs_page.refresh_attributes_shown()
+        self.edit_MOF_page.refresh_attributes_shown()

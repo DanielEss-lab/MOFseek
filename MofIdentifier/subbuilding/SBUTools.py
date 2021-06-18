@@ -45,14 +45,6 @@ class SBUCollection:
         return SBUCollection(self.clusters + other.clusters, self.connectors
                              + other.connectors, self.auxiliaries + other.auxiliaries)
 
-    @classmethod
-    def from_tuples(cls, tuples):
-        clusters, connectors, auxiliaries = [], [], []
-        for tuple in tuples:
-            clusters.extend(tuple[0])
-            connectors.extend(tuple[1])
-            auxiliaries.extend(tuple[2])
-        return SBUCollection(clusters, connectors, auxiliaries)
 
 class UnitType(Enum):
     CLUSTER = 1
@@ -63,22 +55,29 @@ class UnitType(Enum):
         return "cluster" if self == UnitType.CLUSTER else "connector" if self == UnitType.CONNECTOR else "auxiliary"
 
 
-class SBU(Molecule.Molecule):
-    def __init__(self, sbu_id, unit_type, atoms):
+class changeableSBU(Molecule.Molecule):
+    def __init__(self, sbu_id, unit_type, atoms, frequency=1, adjacent_cluster_ids=None, file_content=''):
         super().__init__('No Filepath/Unlabeled', atoms)
+        # Right now, SBUs are constructed with atoms as sets; a refactor to lists wouldn't break much though
+        if adjacent_cluster_ids is None:
+            adjacent_cluster_ids = set()
+        self.file_content = file_content
         self.sbu_id = sbu_id
-        self.adjacent_cluster_ids = set(())
+        self.adjacent_cluster_ids = adjacent_cluster_ids
         self.adjacent_connector_ids = set(())
         self.adjacent_auxiliary_ids = set(())
         self.type = unit_type
-        self.frequency = 1
+        self.frequency = frequency
 
     def connections(self):
         return len(self.adjacent_auxiliary_ids) + len(self.adjacent_cluster_ids) + len(self.adjacent_connector_ids)
 
     def add_atom(self, atom):
         self.atoms.add(atom)
-        self.elementsPresent.add(atom.type_symbol)
+        if atom.type_symbol in self.elementsPresent:
+            self.elementsPresent[atom.type_symbol] += 1
+        else:
+            self.elementsPresent[atom.type_symbol] = 1
 
     def normalize_atoms(self, mof):
         atoms = []
@@ -116,26 +115,17 @@ class SBU(Molecule.Molecule):
         self.atoms = visited
 
     def __str__(self):
-        elements = dict()
-        for atom in self.atoms:
-            if atom.type_symbol in elements:
-                elements[atom.type_symbol] += 1
-            else:
-                elements[atom.type_symbol] = 1
-        atoms_string = ''
-        for element in elements:
-            atoms_string = atoms_string + str(elements[element]) + element + ' '
         unit = str(self.type)
         return "{freq}x {label}: {atoms}({atom_n} atom {unittype}) each bonded to {cluster} clusters, {connector} " \
                "connectors, and {aux} auxiliary groups".format(label=self.label, freq=self.frequency,
-                                                               atoms=atoms_string, atom_n=len(self.atoms),
+                                                               atoms=self.atoms_string(), atom_n=len(self.atoms),
                                                                unittype=unit, cluster=len(self.adjacent_cluster_ids),
                                                                connector=len(self.adjacent_connector_ids),
                                                                aux=len(self.adjacent_auxiliary_ids))
 
     def __eq__(self, other):
         is_isomorphic = SubGraphMatcher.match(self, other)
-        if isinstance(other, SBU):
+        if isinstance(other, changeableSBU):
             return is_isomorphic and len(self.adjacent_connector_ids) == len(other.adjacent_connector_ids) \
                 and len(self.adjacent_cluster_ids) == len(other.adjacent_cluster_ids) \
                 and len(self.adjacent_auxiliary_ids) == len(other.adjacent_auxiliary_ids)
