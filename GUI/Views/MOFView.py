@@ -7,12 +7,6 @@ from MofIdentifier.fileIO import FileOpen
 from MofIdentifier.subbuilding import SBUCollectionManager
 
 
-def format_elements(mof):
-    elements = list(mof.elementsPresent.keys())
-    elements.sort()
-    return ' '.join(elements)
-
-
 def select_for_edit(parent, mof):
     parent.winfo_toplevel().select_mof_for_edit(mof)
 
@@ -23,8 +17,10 @@ def make_view(parent, mof):
     view = tk.Frame(parent, height=40, bd=1, relief=tk.SOLID)
 
     row1 = tk.Frame(master=view)
-    name = tk.Label(row1, text=mof.label, font=("Arial", 10))
+    name = tk.Label(row1, text=mof.label, font=("Arial", 10), width=48, anchor=tk.W)
     name.pack(side='left')
+    elements = tk.Label(row1, text=mof.atoms_string(), font=("Arial", 10))
+    elements.pack(side='left')
     open = tk.Label(row1, text="\U0001F441", cursor='hand2', padx=2, font=("Arial", 16), height=0)
     open.bind('<Button-1>', lambda e: FileOpen.open_file(mof.filepath))
     open.pack(side='right')
@@ -42,8 +38,6 @@ def make_view(parent, mof):
     for text, attr in Attributes.attributes.items():
         if attr.enabled:
             _attribute_view(row2, text, attr.calculate(mof), attr.description).pack(side='left')
-    _attribute_view(row2, 'Elements', format_elements(mof),
-                    'Atomic symbols of elements present in MOF').pack(side='left')
     row2.pack(fill=tk.X)
 
     row3 = tk.Frame(master=view, height=20)

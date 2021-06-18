@@ -22,9 +22,11 @@ class Molecule:
 
     def atoms_string(self):
         string = ''
-        for element in self.elementsPresent:
-            string = string + str(self.elementsPresent[element]) + element + ' '
-        return string[0:-1]
+        elements = list(self.elementsPresent)
+        elements.sort()
+        for element in elements:
+            string = string + str(self.elementsPresent[element]) + ' ' + element + ',  '
+        return string[0:-2]
 
     def get_graph(self):
         if self.should_use_weak_comparison:
