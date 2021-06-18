@@ -29,7 +29,7 @@ def add_ligands_to_database(ligand, matching_mofs):
         file_name = file_name.split('.', 1)[0]
 
         # if the cif does not have ligands field yet -> set the ligands field and value
-        cif_collection.update_one({"filename": file_name}, {"$addToSet": {"ligands": ligand}})
+        cif_collection.update_one({"filename": file_name}, {"$addToSet": {"ligand_names": ligand}})
 
     print("Done")
 
