@@ -61,3 +61,9 @@ class Root(tk.Tk):
         self.search_page.refresh_attributes_shown()
         self.add_MOFs_page.refresh_attributes_shown()
         self.edit_MOF_page.refresh_attributes_shown()
+
+    def force_search_ligand(self, molecule):
+        self.search_page.search_v.force_search_ligand(molecule)
+
+    def force_search_sbu(self, molecule):
+        self.search_page.search_v.force_search_sbu(molecule)

@@ -1,7 +1,7 @@
 import tkinter as tk
 from pathlib import Path
 
-from GUI.Views import MoleculeView
+from GUI.Views import MoleculeView, SBUView
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUCollectionManager
@@ -84,5 +84,5 @@ class Page(FrameWithProcess.Frame):
         self.mol = mol
         if self.molecule_v is not None:
             self.molecule_v.destroy()
-        self.molecule_v = MoleculeView.make_view(self, self.mol)
+        self.molecule_v = SBUView.make_view(self, self.mol)
         self.molecule_v.pack(side=tk.BOTTOM)

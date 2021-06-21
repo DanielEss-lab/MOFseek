@@ -17,9 +17,9 @@ def make_view(parent, mof):
     view = tk.Frame(parent, height=40, bd=1, relief=tk.SOLID)
 
     row1 = tk.Frame(master=view)
-    name = tk.Label(row1, text=mof.label, font=("Arial", 10), width=48, anchor=tk.W)
+    name = tk.Label(row1, text=mof.label, width=48, anchor=tk.W)
     name.pack(side='left')
-    elements = tk.Label(row1, text=mof.atoms_string(), font=("Arial", 10))
+    elements = tk.Label(row1, text=mof.atoms_string())
     elements.pack(side='left')
     open = tk.Label(row1, text="\U0001F441", cursor='hand2', padx=2, font=("Arial", 16), height=0)
     open.bind('<Button-1>', lambda e: FileOpen.open_file(mof.filepath))

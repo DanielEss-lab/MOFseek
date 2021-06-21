@@ -29,7 +29,7 @@ def make_view(parent, ligand):
     f = tkFont.Font(search, search["font"])
     f.configure(underline=True)
     search.configure(font=f)
-    search.bind('<Button-1>', lambda e: parent.search_v.force_search_sbu(ligand))
+    search.bind('<Button-1>', lambda e: parent.winfo_toplevel().force_search_sbu(ligand))
     search.pack(side='right')
     row1.pack(fill=tk.X)
 
@@ -42,6 +42,7 @@ def make_view(parent, ligand):
     row2.pack(fill=tk.X)
 
     row3 = tk.Frame(master=view, height=10)
+    # FIXME: change when it I connect to DB, so that I always get SBU objects and I actually show frequency
     sbu_label = tk.Label(row3, text="<NYI> Occurrences in DB")
     sbu_label.pack(side='left')
     row3.pack(fill=tk.X)
@@ -53,7 +54,7 @@ def make_view(parent, ligand):
     f = tkFont.Font(sbu_search, sbu_search["font"])
     f.configure(underline=True)
     sbu_search.configure(font=f)
-    sbu_search.bind('<Button-1>', lambda e: parent.search_v.force_search_ligand(ligand))
+    sbu_search.bind('<Button-1>', lambda e: parent.winfo_toplevel().force_search_ligand(ligand))
     sbu_search.pack(side='right')
     row4.pack(fill=tk.X)
 
