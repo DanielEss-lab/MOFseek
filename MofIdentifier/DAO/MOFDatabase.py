@@ -65,3 +65,11 @@ class MOFDatabase:
             self.ligand_names = dictionary['ligand_names']
         except KeyError:
             self.sbu_names = set()
+
+    def get_mof(self):
+        if self._mof is None:
+            if self.cif_content is not None:
+                self._mof = CifReader.read_string(self.cif_content, self.filename)
+            else:
+                return None
+        return self._mof
