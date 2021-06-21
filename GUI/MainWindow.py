@@ -48,6 +48,7 @@ class Root(tk.Tk):
     def set_styles(self):
         s = ttk.Style()
         s.configure("TMenubutton", background="#ffffff")
+        s.configure("TCheckbutton", background="#ffffff")
 
     def add_custom_ligand(self, mol):  # To change when connecting to DB
         self.search_page.search_v.add_custom_ligand(mol)

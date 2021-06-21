@@ -1,12 +1,10 @@
 import tkinter as tk
-from pathlib import Path
-from tkinter.filedialog import askopenfilenames
+import tkinter.ttk as ttk
 
 from GUI.Search import Attributes
-from GUI.Utility import FrameWithProcess, MultiMofView, Tooltips
-from MofIdentifier.fileIO import CifReader
 
-instruction_text = """Select which properties you would like to see for each MOF and have the option to sort by. Recommended amount: less than 10"""
+instruction_text = """Select which properties you would like to see for each MOF and have the option to sort by. 
+Recommended amount: less than 10"""
 
 
 class Page(tk.Frame):
@@ -30,8 +28,7 @@ class Page(tk.Frame):
                 Attributes.attributes[self.name].enabled = self.is_enabled.get()
                 self.winfo_toplevel().toggle_attribute()
 
-            btn = tk.Checkbutton(self, text=self.name, variable=self.is_enabled, onvalue=1, offvalue=0,
-                                 command=change_settings)
-            lbl = tk.Label(self, text=Attributes.attributes[self.name].description)
+            btn = ttk.Checkbutton(self, variable=self.is_enabled, command=change_settings, style='TCheckbutton')
+            lbl = tk.Label(self, text=self.name + ': ' + Attributes.attributes[self.name].description)
             btn.pack(side=tk.LEFT)
             lbl.pack(side=tk.LEFT)
