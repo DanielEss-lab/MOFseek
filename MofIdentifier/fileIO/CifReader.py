@@ -1,5 +1,5 @@
 import os
-from io import FileIO
+from io import FileIO, StringIO
 from pathlib import Path
 
 from CifFile import ReadCif
@@ -42,6 +42,16 @@ def read_cif(filename):
         file = open(filename)
         file_str = file.read()
         file.close()
+    return mof_from_cf(cf, filename, file_str)
+
+
+def read_string(cif_content, filename):
+    with StringIO(cif_content) as io:
+        cf = ReadCif(io)
+    return mof_from_cf(cf, filename, cif_content)
+
+
+def mof_from_cf(cf, filename, file_str):
     cb = cf.first_block()
     file_path = filename
     try:

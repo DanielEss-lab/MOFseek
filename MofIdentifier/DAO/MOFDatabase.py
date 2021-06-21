@@ -4,6 +4,7 @@ from MofIdentifier.fileIO import CifReader
 
 class MOFDatabase:
     def __init__(self, dictionary):
+        self.filename = dictionary['filename']
         try:
             self.cif_content = dictionary['cif_content']
         except KeyError:
@@ -14,11 +15,9 @@ class MOFDatabase:
             try:
                 setattr(self, attribute_name, dictionary['attribute_name'])
             except KeyError:
-                if self.cif_content is not None:
+                if self.get_mof() is not None:
                     # use cif content to make MOF object, get attribute from that
-                    if self._mof is None:
-                        self._mof = CifReader.read_cif(StringIO(self.cif_content))
-                    setattr(self, attribute_name, getattr(self._mof, attribute_name))
+                    setattr(self, attribute_name, getattr(self.get_mof(), attribute_name))
                 else:
                     setattr(self, attribute_name, None)
 
@@ -32,8 +31,7 @@ class MOFDatabase:
             self.sbu_names = dictionary['sbu_names']
         except KeyError:
             self.sbu_names = set()
-            # TODO: attempt to figure them out by splitting mof and comparing to sbus in database
-        self.filename = dictionary['filename']
+            # TODO: attempt to figure them out by splitting mof and comparing to sbus in da
         self.LCD = dictionary['LCD']
         self.PLD = dictionary['PLD']
         self.LFPD = dictionary['LFPD']
@@ -65,3 +63,11 @@ class MOFDatabase:
             self.ligand_names = dictionary['ligand_names']
         except KeyError:
             self.sbu_names = set()
+
+    def get_mof(self):
+        if self._mof is None:
+            if self.cif_content is not None:
+                self._mof = CifReader.read_string(self.cif_content, self.filename)
+            else:
+                return None
+        return self._mof
