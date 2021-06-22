@@ -27,9 +27,8 @@ class Page(tk.Frame):
                 Attributes.attributes[self.name].enabled = self.is_enabled.get()
                 self.winfo_toplevel().toggle_attribute()
 
-            btn = tk.Checkbutton(self, text=self.name, variable=self.is_enabled, onvalue=1, offvalue=0,
-                                 command=change_settings)
-            lbl = tk.Label(self, text=Attributes.attributes[self.name].description)
+            btn = ttk.Checkbutton(self, variable=self.is_enabled, command=change_settings, style='TCheckbutton')
+            lbl = tk.Label(self, text=self.name + ': ' + Attributes.attributes[self.name].description)
             btn.pack(side=tk.LEFT)
             lbl.pack(side=tk.LEFT)
 

@@ -2,6 +2,7 @@
 This includes:
  * an abstract base-class for different kinds of tooltips
  * a simple text-only Tooltip class
+Taken from https://github.com/python/cpython/blob/main/Lib/idlelib/tooltip.py
 """
 from tkinter import *
 
@@ -154,26 +155,3 @@ class Hovertip(OnHoverTooltipBase):
         label = Label(self.tipwindow, text=self.text, justify=LEFT,
                       background="#ffffe0", relief=SOLID, borderwidth=1)
         label.pack()
-
-
-def _tooltip(parent):  # htest #
-    top = Toplevel(parent)
-    top.title("Test tooltip")
-    x, y = map(int, parent.geometry().split('+')[1:])
-    top.geometry("+%d+%d" % (x, y + 150))
-    label = Label(top, text="Place your mouse over buttons")
-    label.pack()
-    button1 = Button(top, text="Button 1 -- 1/2 second hover delay")
-    button1.pack()
-    Hovertip(button1, "This is tooltip text for button1.", hover_delay=500)  # # # #
-    button2 = Button(top, text="Button 2 -- no hover delay")
-    button2.pack()
-    Hovertip(button2, "This is tooltip\ntext for button2.", hover_delay=None)
-
-
-if __name__ == '__main__':
-    from unittest import main
-    main('idlelib.idle_test.test_tooltip', verbosity=2, exit=False)
-
-    from idlelib.idle_test.htest import run
-    run(_tooltip)

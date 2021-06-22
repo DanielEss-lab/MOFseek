@@ -1,10 +1,20 @@
+import platform
 import tkinter as tk
 import tkinter.font as tkFont
 
+from GUI import icons
 from GUI.Utility import Tooltips
 from GUI.Search import Attributes
 from MofIdentifier.fileIO import FileOpen
 from MofIdentifier.subbuilding import SBUCollectionManager
+
+
+# if platform.system() == 'Windows':  # Windows
+#     FONT_SIZE = 10
+# elif platform.system() == 'Darwin':  # macOS
+#     FONT_SIZE = 10
+# else:  # linux variants
+#     FONT_SIZE = 10
 
 
 def select_for_edit(parent, mof):
@@ -21,15 +31,15 @@ def make_view(parent, mof):
     name.pack(side='left')
     elements = tk.Label(row1, text=mof.atoms_string())
     elements.pack(side='left')
-    open = tk.Label(row1, text="\U0001F441", cursor='hand2', padx=2, font=("Arial", 16), height=0)
+    open = tk.Label(row1, text=icons.OPEN_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
     open.bind('<Button-1>', lambda e: FileOpen.open_file(mof.filepath))
     open.pack(side='right')
     tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-    see = tk.Label(row1, text="\U0001f4c1", cursor='hand2', padx=2, font=("Arial", 16), height=0)
+    see = tk.Label(row1, text=icons.SEE_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
     see.bind('<Button-1>', lambda e: FileOpen.see_file(mof.filepath))
     see.pack(side='right')
     tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-    edit = tk.Label(row1, text="\U0001F589", cursor='hand2', padx=2, font=("Arial", 16), height=0)
+    edit = tk.Label(row1, text=icons.EDIT_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
     edit.bind('<Button-1>', lambda e: select_for_edit(parent, mof))
     edit.pack(side='right')
     row1.pack(fill=tk.X)
@@ -51,7 +61,7 @@ def make_view(parent, mof):
 
     def display_sbu_name(sbu, color):
         text = f"{sbu.frequency}x {sbu.label} ({sbu.connections()}*)"
-        sbu_label = tk.Label(row3, text=text, fg=color, cursor='hand2', padx=3)
+        sbu_label = tk.Label(row3, text=text, fg=color, cursor=icons.LINK_CURSOR, padx=3)
         f = tkFont.Font(sbu_label, sbu_label["font"])
         f.configure(underline=True)
         sbu_label.configure(font=f)
