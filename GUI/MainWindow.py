@@ -20,7 +20,7 @@ class Root(tk.Tk):
         self.rename_ligand_page = RenameLigandPage.Page(self.tabControl)
         self.rename_sbu_page = RenameSBUPage.Page(self.tabControl)
         self.add_MOFs_page = AddMofPage.Page(self.tabControl)
-        self.edit_MOF_page = EditMOFPage.Page(self.tabControl)
+        # self.edit_MOF_page = EditMOFPage.Page(self.tabControl)
         self.settings_page = SettingsPage.Page(self.tabControl)
 
         self.tabControl.add(self.search_page, text='Search')
@@ -28,7 +28,7 @@ class Root(tk.Tk):
         self.tabControl.add(self.rename_ligand_page, text='Rename Ligand')
         self.tabControl.add(self.rename_sbu_page, text='Rename SBU')
         self.tabControl.add(self.add_MOFs_page, text='Add MOFs')
-        self.tabControl.add(self.edit_MOF_page, text='Edit MOF')
+        # self.tabControl.add(self.edit_MOF_page, text='Edit MOF')
         self.tabControl.add(self.settings_page, text='Settings')
         self.tabControl.pack(expand=1, fill="both")
 
