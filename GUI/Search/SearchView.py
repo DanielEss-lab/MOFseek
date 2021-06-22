@@ -39,13 +39,13 @@ class View(FrameWithProcess.Frame):
         self.lbl_elements = tk.Label(self, text="Required Elements: ")
         self.lbl_elements.grid(row=1, column=2, pady=2, sticky=tk.E, padx=(4, 0))
         self.ent_elements = tk.Entry(self)
-        self.ent_elements.insert(0, 'C, H')
+        # self.ent_elements.insert(0, 'C, H')
         self.ent_elements.grid(row=1, column=3, pady=2, padx=(0, 4), sticky=tk.W)
         self.lbl_sbus = tk.Label(self, text="Required SBUs: ")
-        self.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.NE)
+        # self.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.NE)
         self.ent_sbus = MultipleAutoCompleteSearch.View(self, self.focus_sbu)
         self.ent_sbus.set_possible_values(self.all_sbu_names())
-        self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
+        # self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
 
         small_font = ("Arial", 8)
         self.lbl_excl_ligand = tk.Label(self, text="Forbidden Ligands: ", font=small_font)
@@ -59,10 +59,10 @@ class View(FrameWithProcess.Frame):
         self.ent_excl_elements.insert(0, '')
         self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.W)
         self.lbl_excl_sbus = tk.Label(self, text="Forbidden SBUs: ", font=small_font)
-        self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
+        # self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
         self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, self.focus_sbu, small_font)
         self.ent_excl_sbus.set_possible_values(self.all_sbu_names())
-        self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
+        # self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
 
         self.attribute_row = None
         self.add_attribute_search_entries()  # Row 3

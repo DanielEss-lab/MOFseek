@@ -16,35 +16,31 @@ class Page(tk.Frame):
         for attr in Attributes.attributes:
             Page.AttributeSetting(self, attr).grid(sticky=tk.W)
 
-    class AttributeSetting(tk.Frame):
-        def __init__(self, parent, attribute_name):
-            self.parent = parent
-            self.name = attribute_name
-            super().__init__(self.parent)
-            self.is_enabled = tk.IntVar(value=1 if Attributes.attributes[self.name].enabled else 0)
-
-            def change_settings():
-                Attributes.attributes[self.name].enabled = self.is_enabled.get()
-                self.winfo_toplevel().toggle_attribute()
-
-            btn = ttk.Checkbutton(self, variable=self.is_enabled, command=change_settings, style='TCheckbutton')
-            lbl = tk.Label(self, text=self.name + ': ' + Attributes.attributes[self.name].description)
-            btn.pack(side=tk.LEFT)
-            lbl.pack(side=tk.LEFT)
+        Page.Setting(self, 'SBU search', 'Enable the powerful (but situational) SBU search', 0,
+                     lambda enabled: self.winfo_toplevel().toggle_sbu_search(enabled)).grid(sticky=tk.W, pady=(20,0))
 
     class Setting(tk.Frame):
-        def __init__(self, parent, attribute_name):
+        def __init__(self, parent, name, description, starts_enabled, function):
             self.parent = parent
-            self.name = attribute_name
+            self.name = name
             super().__init__(self.parent)
-            self.is_enabled = tk.IntVar(value=1 if Attributes.attributes[self.name].enabled else 0)
+            self.is_enabled = tk.IntVar(value=starts_enabled)
 
-            def change_settings():
-                Attributes.attributes[self.name].enabled = self.is_enabled.get()
-                self.winfo_toplevel().toggle_attribute()
+            def change_setting():
+                enabled = self.is_enabled.get()
+                function(enabled)
 
-            btn = ttk.Checkbutton(self, text=self.name, variable=self.is_enabled, onvalue=1, offvalue=0,
-                                 command=change_settings)
-            lbl = tk.Label(self, text=Attributes.attributes[self.name].description)
+            btn = ttk.Checkbutton(self, variable=self.is_enabled, onvalue=1, offvalue=0,
+                                  command=change_setting)
+            lbl = tk.Label(self, text=self.name + ': ' + description)
             btn.pack(side=tk.LEFT)
             lbl.pack(side=tk.LEFT)
+
+    class AttributeSetting(Setting):
+        def __init__(self, parent, attribute_name):
+            def change_attribute(now_enabled):
+                Attributes.attributes[self.name].enabled = now_enabled
+                self.winfo_toplevel().toggle_attribute()
+
+            super().__init__(parent, attribute_name, Attributes.attributes[attribute_name].description,
+                             1 if Attributes.attributes[attribute_name].enabled else 0, change_attribute)

@@ -30,3 +30,17 @@ class SearchPage(tk.Frame):
     def refresh_attributes_shown(self):
         self.search_results_v.start_process(self.search_results_v.results)
         self.search_v.regenerate_attribute_row()
+
+    def show_sbu_search(self):
+        self.search_v.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.NE)
+        self.search_v.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
+        self.search_v.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
+        self.search_v.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
+
+    def hide_sbu_search(self):
+        self.search_v.lbl_sbus.grid_forget()
+        self.search_v.ent_sbus.grid_forget()
+        self.search_v.lbl_excl_sbus.grid_forget()
+        self.search_v.ent_excl_sbus.grid_forget()
+        self.search_v.ent_sbus.clear()
+        self.search_v.ent_excl_sbus.clear()

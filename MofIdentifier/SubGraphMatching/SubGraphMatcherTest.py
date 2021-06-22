@@ -44,8 +44,8 @@ class StrongFindLigandInMofTest(unittest.TestCase):
 
     def test_asterisk_WCA(self):
         # To match anything
-        H2O_1 = XyzReader.get_molecule('../ligands/H2O_1.xyz')
-        H2O_2 = XyzReader.get_molecule('../ligands/H2O_2.xyz')
+        H2O_1 = XyzReader.get_molecule('../ligands/H2O_bonded.xyz')
+        H2O_2 = XyzReader.get_molecule('../ligands/test_resources/H2O_2.xyz')
         H20_good_ex = XyzReader.get_molecule('../ligands/test_resources/H2O_1_good.xyz')
         H20_bad_ex = XyzReader.get_molecule('../ligands/test_resources/H2O_1_bad.xyz')
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(H2O_1, H20_good_ex), "Should find match in structures")
