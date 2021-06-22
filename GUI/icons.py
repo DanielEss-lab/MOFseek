@@ -5,7 +5,7 @@ if platform.system() == 'Windows':  # Windows
     OPEN_ICON = "\U0001F441"
     EDIT_ICON = "\U0001F589"
     LINK_CURSOR = 'hand2'
-    PROGRESS_SPEED = 1
+    PROGRESS_SPEED = 32
 elif platform.system() == 'Darwin':  # macOS
     SEE_ICON = "reveal"
     OPEN_ICON = "open"
