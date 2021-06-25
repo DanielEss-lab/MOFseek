@@ -17,7 +17,7 @@ def condense_t(tup):
 
 
 class SearchTerms:
-    def __init__(self, ligands=None, element_symbol_list=None, excl_ligands=None, excl_elements=None, sbus=None,
+    def __init__(self, ligands=None, excl_ligands=None, elements=None, excl_elements=None, sbus=None,
                  excl_sbus=None, numerical_attr=None, label=''):
         if excl_sbus is None:
             excl_sbus = []
@@ -29,12 +29,12 @@ class SearchTerms:
             excl_ligands = []
         if ligands is None:
             ligands = []
-        if element_symbol_list is None:
-            element_symbol_list = []
+        if elements is None:
+            elements = []
         if numerical_attr is None:
             numerical_attr = dict()
         self.ligands = ligands
-        self.element_symbols = element_symbol_list
+        self.element_symbols = elements
         self.excl_ligands = excl_ligands
         self.excl_element_symbols = excl_elements
         self.sbus = sbus

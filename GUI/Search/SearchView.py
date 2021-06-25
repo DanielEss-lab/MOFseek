@@ -146,7 +146,7 @@ class View(FrameWithProcess.Frame):
             forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
             attributes = self.get_attribute_parameters()
             label_substring = self.ent_label.get()
-            search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols,
+            search = SearchTerms(ligands, forbidden_ligands, element_symbols, forbidden_element_symbols,
                                  sbus, forbidden_sbus, attributes, label_substring)
         # Shortcut evaluation if possible
         if search in self.search_to_results and self.search_to_results[search] is not None \
