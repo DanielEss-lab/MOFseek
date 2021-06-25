@@ -26,7 +26,7 @@ class Page(FrameWithProcess.Frame):
         if self.mofView is not None:
             self.mofView.pack_forget()
         self.mof = mof
-        self.mofView = MOFView.make_view(self.mof_frame, mof)
+        self.mofView = MOFView.View(self.mof_frame, mof)
         self.mofView.pack()
 
     def edit_mof_in_db(self, new_mof):

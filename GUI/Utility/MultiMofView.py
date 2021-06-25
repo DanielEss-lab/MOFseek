@@ -1,3 +1,4 @@
+from _tkinter import TclError
 import tkinter as tk
 
 from GUI.Views import MOFView
@@ -45,5 +46,9 @@ class View(tk.Frame):
         self.frame.focus_set()
         self.canvas.yview_moveto(0)
         for mof in results:
-            mof_v = MOFView.make_view(self.frame, mof)
+            mof_v = MOFView.View(self.frame, mof)
             mof_v.grid(sticky=("N", "S", "E", "W"))
+
+    def refresh_all_attributes(self):
+        for widget in self.frame.winfo_children():
+            widget.refresh_attributes()

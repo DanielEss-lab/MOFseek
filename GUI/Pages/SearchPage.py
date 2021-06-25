@@ -28,7 +28,7 @@ class SearchPage(tk.Frame):
         self.search_results_v.start_process(results)
 
     def refresh_attributes_shown(self):
-        self.search_results_v.start_process(self.search_results_v.results)
+        self.search_results_v.main_body.refresh_all_attributes()
         self.search_v.regenerate_attribute_row()
 
     def show_sbu_search(self):
