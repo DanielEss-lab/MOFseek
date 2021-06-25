@@ -5,7 +5,7 @@ from pathlib import Path
 
 from GUI.Search import Attributes
 from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips
-from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForTests
+from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUCollectionManager
@@ -157,7 +157,7 @@ class View(FrameWithProcess.Frame):
             self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
                                                             self.redo_search_selected.set(value))
             self.search_to_results[search] = 'ongoing'
-            results = search_in_mofsForTests(search)  # TODO: this will change with db integration
+            results = search_in_mofsForGUI_temp(search)  # TODO: this will change with db integration
             self.search_to_results[search] = results
             self.parent.display_search_results(results)
 

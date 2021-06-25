@@ -14,6 +14,8 @@ class Root(tk.Tk):
         self.set_styles()
 
         self.tabControl = ttk.Notebook(self)
+        self.tabControl.bind('<<NotebookTabChanged>>', self.on_tab_change)
+        self.prev_tab_name = ''
 
         self.search_page = SearchPage.SearchPage(self.tabControl)
         self.add_ligand_page = AddLigandPage.AddLigandPage(self.tabControl)
@@ -31,6 +33,11 @@ class Root(tk.Tk):
         self.tabControl.add(self.edit_MOF_page, text='Edit MOF')
         self.tabControl.add(self.settings_page, text='Settings')
         self.tabControl.pack(expand=1, fill="both")
+
+    def on_tab_change(self, event):
+        if self.prev_tab_name == 'Settings':
+            self.display_attributes_by_settings()
+        self.prev_tab_name = event.widget.tab('current')['text']
 
     def select_mof_for_edit(self, mof):
         if self.tabControl.index('current') != 5:
@@ -57,7 +64,7 @@ class Root(tk.Tk):
         self.search_page.highlight_molecule(mol)
         self.tabControl.select(0)
 
-    def toggle_attribute(self):
+    def display_attributes_by_settings(self):
         self.search_page.refresh_attributes_shown()
         self.add_MOFs_page.refresh_attributes_shown()
         self.edit_MOF_page.refresh_attributes_shown()

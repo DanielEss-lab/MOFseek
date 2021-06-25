@@ -19,34 +19,36 @@ class View(tk.Frame):
         self.top_page = parent.winfo_toplevel()
         tk.Frame.__init__(self, self.parent, height=40, bd=1, relief=tk.SOLID)
         self.sbus = SBUCollectionManager.process_new_mof(mof)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
 
-        row1 = tk.Frame(master=self)
-        name = tk.Label(row1, text=mof.label, width=48, anchor=tk.W)
-        name.pack(side='left')
-        elements = tk.Label(row1, text=mof.atoms_string())
-        elements.pack(side='left')
-        open = tk.Label(row1, text=icons.OPEN_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+        name = tk.Label(self, text=mof.label, width=48, anchor=tk.W)
+        name.grid(sticky=tk.W, row=0, column=0)
+        elements = tk.Label(self, text=mof.atoms_string())
+        elements.grid(row=0, column=1)
+        row_icon_btns = tk.Frame(master=self)
+        open = tk.Label(row_icon_btns, text=icons.OPEN_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
         open.bind('<Button-1>', lambda e: FileOpen.open_file(mof.filepath))
         open.pack(side='right')
-        tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-        see = tk.Label(row1, text=icons.SEE_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+        tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
+        see = tk.Label(row_icon_btns, text=icons.SEE_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
         see.bind('<Button-1>', lambda e: FileOpen.see_file(mof.filepath))
         see.pack(side='right')
-        tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-        edit = tk.Label(row1, text=icons.EDIT_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+        tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
+        edit = tk.Label(row_icon_btns, text=icons.EDIT_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
         edit.bind('<Button-1>', lambda e: select_for_edit(parent, mof))
         edit.pack(side='right')
-        row1.grid(sticky=tk.EW)
+        row_icon_btns.grid(sticky=tk.E, row=0, column=2)
 
         self.attribute_row = self.generate_attribute_row()
-        self.attribute_row.grid(sticky=tk.EW)
 
-        self.generate_sbu_row().grid(sticky=tk.EW)
+        self.generate_sbu_row().grid(sticky=tk.EW, columnspan=3)
 
         row4 = tk.Frame(master=self, height=20)
         ligand_label = tk.Label(row4, text="Ligands:")
         ligand_label.pack(side='left')
-        row4.grid(sticky=tk.EW)
+        row4.grid(sticky=tk.EW, columnspan=3)
 
     def generate_sbu_row(self):
         attribute_row = tk.Frame(master=self, height=20)
@@ -78,19 +80,22 @@ class View(tk.Frame):
     def refresh_attributes(self):
         self.attribute_row.grid_forget()
         self.attribute_row = self.generate_attribute_row()
-        self.attribute_row.grid(row=1, sticky=tk.EW)
 
     def generate_attribute_row(self):
         row = tk.Frame(master=self, height=20)
+        i = 0
         for text, attr in Attributes.attributes.items():
             if attr.enabled:
-                _attribute_view(row, text, attr.calculate(self.mof), attr.description).pack(side='left')
-        row.grid(sticky=tk.EW)
+                _attribute_view(row, text, attr.calculate(self.mof), attr.description).grid(column=i, row=0, sticky=tk.EW)
+                row.grid_columnconfigure(i, weight=1)
+                i += 1
+        row.grid(sticky=tk.EW, row=1, columnspan=3)
         return row
 
 
 def _attribute_view(parent, name, value, description):
-    view = tk.Frame(parent, bd=1, relief=tk.SOLID)
+    view = tk.Frame(parent, bd=0, relief=tk.SOLID)
+    view.config(highlightbackground='#ffffff', highlightcolor="#ffffff", highlightthickness=1)
     top = tk.Label(view, text=name)
     Tooltips.create_tool_tip(top, description)
     top.pack()

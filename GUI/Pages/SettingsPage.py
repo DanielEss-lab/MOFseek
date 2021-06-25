@@ -40,7 +40,5 @@ class Page(tk.Frame):
         def __init__(self, parent, attribute_name):
             def change_attribute(now_enabled):
                 Attributes.attributes[self.name].enabled = now_enabled
-                self.winfo_toplevel().toggle_attribute()
-
             super().__init__(parent, attribute_name, Attributes.attributes[attribute_name].description,
                              1 if Attributes.attributes[attribute_name].enabled else 0, change_attribute)
