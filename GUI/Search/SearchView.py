@@ -81,10 +81,7 @@ class View(FrameWithProcess.Frame):
 
         self.btn_clear = StyledButton.make(self, text="Clear", command=self.clear)
         self.btn_clear.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=1)
-        self.btn_search = tk.Button(self, text="Search", command=self.start_process, font=('Arial', f_size * 2), bd=4,
-                                    highlightcolor=os_specific_settings.secondary_color,
-                                    highlightbackground=os_specific_settings.secondary_color, highlightthickness=1
-                                    )
+        self.btn_search = StyledButton.make(self, text="Search", command=self.start_process, font=('Arial', f_size * 2))
         self.btn_search.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=12)
 
     def clear(self):

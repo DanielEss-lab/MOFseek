@@ -3,7 +3,7 @@ import tkinter.ttk as ttk
 import traceback
 
 from GUI import os_specific_settings
-from GUI.Utility import TerminableThread
+from GUI.Utility import TerminableThread, StyledButton
 
 
 class Frame(tk.Frame):
@@ -13,10 +13,10 @@ class Frame(tk.Frame):
 
         self.progress = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
 
-        self.btn_cancel = tk.Button(self, text="Cancel", command=self._cancel_process)
+        self.btn_cancel = StyledButton.make(self, text="Cancel", command=self._cancel_process)
 
         self.error_row = tk.Frame(self)
-        self.exit_error_btn = tk.Button(self.error_row, text='X', command=self._hide_error)
+        self.exit_error_btn = StyledButton.make(self.error_row, text='X', command=self._hide_error)
         self.exit_error_btn.pack(side=tk.LEFT)
         self.lbl_error_text = tk.Label(self.error_row, fg='red')
         self.lbl_error_text.pack(side=tk.LEFT)
