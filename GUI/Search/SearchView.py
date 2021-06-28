@@ -1,11 +1,11 @@
 import tkinter as tk
-import tkinter.ttk as ttk
 import tkinter.font as tkFont
 import re
 from pathlib import Path
 
+from GUI import os_specific_settings
 from GUI.Search import Attributes
-from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips
+from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
 from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader
@@ -49,7 +49,7 @@ class View(FrameWithProcess.Frame):
         # self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
 
         f_size = tkFont.Font(self.lbl_ligand, self.lbl_ligand["font"])['size']
-        small_font = ("Arial", f_size-2)
+        small_font = ("Arial", f_size - 2)
         self.lbl_excl_ligand = tk.Label(self, text="Forbidden Ligands: ", font=small_font)
         self.lbl_excl_ligand.grid(row=2, column=0, pady=2, sticky=tk.NE)
         self.ent_excl_ligand = MultipleAutoCompleteSearch.View(self, self.focus_ligand, small_font)
@@ -73,17 +73,19 @@ class View(FrameWithProcess.Frame):
         self.lbl_redo_search.grid(row=4, column=0, pady=2)
         self.redo_search_selected = tk.StringVar()
         self.redo_search_selected.set('History')
-        self.dropdown_redo_search = tk.OptionMenu(self, self.redo_search_selected, *self.search_to_results, value='History')
+        self.dropdown_redo_search = tk.OptionMenu(self, self.redo_search_selected, *self.search_to_results,
+                                                  value='History')
         self.dropdown_redo_search.grid(row=4, column=1, pady=2, sticky=tk.EW, columnspan=4)
-        self.btn_redo_search = tk.Button(self, text="Redo", command=self.redo_search)
+        self.btn_redo_search = StyledButton.make(self, text="Redo", command=self.redo_search)
         self.btn_redo_search.grid(row=4, column=5, pady=2)
 
-        self.btn_clear = tk.Button(self, text="Clear", command=self.clear)
+        self.btn_clear = StyledButton.make(self, text="Clear", command=self.clear)
         self.btn_clear.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=1)
-        # s.configure("my.TButton", font=('Arial', f_size*2))
-        self.btn_search = tk.Button(self, text="Search", command=self.start_process, font=('Arial', 16), bd=4)
+        self.btn_search = tk.Button(self, text="Search", command=self.start_process, font=('Arial', f_size * 2), bd=4,
+                                    highlightcolor=os_specific_settings.secondary_color,
+                                    highlightbackground=os_specific_settings.secondary_color, highlightthickness=1
+                                    )
         self.btn_search.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=12)
-
 
     def clear(self):
         for entry in self.attribute_entries:
@@ -158,7 +160,7 @@ class View(FrameWithProcess.Frame):
         else:
             self.text_to_search[str(search)] = search
             self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
-                                                            self.redo_search_selected.set(value))
+            self.redo_search_selected.set(value))
             self.search_to_results[search] = 'ongoing'
             results = search_in_mofsForGUI_temp(search)  # TODO: this will change with db integration
             self.search_to_results[search] = results

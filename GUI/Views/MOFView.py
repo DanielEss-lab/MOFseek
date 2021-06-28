@@ -95,7 +95,7 @@ class View(tk.Frame):
 
 def _attribute_view(parent, name, value, description):
     view = tk.Frame(parent, bd=0, relief=tk.SOLID)
-    view.config(highlightbackground=os_specific_settings.mof_outline_color, highlightcolor=os_specific_settings.mof_outline_color, highlightthickness=1)
+    view.config(highlightbackground=os_specific_settings.secondary_color, highlightcolor=os_specific_settings.secondary_color, highlightthickness=1)
     top = tk.Label(view, text=name)
     Tooltips.create_tool_tip(top, description)
     top.pack()

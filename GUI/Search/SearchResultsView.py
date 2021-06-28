@@ -3,7 +3,7 @@ import time
 import tkinter as tk
 import tkinter.filedialog as fd
 
-from GUI.Utility import MultiMofView, FrameWithProcess
+from GUI.Utility import MultiMofView, FrameWithProcess, StyledButton
 from GUI.Search import Attributes
 
 
@@ -35,10 +35,10 @@ class View(FrameWithProcess.Frame):
         self.main_body = MultiMofView.View(self)
         self.main_body.grid(row=3, column=0, columnspan=3, sticky=tk.NSEW)
         self.export_frm = tk.Frame(self)
-        self.btn_export_txt = tk.Button(self.export_frm, text='Export names as .txt', command=self.export_txt)
+        self.btn_export_txt = StyledButton.make(self.export_frm, text='Export names as .txt', command=self.export_txt)
         self.btn_export_txt['state'] = "disabled"
         self.btn_export_txt.pack(side=tk.LEFT)
-        self.btn_export_cifs = tk.Button(self.export_frm, text='Export MOF CIFs', command=self.export_cifs)
+        self.btn_export_cifs = StyledButton.make(self.export_frm, text='Export MOF CIFs', command=self.export_cifs)
         self.btn_export_cifs['state'] = "disabled"
         self.btn_export_cifs.pack(side=tk.LEFT)
         self.export_frm.grid(row=2, column=2, padx=2, sticky=tk.E)

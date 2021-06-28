@@ -2,7 +2,7 @@ import tkinter as tk
 from pathlib import Path
 
 from GUI.Views import MoleculeView
-from GUI.Utility import AutoCompleteComboBox, FrameWithProcess
+from GUI.Utility import AutoCompleteComboBox, FrameWithProcess, StyledButton
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader
 
@@ -28,7 +28,8 @@ class Page(FrameWithProcess.Frame):
         self.extension_text = tk.Label(row1, text='')
         self.extension_text.pack(side=tk.LEFT)
         row1.pack()
-        self.rename_button = tk.Button(self, text="Rename", command=lambda: self.start_process(self.new_name_ent.get()))
+        self.rename_button = StyledButton.make(self, text="Rename",
+                                               command=lambda: self.start_process(self.new_name_ent.get()))
         self.rename_button.pack()
         self.mol = None
 
