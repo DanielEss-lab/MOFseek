@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import traceback
 
-from GUI import icons
+from GUI import os_specific_settings
 from GUI.Utility import TerminableThread
 
 
@@ -33,7 +33,7 @@ class Frame(tk.Frame):
     def start_process(self, arg=None):
         def process():
             try:
-                self.progress.start(icons.PROGRESS_SPEED)
+                self.progress.start(os_specific_settings.PROGRESS_SPEED)
                 self.process(arg)
             except InterruptedError:
                 pass

@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
+from GUI import os_specific_settings
 from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage, EditMOFPage, SettingsPage
 
 
@@ -54,7 +55,11 @@ class Root(tk.Tk):
 
     def set_styles(self):
         s = ttk.Style()
+        print(s.theme_names())
         s.configure("TMenubutton", background="#ffffff")
+        s.configure("TMenubutton", background="#ffffff")
+        s.configure("my.button", font=('Arial', 16))
+        os_specific_settings.style_for_platform(s)
 
     def add_custom_ligand(self, mol):  # To change when connecting to DB
         self.search_page.search_v.add_custom_ligand(mol)

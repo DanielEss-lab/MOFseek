@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
-from GUI import icons
+from GUI import os_specific_settings
 from GUI.Utility import Tooltips
 from GUI.Search import Attributes
 from MofIdentifier.fileIO import FileOpen
@@ -28,15 +28,15 @@ class View(tk.Frame):
         elements = tk.Label(self, text=mof.atoms_string())
         elements.grid(row=0, column=1)
         row_icon_btns = tk.Frame(master=self)
-        open = tk.Label(row_icon_btns, text=icons.OPEN_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+        open = tk.Label(row_icon_btns, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
         open.bind('<Button-1>', lambda e: FileOpen.open_file(mof.filepath))
         open.pack(side='right')
         tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
-        see = tk.Label(row_icon_btns, text=icons.SEE_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+        see = tk.Label(row_icon_btns, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
         see.bind('<Button-1>', lambda e: FileOpen.see_file(mof.filepath))
         see.pack(side='right')
         tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
-        edit = tk.Label(row_icon_btns, text=icons.EDIT_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+        edit = tk.Label(row_icon_btns, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
         edit.bind('<Button-1>', lambda e: select_for_edit(parent, mof))
         edit.pack(side='right')
         row_icon_btns.grid(sticky=tk.E, row=0, column=2)
@@ -64,7 +64,7 @@ class View(tk.Frame):
 
     def display_sbu_name(self, parent, sbu, color):
         text = f"{sbu.frequency}x {sbu.label} ({sbu.connections()}*)"
-        sbu_label = tk.Label(parent, text=text, fg=color, cursor=icons.LINK_CURSOR, padx=3)
+        sbu_label = tk.Label(parent, text=text, fg=color, cursor=os_specific_settings.LINK_CURSOR, padx=3)
         f = tkFont.Font(sbu_label, sbu_label["font"])
         f.configure(underline=True)
         sbu_label.configure(font=f)
@@ -95,7 +95,7 @@ class View(tk.Frame):
 
 def _attribute_view(parent, name, value, description):
     view = tk.Frame(parent, bd=0, relief=tk.SOLID)
-    view.config(highlightbackground='#ffffff', highlightcolor="#ffffff", highlightthickness=1)
+    view.config(highlightbackground=os_specific_settings.mof_outline_color, highlightcolor=os_specific_settings.mof_outline_color, highlightthickness=1)
     top = tk.Label(view, text=name)
     Tooltips.create_tool_tip(top, description)
     top.pack()

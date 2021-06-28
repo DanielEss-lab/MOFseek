@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+import tkinter.font as tkFont
 import re
 from pathlib import Path
 
@@ -47,7 +48,8 @@ class View(FrameWithProcess.Frame):
         self.ent_sbus.set_possible_values(self.all_sbu_names())
         # self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
 
-        small_font = ("Arial", 8)
+        f_size = tkFont.Font(self.lbl_ligand, self.lbl_ligand["font"])['size']
+        small_font = ("Arial", f_size-2)
         self.lbl_excl_ligand = tk.Label(self, text="Forbidden Ligands: ", font=small_font)
         self.lbl_excl_ligand.grid(row=2, column=0, pady=2, sticky=tk.NE)
         self.ent_excl_ligand = MultipleAutoCompleteSearch.View(self, self.focus_ligand, small_font)
@@ -71,13 +73,14 @@ class View(FrameWithProcess.Frame):
         self.lbl_redo_search.grid(row=4, column=0, pady=2)
         self.redo_search_selected = tk.StringVar()
         self.redo_search_selected.set('History')
-        self.dropdown_redo_search = ttk.OptionMenu(self, self.redo_search_selected, *self.search_to_results.keys())
+        self.dropdown_redo_search = tk.OptionMenu(self, self.redo_search_selected, *self.search_to_results, value='History')
         self.dropdown_redo_search.grid(row=4, column=1, pady=2, sticky=tk.EW, columnspan=4)
         self.btn_redo_search = tk.Button(self, text="Redo", command=self.redo_search)
         self.btn_redo_search.grid(row=4, column=5, pady=2)
 
         self.btn_clear = tk.Button(self, text="Clear", command=self.clear)
         self.btn_clear.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=1)
+        # s.configure("my.TButton", font=('Arial', f_size*2))
         self.btn_search = tk.Button(self, text="Search", command=self.start_process, font=('Arial', 16), bd=4)
         self.btn_search.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=12)
 

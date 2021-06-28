@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from GUI import icons
+from GUI import os_specific_settings
 from MofIdentifier.fileIO import FileOpen
 import tkinter.font as tkFont
 
@@ -15,18 +15,18 @@ def make_view(parent, sbu):
     row1 = tk.Frame(master=view)
     name = tk.Label(row1, text=sbu.label)
     name.pack(side='left')
-    open = tk.Label(row1, text=icons.OPEN_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
+    open = tk.Label(row1, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
     open.bind('<Button-1>', lambda e: FileOpen.open_file(sbu.filepath))
     open.pack(side='right')
     tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-    see = tk.Label(row1, text=icons.SEE_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
+    see = tk.Label(row1, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
     see.bind('<Button-1>', lambda e: FileOpen.see_file(sbu.filepath))
     see.pack(side='right')
     tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-    edit = tk.Label(row1, text=icons.EDIT_ICON, cursor=icons.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+    edit = tk.Label(row1, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
     edit.bind('<Button-1>', lambda e: select_for_edit(parent, sbu))
     edit.pack(side='right')
-    search = tk.Label(row1, text="Search as Ligand", cursor=icons.LINK_CURSOR, padx=8)
+    search = tk.Label(row1, text="Search as Ligand", cursor=os_specific_settings.LINK_CURSOR, padx=8)
     f = tkFont.Font(search, search["font"])
     f.configure(underline=True)
     search.configure(font=f)
@@ -53,7 +53,7 @@ def make_view(parent, sbu):
     row4 = tk.Frame(master=view, height=20)
     mof_label = tk.Label(row4, text="MOFs:")
     mof_label.pack(side='left')
-    sbu_search = tk.Label(row4, text="Search", cursor=icons.LINK_CURSOR, padx=8)
+    sbu_search = tk.Label(row4, text="Search", cursor=os_specific_settings.LINK_CURSOR, padx=8)
     f = tkFont.Font(sbu_search, sbu_search["font"])
     f.configure(underline=True)
     sbu_search.configure(font=f)
