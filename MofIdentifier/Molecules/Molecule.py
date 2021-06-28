@@ -20,6 +20,9 @@ class Molecule:
         self.no_h_graph = None
         self.should_use_weak_comparison = weak_comparison_enabled
 
+    def __str__(self):
+        return self.atoms_string()
+
     def atoms_string(self):
         string = ''
         elements = list(self.elementsPresent)

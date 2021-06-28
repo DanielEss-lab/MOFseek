@@ -1,5 +1,6 @@
 from MofIdentifier.Molecules import Molecule
 from MofIdentifier.Molecules.atom import conversion_to_Cartesian
+from MofIdentifier.bondTools import SolventTools
 from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
 from MofIdentifier.subbuilding import SBUIdentifier
 
@@ -9,7 +10,7 @@ class MOF(Molecule.Molecule):
         super().__init__(filepath, atoms)
         self.symmetry = symmetry
         self.fractional_lengths = (a, b, c)
-        self.angles = (al, be, ga)
+        self.angles = (al, be, ga)  # alpha, beta, gamma
         self.cif_content = file_string
         (length_x, n, n) = conversion_to_Cartesian(1, 0, 0, (al, be, ga), (a, b, c))
         (n, length_y, n) = conversion_to_Cartesian(0, 1, 0, (al, be, ga), (a, b, c))
@@ -20,6 +21,13 @@ class MOF(Molecule.Molecule):
         bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths)
         bond_creator.connect_atoms()
         self._sbus = None
+
+        components = SolventTools.get_connected_components(atoms)
+        if len(components) > 1:
+            self.atoms = components[0]
+            self.solvents = SolventTools.count_solvents(components[1:])
+        else:
+            self.solvents = dict()
 
         # self.sbu_names
         # self.identified_ligand_names
