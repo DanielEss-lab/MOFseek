@@ -1,6 +1,5 @@
 from MofIdentifier.SubGraphMatching import SubGraphMatcher, GraphMaker
 from MofIdentifier.fileIO import LigandReader
-from MofIdentifier.subbuilding import SBUIdentifier
 
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files

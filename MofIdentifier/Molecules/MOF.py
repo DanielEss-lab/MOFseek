@@ -1,7 +1,3 @@
-import math
-
-import numpy as np
-
 from MofIdentifier.Molecules import Molecule
 from MofIdentifier.Molecules.atom import conversion_to_Cartesian
 from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
