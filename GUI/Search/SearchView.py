@@ -1,7 +1,9 @@
+import platform
 import tkinter as tk
 import tkinter.font as tkFont
 import re
 from pathlib import Path
+from tkinter import ttk
 
 from GUI import os_specific_settings
 from GUI.Search import Attributes
@@ -73,8 +75,11 @@ class View(FrameWithProcess.Frame):
         self.lbl_redo_search.grid(row=4, column=0, pady=2)
         self.redo_search_selected = tk.StringVar()
         self.redo_search_selected.set('History')
-        self.dropdown_redo_search = tk.OptionMenu(self, self.redo_search_selected, *self.search_to_results,
-                                                  value='History')
+        if platform.system() == 'Darwin':
+            self.dropdown_redo_search = tk.OptionMenu(self, self.redo_search_selected, *self.search_to_results,
+                                                      value='History')
+        else:
+            self.dropdown_redo_search = ttk.OptionMenu(self, self.redo_search_selected, *self.search_to_results)
         self.dropdown_redo_search.grid(row=4, column=1, pady=2, sticky=tk.EW, columnspan=4)
         self.btn_redo_search = StyledButton.make(self, text="Redo", command=self.redo_search)
         self.btn_redo_search.grid(row=4, column=5, pady=2)
