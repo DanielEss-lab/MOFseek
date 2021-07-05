@@ -20,6 +20,7 @@ class Frame(tk.Frame):
         self.exit_error_btn.pack(side=tk.LEFT)
         self.lbl_error_text = tk.Label(self.error_row, fg='red')
         self.lbl_error_text.pack(side=tk.LEFT)
+        self.process_is_going = False
 
     def add_error_to_layout(self, error_row):
         error_row.pack()
@@ -31,9 +32,13 @@ class Frame(tk.Frame):
         btn_cancel.pack()
 
     def start_process(self, arg=None):
+        if self.process_is_going:
+            self._cancel_process()
+
         def process():
             try:
                 self.progress.start(os_specific_settings.PROGRESS_SPEED)
+                self.process_is_going = True
                 self.process(arg)
             except InterruptedError:
                 pass
@@ -42,6 +47,7 @@ class Frame(tk.Frame):
                 self._show_error(ex)
                 print(error_text)
             finally:
+                self.process_is_going = False
                 self.progress.stop()
                 self.progress.pack_forget()
                 self.btn_cancel.pack_forget()
