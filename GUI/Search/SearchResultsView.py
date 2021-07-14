@@ -75,7 +75,7 @@ class View(FrameWithProcess.Frame):
             return
         for mof in self.results:
             with open(os.path.join(path, mof.label), "w") as f:
-                f.write(mof.cif_content)
+                f.write(mof.file_content)
 
     def export_txt(self):
         if len(self.results) == 0:

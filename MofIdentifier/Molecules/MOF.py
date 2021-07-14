@@ -10,7 +10,7 @@ class MOF(Molecule.Molecule):
         self.symmetry = symmetry
         self.fractional_lengths = (a, b, c)
         self.angles = (al, be, ga)
-        self.cif_content = file_string
+        self.file_content = file_string
         (length_x, n, n) = conversion_to_Cartesian(1, 0, 0, (al, be, ga), (a, b, c))
         (n, length_y, n) = conversion_to_Cartesian(0, 1, 0, (al, be, ga), (a, b, c))
         (n, n, length_z) = conversion_to_Cartesian(0, 0, 1, (al, be, ga), (a, b, c))

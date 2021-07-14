@@ -5,19 +5,19 @@ from MofIdentifier.fileIO import CifReader
 class MOFDatabase:
     def __init__(self, dictionary):
         try:
-            self.cif_content = dictionary['cif_content']
+            self.file_content = dictionary['cif_content']
         except KeyError:
-            self.cif_content = None
+            self.file_content = None
         self._mof = None
 
         def set_from_dictionary_or_mof(attribute_name):
             try:
                 setattr(self, attribute_name, dictionary['attribute_name'])
             except KeyError:
-                if self.cif_content is not None:
+                if self.file_content is not None:
                     # use cif content to make MOF object, get attribute from that
                     if self._mof is None:
-                        self._mof = CifReader.read_cif(StringIO(self.cif_content))
+                        self._mof = CifReader.read_cif(StringIO(self.file_content))
                     setattr(self, attribute_name, getattr(self._mof, attribute_name))
                 else:
                     setattr(self, attribute_name, None)

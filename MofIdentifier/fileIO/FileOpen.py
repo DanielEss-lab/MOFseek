@@ -3,6 +3,13 @@ import platform
 import subprocess
 
 
+def make_and_open(molecule):
+    pass
+
+def make_and_see(molecule):
+    pass
+
+
 def open_file(filepath):
     if platform.system() == 'Windows':  # Windows
         os.startfile(filepath)
