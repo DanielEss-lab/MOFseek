@@ -38,7 +38,10 @@ class Root(tk.Tk):
     def on_tab_change(self, event):
         if self.prev_tab_name == 'Settings':
             self.display_attributes_by_settings()
-        self.prev_tab_name = event.widget.tab('current')['text']
+        new_tab_name = event.widget.tab('current')['text']
+        if new_tab_name == 'Settings':
+            self.settings_page.refresh_download_filepath_row()
+        self.prev_tab_name = new_tab_name
 
     def select_mof_for_edit(self, mof):
         if self.tabControl.index('current') != 5:

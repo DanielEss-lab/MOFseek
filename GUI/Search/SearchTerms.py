@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from GUI.Search import Attributes
+from GUI import Attributes
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import CifReader
 from MofIdentifier.subbuilding import SBUIdentifier

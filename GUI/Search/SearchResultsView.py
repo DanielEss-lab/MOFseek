@@ -4,7 +4,8 @@ import tkinter as tk
 import tkinter.filedialog as fd
 
 from GUI.Utility import MultiMofView, FrameWithProcess, StyledButton
-from GUI.Search import Attributes
+from GUI import Attributes
+from MofIdentifier.fileIO import MoleculeWriter
 
 
 class View(FrameWithProcess.Frame):
@@ -71,11 +72,7 @@ class View(FrameWithProcess.Frame):
         if len(self.results) == 0:
             return
         path = fd.askdirectory()
-        if path is None:
-            return
-        for mof in self.results:
-            with open(os.path.join(path, mof.label), "w") as f:
-                f.write(mof.file_content)
+        MoleculeWriter.write_many(self.results, path)
 
     def export_txt(self):
         if len(self.results) == 0:

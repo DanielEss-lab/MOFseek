@@ -2,14 +2,14 @@ import os
 
 
 def write_many(mols, path):
-    if len(mols) == 0:
-        return
-    if path is None:
-        return
-    for mol in mols:
-        write_one(mol, path)
+    if os.path.isdir(path):
+        for mol in mols:
+            write_one(mol, path)
 
 
 def write_one(mol, path):
-    with open(os.path.join(path, mol.label), "w") as f:
-        f.write(mol.file_content)
+    if os.path.isdir(path):
+        complete_path = os.path.join(path, mol.label)
+        if not os.path.exists(complete_path):
+            with open(complete_path, "w") as f:
+                f.write(mol.file_content)

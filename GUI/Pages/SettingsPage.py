@@ -1,7 +1,8 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
-from GUI.Search import Attributes
+from GUI import Attributes, Settings
+from GUI.Utility import StyledButton
 
 instruction_text = """Select which properties you would like to search by and see for each MOF. """
 
@@ -18,6 +19,9 @@ class Page(tk.Frame):
 
         Page.Setting(self, 'SBU search', 'Enable the powerful (but situational) SBU search', 0,
                      lambda enabled: self.winfo_toplevel().toggle_sbu_search(enabled)).grid(sticky=tk.W, pady=(20,0))
+
+        self.download_filepath_option_row = self.make_download_filepath_option_row()
+        self.download_filepath_option_row.grid(sticky=tk.W)
 
     class Setting(tk.Frame):
         def __init__(self, parent, name, description, starts_enabled, function):
@@ -42,3 +46,20 @@ class Page(tk.Frame):
                 Attributes.attributes[self.name].enabled = now_enabled
             super().__init__(parent, attribute_name, Attributes.attributes[attribute_name].description,
                              1 if Attributes.attributes[attribute_name].enabled else 0, change_attribute)
+
+    def make_download_filepath_option_row(self):
+        row = tk.Frame(self)
+
+        def callback():
+            Settings.change_download_filepath()
+            self.refresh_download_filepath_row()
+        btn = StyledButton.make(row, 'Change filepath for opening molecules', command=callback)
+        lbl = tk.Label(row, text=Settings.download_filepath)
+        btn.pack(side=tk.LEFT)
+        lbl.pack(side=tk.LEFT)
+        return row
+
+    def refresh_download_filepath_row(self):
+        self.download_filepath_option_row.grid_forget()
+        self.download_filepath_option_row = self.make_download_filepath_option_row()
+        self.download_filepath_option_row.grid(sticky=tk.W)
