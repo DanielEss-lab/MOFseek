@@ -23,11 +23,9 @@ class MOF(Molecule.Molecule):
         self._sbus = None
 
         components = SolventTools.get_connected_components(atoms)
-        if len(components) > 1:
-            self.atoms = components[0]
-            self.solvents = SolventTools.count_solvents(components[1:])
-        else:
-            self.solvents = dict()
+        self.atoms = []
+        self.solvents = dict()
+        self.assign_components(components, self.atoms, self.solvents)
 
         # self.sbu_names
         # self.identified_ligand_names
@@ -39,3 +37,12 @@ class MOF(Molecule.Molecule):
 
     def __str__(self):
         return "{} with fractional dimensions {}".format(self.label, self.fractional_lengths)
+
+    def assign_components(self, components, atoms, solvents):
+        atoms.extend(components[0])
+        for comp_index in range(1, len(components)):
+            if len(components[comp_index]) < 8 and len(components[comp_index]) * 2 < len(components[0]):
+                self.solvents = SolventTools.count_solvents(components[comp_index:])
+                return
+            else:
+                atoms.extend(components[comp_index])

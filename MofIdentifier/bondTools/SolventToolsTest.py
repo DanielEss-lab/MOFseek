@@ -14,7 +14,7 @@ class SolventToolsTest(unittest.TestCase):
 
     def test_cif_with_multiple_pieces(self):
         mof = CifReader.get_mof('../mofsForTests/UGOSOY_charged.cif')
-        self.assertEqual(True, False)
+        self.assertEqual(1, len(mof.solvents))
 
 
 if __name__ == '__main__':
