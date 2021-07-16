@@ -95,7 +95,7 @@ def read_sbus_from_files(sbu_names):
 
 
 if __name__ == '__main__':
-    mof = CifReader.get_mof('../mofsForTests/RUSSAA_clean.cif')
+    mof = CifReader.get_mof('../../GUI/mofsForGui_temp/acscombsci.5b00188_24205_clean.cif')
     sbus = process_new_mof(mof)
     print(mof.label)
     print(sbus)
