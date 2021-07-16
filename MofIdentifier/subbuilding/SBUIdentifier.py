@@ -237,7 +237,7 @@ class SBUIdentifier:
                     cluster.add_atom(atom)
                     self.mark_group(atom, cluster.sbu_id)
                     return True
-        if num_cluster_neighbors > num_noncluster_neighbors and len(cluster_ids) == 1:
+        if num_cluster_neighbors > 1 + num_noncluster_neighbors and len(cluster_ids) == 1:
             # if num_noncluster_neighbors == 1 then it's likely to be part of an aux sbu, not part of the cluster
             cluster.add_atom(atom)
             self.mark_group(atom, cluster.sbu_id)
