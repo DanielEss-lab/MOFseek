@@ -120,6 +120,22 @@ class SubGraphMatcherTest(unittest.TestCase):
         self.assertTrue(SubGraphMatcher.find_ligand_in_mof(xyz_benzene, mof_808), 'Should find match')
         self.assertFalse(SubGraphMatcher.find_ligand_in_mof(smile_full_benzene, mof_808), 'Should not find match')
 
+class SetAssignmentTest(unittest.TestCase):
+
+    def test_does_assign_label_from_set(self):
+        conn_73 = XyzReader.get_molecule('../ligands/test_resources/connector_73.xyz')
+        conn_74 = XyzReader.get_molecule('../ligands/test_resources/connector_74.xyz')
+        self.assertTrue(SubGraphMatcher.match(conn_73, conn_74))
+        self.assertTrue(SubGraphMatcher.does_assign_label_from_set(conn_73, [conn_74]))
+        self.assertTrue(SubGraphMatcher.does_assign_label_from_set(conn_74, [conn_73]))
+
+    def test_name_molecules_from_set(self):
+        conn_59 = XyzReader.get_molecule('../ligands/test_resources/connector_59.xyz')
+        conn_61 = XyzReader.get_molecule('../ligands/test_resources/connector_61.xyz')
+        result = SubGraphMatcher.name_molecules_from_set([conn_59], [conn_61])
+        self.assertEqual(0, len(result[0]))  # unrecognized molecules
+        self.assertEqual(1, len(result[1]))  # recognized molecules
+
 
 if __name__ == '__main__':
     unittest.main()

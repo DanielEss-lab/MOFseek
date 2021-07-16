@@ -1,5 +1,7 @@
 import unittest
 
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
+from MofIdentifier.fileIO import XyzReader
 from MofIdentifier.fileIO.CifReader import get_mof
 
 
@@ -132,6 +134,17 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (sbu_breakdown.connectors[0].frequency == 4)
         assert (sbu_breakdown.connectors[1].frequency == 4)
         assert (sbu_breakdown.connectors[2].frequency == 4)
+
+    def test_infinite_band_connector(self):
+        mof_24205 = get_mof('../mofsForTests/acscombsci.5b00188_24205_clean.cif')
+        conn_74 = XyzReader.get_molecule('../ligands/test_resources/connector_74.xyz')
+        sbu_breakdown = mof_24205.sbus()
+
+        assert (len(sbu_breakdown.clusters) == 1)
+        assert (len(sbu_breakdown.auxiliaries) == 0)
+        assert (len(sbu_breakdown.connectors) == 3)
+        infinite_connector = [c for c in sbu_breakdown.connectors if len(c.atoms) == 23][0]
+        self.assertTrue(SubGraphMatcher.match(infinite_connector, conn_74))
 
 
 if __name__ == '__main__':
