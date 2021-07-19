@@ -65,8 +65,8 @@ class MOFDatabase:
 
     def get_mof(self):
         if self._mof is None:
-            if self.cif_content is not None:
-                self._mof = CifReader.read_string(self.cif_content, self.filename)
+            if self.file_content is not None:
+                self._mof = CifReader.read_string(self.file_content, self.filename)
             else:
                 return None
         return self._mof

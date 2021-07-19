@@ -23,7 +23,7 @@ def read_ligand(ligand_file_path):
         mofs_from_database.append(mof)
 
     for mof in mofs_from_database:
-        if mof.cif_content is not None:
+        if mof.file_content is not None:
             if SubGraphMatcher.find_ligand_in_mof(ligand_file, mof.get_mof()):
                 matched_mofs.append(mof)
                 matched_mof_names.append(mof.filename)
