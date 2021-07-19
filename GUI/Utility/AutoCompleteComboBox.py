@@ -80,7 +80,7 @@ class Box(ttk.Combobox):
 def test(test_list):
     """Run a mini application to test the AutocompleteEntry Widget."""
     root = tk.Tk(className=' AutocompleteEntry demo')
-    combo = Box(root)
+    combo = Box(root, ('Arial', 12))
     combo.set_completion_list(test_list)
     combo.pack()
     combo.focus_set()

@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from GUI.Utility import AutoCompleteComboBox
+from GUI.Utility import AutoCompleteComboBox, StyledButton
 
 
 class View(tk.Frame):
@@ -15,13 +15,14 @@ class View(tk.Frame):
         self.initial_combobox.grid(row=0, column=1, pady=2, sticky=tk.NSEW)
         if focus_function is not None:
             self.focus_button_by_row_index = dict()
-            initial_focus_button = tk.Button(self, text='i', font=('Consolas', self.font[1]),
-                                             command=lambda: focus_function(self.initial_combobox.get()))
+            initial_focus_button = StyledButton.make(self, text='i', font=('Consolas', self.font[1]),
+                                                     command=lambda: focus_function(self.initial_combobox.get()))
             initial_focus_button.grid(row=0, column=2, pady=2)
         self.box_by_row_index = dict()
         self.minus_button_by_row_index = dict()
         self.values = None
-        second_row_button = tk.Button(self, text='+', font=self.font, command=lambda: self.new_combobox(second_row_button))
+        second_row_button = StyledButton.make(self, text='+', font=self.font,
+                                              command=lambda: self.new_combobox(second_row_button))
         second_row_button.grid(row=1, column=0, pady=2)
 
     def get_values(self):
@@ -56,12 +57,13 @@ class View(tk.Frame):
         combobox.grid(row=row_index, column=1, pady=2, sticky=tk.NSEW)
         combobox.focus_set()
         if self.focus_function is not None:
-            focus_button = tk.Button(self, text='i', font=('Consolas', self.font[1]),
-                                     command=lambda: self.focus_function(combobox.get()))
+            focus_button = StyledButton.make(self, text='i', font=('Consolas', self.font[1]),
+                                             command=lambda: self.focus_function(combobox.get()))
             self.focus_button_by_row_index[row_index] = focus_button
             focus_button.grid(row=row_index, column=2, pady=2)
-        new_row_button = tk.Button(self, text='+', font=self.font, command=lambda: self.new_combobox(new_row_button))
-        new_row_button.grid(row=row_index+1, column=0, pady=2)
+        new_row_button = StyledButton.make(self, text='+', font=self.font,
+                                           command=lambda: self.new_combobox(new_row_button))
+        new_row_button.grid(row=row_index + 1, column=0, pady=2)
 
     def remove_combobox(self, button):
         row_index = button.grid_info()['row']

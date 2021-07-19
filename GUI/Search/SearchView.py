@@ -1,11 +1,13 @@
+import platform
 import tkinter as tk
-import tkinter.ttk as ttk
+import tkinter.font as tkFont
 import re
 from pathlib import Path
+from tkinter import ttk
 
-from GUI.Search import Attributes
-from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips
-from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForTests
+from GUI import Attributes
+from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
+from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUCollectionManager
@@ -37,17 +39,18 @@ class View(FrameWithProcess.Frame):
         self.ent_ligand.grid(row=1, column=1, pady=2, sticky=tk.EW)
         self.ent_ligand.initial_combobox.focus_set()
         self.lbl_elements = tk.Label(self, text="Required Elements: ")
-        self.lbl_elements.grid(row=1, column=2, pady=2, sticky=tk.E)
+        self.lbl_elements.grid(row=1, column=2, pady=2, sticky=tk.E, padx=(4, 0))
         self.ent_elements = tk.Entry(self)
-        self.ent_elements.insert(0, 'C, H')
-        self.ent_elements.grid(row=1, column=3, pady=2, sticky=tk.EW)
+        # self.ent_elements.insert(0, 'C, H')
+        self.ent_elements.grid(row=1, column=3, pady=2, padx=(0, 4), sticky=tk.W)
         self.lbl_sbus = tk.Label(self, text="Required SBUs: ")
-        self.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.NE)
+        # self.lbl_sbus.grid(row=1, column=4, pady=2, sticky=tk.NE)
         self.ent_sbus = MultipleAutoCompleteSearch.View(self, self.focus_sbu)
         self.ent_sbus.set_possible_values(self.all_sbu_names())
-        self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
+        # self.ent_sbus.grid(row=1, column=5, pady=2, sticky=tk.EW)
 
-        small_font = ("Arial", 8)
+        f_size = tkFont.Font(self.lbl_ligand, self.lbl_ligand["font"])['size']
+        small_font = ("Arial", f_size - 2)
         self.lbl_excl_ligand = tk.Label(self, text="Forbidden Ligands: ", font=small_font)
         self.lbl_excl_ligand.grid(row=2, column=0, pady=2, sticky=tk.NE)
         self.ent_excl_ligand = MultipleAutoCompleteSearch.View(self, self.focus_ligand, small_font)
@@ -59,10 +62,10 @@ class View(FrameWithProcess.Frame):
         self.ent_excl_elements.insert(0, '')
         self.ent_excl_elements.grid(row=2, column=3, pady=2, sticky=tk.W)
         self.lbl_excl_sbus = tk.Label(self, text="Forbidden SBUs: ", font=small_font)
-        self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
+        # self.lbl_excl_sbus.grid(row=2, column=4, pady=2, sticky=tk.NE)
         self.ent_excl_sbus = MultipleAutoCompleteSearch.View(self, self.focus_sbu, small_font)
         self.ent_excl_sbus.set_possible_values(self.all_sbu_names())
-        self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
+        # self.ent_excl_sbus.grid(row=2, column=5, pady=2, sticky=tk.W)
 
         self.attribute_row = None
         self.add_attribute_search_entries()  # Row 3
@@ -71,16 +74,19 @@ class View(FrameWithProcess.Frame):
         self.lbl_redo_search.grid(row=4, column=0, pady=2)
         self.redo_search_selected = tk.StringVar()
         self.redo_search_selected.set('History')
-        self.dropdown_redo_search = ttk.OptionMenu(self, self.redo_search_selected, *self.search_to_results.keys())
+        if platform.system() == 'Darwin':
+            self.dropdown_redo_search = tk.OptionMenu(self, self.redo_search_selected, *self.search_to_results,
+                                                      value='History')
+        else:
+            self.dropdown_redo_search = ttk.OptionMenu(self, self.redo_search_selected, *self.search_to_results)
         self.dropdown_redo_search.grid(row=4, column=1, pady=2, sticky=tk.EW, columnspan=4)
-        self.btn_redo_search = tk.Button(self, text="Redo", command=self.redo_search)
+        self.btn_redo_search = StyledButton.make(self, text="Redo", command=self.redo_search)
         self.btn_redo_search.grid(row=4, column=5, pady=2)
 
-        self.btn_clear = tk.Button(self, text="Clear", command=self.clear)
+        self.btn_clear = StyledButton.make(self, text="Clear", command=self.clear)
         self.btn_clear.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=1)
-        self.btn_search = tk.Button(self, text="Search", command=self.start_process, font=('Arial', 16), bd=4)
+        self.btn_search = StyledButton.make(self, text="Search", command=self.start_process, font=('Arial', f_size * 2))
         self.btn_search.grid(row=ROW_MAXIMUM - 1, column=0, pady=2, columnspan=12)
-
 
     def clear(self):
         for entry in self.attribute_entries:
@@ -146,7 +152,7 @@ class View(FrameWithProcess.Frame):
             forbidden_element_symbols = re.findall(r"[\w']+", forbidden_element_symbols_text)
             attributes = self.get_attribute_parameters()
             label_substring = self.ent_label.get()
-            search = SearchTerms(ligands, element_symbols, forbidden_ligands, forbidden_element_symbols,
+            search = SearchTerms(ligands, forbidden_ligands, element_symbols, forbidden_element_symbols,
                                  sbus, forbidden_sbus, attributes, label_substring)
         # Shortcut evaluation if possible
         if search in self.search_to_results and self.search_to_results[search] is not None \
@@ -155,9 +161,9 @@ class View(FrameWithProcess.Frame):
         else:
             self.text_to_search[str(search)] = search
             self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
-                                                            self.redo_search_selected.set(value))
+            self.redo_search_selected.set(value))
             self.search_to_results[search] = 'ongoing'
-            results = search_in_mofsForTests(search)  # TODO: this will change with db integration
+            results = search_in_mofsForGUI_temp(search)  # TODO: this will change with db integration
             self.search_to_results[search] = results
             self.parent.display_search_results(results)
 

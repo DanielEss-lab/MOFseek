@@ -26,7 +26,7 @@ def add_cifs_to_database(cifs_path):
         # Store mof data in the database using pymongo
         file_name = mof.label
         file_name = file_name.split('.', 1)[0]
-        cif_collection.update_one({"filename": file_name}, {"$set": {'cif_content': mof.cif_content}})
+        cif_collection.update_one({"filename": file_name}, {"$set": {'cif_content': mof.file_content}})
     print("Done")
 
 

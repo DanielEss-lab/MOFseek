@@ -1,3 +1,4 @@
+from _tkinter import TclError
 import tkinter as tk
 
 from GUI.Views import MOFView
@@ -6,24 +7,28 @@ from GUI.Views import MOFView
 class View(tk.Frame):
     def __init__(self, parent):
         self.parent = parent
-        tk.Frame.__init__(self, self.parent, height=450, width=800)
+        super().__init__(self.parent, height=450)
         self.results = []
 
         self.canvas = tk.Canvas(self, borderwidth=0, background="#ffffff", height=400)
-        self.frame = tk.Frame(self.canvas, background="#ffffff")
+        self.mofs_frame = tk.Frame(self.canvas, background="#ffffff")
+        self.mofs_frame.grid_columnconfigure(0, weight=1)
         self.canvas.master = parent
         self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.vsb.set)
 
         self.vsb.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
-        self.canvas.create_window((4, 4), window=self.frame, anchor="nw",
-                                  tags="self.frame")
+        self.canvas.create_window((4, 4), window=self.mofs_frame, anchor="nw", tags="frame")
 
-        self.frame.bind("<Configure>", self.on_frame_configure)
+        self.canvas.bind('<Configure>', self.frame_width)
+        self.mofs_frame.bind("<Configure>", self.on_frame_configure)
         # self.frame.bind('<Configure>', self._configure_window)
         self.canvas.bind('<Enter>', self._bound_to_mousewheel)
         self.canvas.bind('<Leave>', self._unbound_to_mousewheel)
+
+    def frame_width(self, event):
+        self.canvas.itemconfig("frame", width=self.canvas.winfo_width())
 
     def on_frame_configure(self, event):
         # Reset the scroll region to encompass the inner frame
@@ -40,10 +45,14 @@ class View(tk.Frame):
 
     def display_results(self, results):
         self.results = results
-        for widget in self.frame.winfo_children():
+        for widget in self.mofs_frame.winfo_children():
             widget.destroy()
-        self.frame.focus_set()
+        self.mofs_frame.focus_set()
         self.canvas.yview_moveto(0)
         for mof in results:
-            mof_v = MOFView.make_view(self.frame, mof)
-            mof_v.grid(sticky=("N", "S", "E", "W"))
+            mof_v = MOFView.View(self.mofs_frame, mof)
+            mof_v.grid(sticky=tk.EW)
+
+    def refresh_all_attributes(self):
+        for widget in self.mofs_frame.winfo_children():
+            widget.refresh_attributes()
