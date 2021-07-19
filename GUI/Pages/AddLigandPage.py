@@ -1,9 +1,8 @@
 import tkinter as tk
 from pathlib import Path
-from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
 
-from GUI.Utility import FrameWithProcess
+from GUI.Utility import FrameWithProcess, StyledButton
 from GUI.Views import LigandView
 from MofIdentifier.fileIO import LigandReader
 
@@ -20,12 +19,12 @@ class AddLigandPage(FrameWithProcess.Frame):
         self.molecule_v = None
         instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
         instructions.pack()
-        btn = tk.Button(self, text='Open Ligand', command=lambda: self.open_file())
+        btn = StyledButton.make(self, 'Open Ligand', lambda: self.open_file())
         btn.pack()
         self.frm_ligand_preview = tk.Frame(self)
         # LigandView.make_view()
         self.frm_ligand_preview.pack()
-        self.add_btn = tk.Button(self, text='Upload to DB', command=lambda: self.start_process(self.mol))
+        self.add_btn = StyledButton.make(self, 'Upload to DB', lambda: self.start_process(self.mol))
         self.add_btn['state'] = "disabled"
         self.add_btn.pack()
 

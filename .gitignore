@@ -2,3 +2,6 @@
 __pycache__/
 venv/
 ./
+MofIdentifier/subbuilding/connector/
+MofIdentifier/subbuilding/auxiliary/
+MofIdentifier/subbuilding/cluster/

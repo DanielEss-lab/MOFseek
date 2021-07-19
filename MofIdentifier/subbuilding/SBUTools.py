@@ -68,6 +68,8 @@ class changeableSBU(Molecule.Molecule):
         self.adjacent_auxiliary_ids = set(())
         self.type = unit_type
         self.frequency = frequency
+        if self.frequency == float('inf'):
+            self.should_use_weak_comparison = True
 
     def connections(self):
         return len(self.adjacent_auxiliary_ids) + len(self.adjacent_cluster_ids) + len(self.adjacent_connector_ids)
@@ -85,7 +87,8 @@ class changeableSBU(Molecule.Molecule):
             while not atom.is_in_unit_cell():
                 atom = atom.original
             atoms.append(atom)
-        starting_atom = atoms[0]  # Get an atom, any atom
+        atoms.sort()
+        starting_atom = atoms[0]  # Get an atom, any atom # Mark
         visited = {starting_atom}
         queue = deque([starting_atom])
         while queue:

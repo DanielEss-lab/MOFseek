@@ -1,4 +1,3 @@
-from io import StringIO
 from MofIdentifier.fileIO import CifReader
 
 
@@ -6,9 +5,9 @@ class MOFDatabase:
     def __init__(self, dictionary):
         self.filename = dictionary['filename']
         try:
-            self.cif_content = dictionary['cif_content']
+            self.file_content = dictionary['cif_content']
         except KeyError:
-            self.cif_content = None
+            self.file_content = None
         self._mof = None
 
         def set_from_dictionary_or_mof(attribute_name):

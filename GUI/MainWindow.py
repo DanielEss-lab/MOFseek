@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
+from GUI import os_specific_settings
 from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage, EditMOFPage, SettingsPage
 
 
@@ -14,6 +15,8 @@ class Root(tk.Tk):
         self.set_styles()
 
         self.tabControl = ttk.Notebook(self)
+        self.tabControl.bind('<<NotebookTabChanged>>', self.on_tab_change)
+        self.prev_tab_name = ''
 
         self.search_page = SearchPage.SearchPage(self.tabControl)
         self.add_ligand_page = AddLigandPage.AddLigandPage(self.tabControl)
@@ -32,6 +35,14 @@ class Root(tk.Tk):
         self.tabControl.add(self.settings_page, text='Settings')
         self.tabControl.pack(expand=1, fill="both")
 
+    def on_tab_change(self, event):
+        if self.prev_tab_name == 'Settings':
+            self.display_attributes_by_settings()
+        new_tab_name = event.widget.tab('current')['text']
+        if new_tab_name == 'Settings':
+            self.settings_page.refresh_download_filepath_row()
+        self.prev_tab_name = new_tab_name
+
     def select_mof_for_edit(self, mof):
         if self.tabControl.index('current') != 5:
             self.edit_MOF_page.select_mof(mof)
@@ -48,6 +59,7 @@ class Root(tk.Tk):
     def set_styles(self):
         s = ttk.Style()
         s.configure("TMenubutton", background="#ffffff")
+        os_specific_settings.style_for_platform(s)
 
     def add_custom_ligand(self, mol):  # To change when connecting to DB
         self.search_page.search_v.add_custom_ligand(mol)
@@ -57,7 +69,22 @@ class Root(tk.Tk):
         self.search_page.highlight_molecule(mol)
         self.tabControl.select(0)
 
-    def toggle_attribute(self):
+    def display_attributes_by_settings(self):
         self.search_page.refresh_attributes_shown()
         self.add_MOFs_page.refresh_attributes_shown()
         self.edit_MOF_page.refresh_attributes_shown()
+
+    def force_search_ligand(self, molecule):
+        self.search_page.search_v.force_search_ligand(molecule)
+
+    def force_search_sbu(self, molecule):
+        self.search_page.search_v.force_search_sbu(molecule)
+
+    def toggle_sbu_search(self, enabled):
+        if enabled:
+            self.search_page.show_sbu_search()
+        else:
+            self.search_page.hide_sbu_search()
+
+    def toggle_solvent(self):
+        self.search_page.refresh_elements_shown()

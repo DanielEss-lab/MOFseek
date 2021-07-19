@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from GUI.Utility import FrameWithProcess
+from GUI.Utility import FrameWithProcess, StyledButton
 from GUI.Views import MOFView
 
 instruction_text = """Choose a MOF from the Search page, and then edit it from this page. Saving the edits to the 
@@ -17,8 +17,8 @@ class Page(FrameWithProcess.Frame):
         self.mof_frame = tk.Frame(self)
         self.mof_frame.pack()
         self.mofView = None
-        self.edit_button = tk.Button(self, text="Save Edits",
-                                       command=lambda: self.start_process(self.assemble_new_mof()))
+        self.edit_button = StyledButton.make(self, text="Save Edits",
+                                             command=lambda: self.start_process(self.assemble_new_mof()))
         self.edit_button.pack()
         self.mof = None
 
@@ -26,7 +26,7 @@ class Page(FrameWithProcess.Frame):
         if self.mofView is not None:
             self.mofView.pack_forget()
         self.mof = mof
-        self.mofView = MOFView.make_view(self.mof_frame, mof)
+        self.mofView = MOFView.View(self.mof_frame, mof)
         self.mofView.pack()
 
     def edit_mof_in_db(self, new_mof):

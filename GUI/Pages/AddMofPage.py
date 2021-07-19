@@ -2,7 +2,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter.filedialog import askopenfilenames
 
-from GUI.Utility import FrameWithProcess, MultiMofView
+from GUI.Utility import FrameWithProcess, MultiMofView, StyledButton
 from MofIdentifier.fileIO import CifReader
 
 instruction_text = """Choose one or more .cif files from your computer. The MOFs will be loaded onto the database, and 
@@ -16,12 +16,12 @@ class Page(FrameWithProcess.Frame):
         super().__init__(self.parent, lambda mofs: self.add_mofs_to_db(mofs))
         instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
         instructions.pack()
-        open_btn = tk.Button(self, text='Open Mof(s)', command=self.open_mofs)
+        open_btn = StyledButton.make(self, text='Open Mof(s)', command=self.open_mofs)
         open_btn.pack()
         self.mofs = []
         self.mof_preview = MultiMofView.View(self)
         self.mof_preview.pack(fill=tk.X)
-        self.add_btn = tk.Button(self, text='Upload to DB', command=lambda: self.start_process(self.mofs))
+        self.add_btn = StyledButton.make(self, text='Upload to DB', command=lambda: self.start_process(self.mofs))
         self.add_btn['state'] = "disabled"
         self.add_btn.pack()
 

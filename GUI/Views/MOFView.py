@@ -1,8 +1,8 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
+from GUI import os_specific_settings, Attributes, Settings
 from GUI.Utility import Tooltips
-from GUI.Search import Attributes
 from MofIdentifier.fileIO import FileOpen
 from MofIdentifier.subbuilding import SBUCollectionManager
 
@@ -11,71 +11,104 @@ def select_for_edit(parent, mof):
     parent.winfo_toplevel().select_mof_for_edit(mof)
 
 
-def make_view(parent, mof):
-    sbus = SBUCollectionManager.process_new_mof(mof)
-    page = parent.winfo_toplevel()
-    view = tk.Frame(parent, height=40, bd=1, relief=tk.SOLID)
+class View(tk.Frame):
+    def __init__(self, parent, mof):
+        self.parent = parent
+        self.mof = mof
+        self.top_page = parent.winfo_toplevel()
+        tk.Frame.__init__(self, self.parent, height=40, bd=1, relief=tk.SOLID)
+        # self.sbus = SBUCollectionManager.process_new_mof(mof)   # Temporarily disabled for speed (part 1/2)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
 
-    row1 = tk.Frame(master=view)
-    name = tk.Label(row1, text=mof.label, font=("Arial", 10), width=48, anchor=tk.W)
-    name.pack(side='left')
-    elements = tk.Label(row1, text=mof.atoms_string(), font=("Arial", 10))
-    elements.pack(side='left')
-    open = tk.Label(row1, text="\U0001F441", cursor='hand2', padx=2, font=("Arial", 16), height=0)
-    open.bind('<Button-1>', lambda e: FileOpen.open_file(mof.filepath))
-    open.pack(side='right')
-    tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-    see = tk.Label(row1, text="\U0001f4c1", cursor='hand2', padx=2, font=("Arial", 16), height=0)
-    see.bind('<Button-1>', lambda e: FileOpen.see_file(mof.filepath))
-    see.pack(side='right')
-    tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-    edit = tk.Label(row1, text="\U0001F589", cursor='hand2', padx=2, font=("Arial", 16), height=0)
-    edit.bind('<Button-1>', lambda e: select_for_edit(parent, mof))
-    edit.pack(side='right')
-    row1.pack(fill=tk.X)
+        name = tk.Label(self, text=mof.label, width=48, anchor=tk.W)
+        name.grid(sticky=tk.W, row=0, column=0)
+        self.elements = tk.Label(self, text=mof.atoms_string_with_solvents() if Settings.keep_solvent
+                            else mof.atoms_string_without_solvents())
+        self.elements.grid(row=0, column=1)
+        row_icon_btns = tk.Frame(master=self)
+        open = tk.Label(row_icon_btns, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR,
+                        padx=2, font=("Arial", 16), height=0)
+        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(mof))
+        open.pack(side='right')
+        tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
+        see = tk.Label(row_icon_btns, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR,
+                       padx=2, font=("Arial", 16), height=0)
+        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(mof))
+        see.pack(side='right')
+        tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
+        edit = tk.Label(row_icon_btns, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR,
+                        padx=2, font=("Arial", 16), height=0)
+        edit.bind('<Button-1>', lambda e: select_for_edit(parent, mof))
+        edit.pack(side='right')
+        row_icon_btns.grid(sticky=tk.E, row=0, column=2)
 
-    row2 = tk.Frame(master=view, height=20)
-    for text, attr in Attributes.attributes.items():
-        if attr.enabled:
-            _attribute_view(row2, text, attr.calculate(mof), attr.description).pack(side='left')
-    row2.pack(fill=tk.X)
+        self.attribute_row = self.generate_attribute_row()
 
-    row3 = tk.Frame(master=view, height=20)
-    sbu_label = tk.Label(row3, text="SBUs:")
-    sbu_label.pack(side='left')
+        # self.generate_sbu_row().grid(sticky=tk.EW, columnspan=3) # Temporarily disabled for speed (part 2/2)
 
-    def have_page_highlight(clicked_node):
-        def fun(*args):
-            page.highlight_molecule(clicked_node)
-        return fun
+        row4 = tk.Frame(master=self, height=20)
+        ligand_label = tk.Label(row4, text="Ligands:")
+        ligand_label.pack(side='left')
+        row4.grid(sticky=tk.EW, columnspan=3)
 
-    def display_sbu_name(sbu, color):
+    def generate_sbu_row(self):
+        sbu_row = tk.Frame(master=self, height=20)
+        sbu_label = tk.Label(sbu_row, text="SBUs:")
+        sbu_label.pack(side='left')
+        for node in self.sbus.clusters:
+            self.display_sbu_name(sbu_row, node, '#0000a0')
+        for conn in self.sbus.connectors:
+            self.display_sbu_name(sbu_row, conn, '#008100')
+        for aux in self.sbus.auxiliaries:
+            self.display_sbu_name(sbu_row, aux, '#810000')
+        return sbu_row
+
+    def display_sbu_name(self, parent, sbu, color):
         text = f"{sbu.frequency}x {sbu.label} ({sbu.connections()}*)"
-        sbu_label = tk.Label(row3, text=text, fg=color, cursor='hand2', padx=3)
+        sbu_label = tk.Label(parent, text=text, fg=color, cursor=os_specific_settings.LINK_CURSOR, padx=3)
         f = tkFont.Font(sbu_label, sbu_label["font"])
         f.configure(underline=True)
         sbu_label.configure(font=f)
-        event_function = have_page_highlight(sbu)
+        event_function = self.have_page_highlight(sbu)
         sbu_label.bind('<Button-1>', event_function)
         sbu_label.pack(side='left')
-    for node in sbus.clusters:
-        display_sbu_name(node, '#0000a0')
-    for conn in sbus.connectors:
-        display_sbu_name(conn, '#008100')
-    for aux in sbus.auxiliaries:
-        display_sbu_name(aux, '#810000')
-    row3.pack(fill=tk.X)
 
-    row4 = tk.Frame(master=view, height=20)
-    ligand_label = tk.Label(row4, text="Ligands:")
-    ligand_label.pack(side='left')
-    row4.pack(fill=tk.X)
+    def have_page_highlight(self, clicked_node):
+        def fun(*args):
+            self.top_page.highlight_molecule(clicked_node)
 
-    return view
+        return fun
+
+    def refresh_attributes(self):
+        self.attribute_row.grid_forget()
+        self.attribute_row = self.generate_attribute_row()
+
+    def refresh_elements(self):
+        if self.elements is not None:
+            self.elements.grid_forget()
+        self.elements = tk.Label(self, text=self.mof.atoms_string_with_solvents() if Settings.keep_solvent
+                                 else self.mof.atoms_string_without_solvents())
+        self.elements.grid(row=0, column=1)
+
+    def generate_attribute_row(self):
+        row = tk.Frame(master=self, height=20)
+        i = 0
+        for text, attr in Attributes.attributes.items():
+            if attr.enabled:
+                _attribute_view(row, text, attr.calculate(self.mof), attr.description).grid(column=i, row=0,
+                                                                                            sticky=tk.EW)
+                row.grid_columnconfigure(i, weight=1)
+                i += 1
+        row.grid(sticky=tk.EW, row=1, columnspan=3)
+        return row
 
 
 def _attribute_view(parent, name, value, description):
-    view = tk.Frame(parent, bd=1, relief=tk.SOLID)
+    view = tk.Frame(parent, bd=0, relief=tk.SOLID)
+    view.config(highlightbackground=os_specific_settings.secondary_color,
+                highlightcolor=os_specific_settings.secondary_color, highlightthickness=1)
     top = tk.Label(view, text=name)
     Tooltips.create_tool_tip(top, description)
     top.pack()

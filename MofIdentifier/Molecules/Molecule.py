@@ -20,13 +20,16 @@ class Molecule:
         self.no_h_graph = None
         self.should_use_weak_comparison = weak_comparison_enabled
 
+    def __str__(self):
+        return self.atoms_string()
+
     def atoms_string(self):
         string = ''
         elements = list(self.elementsPresent)
         elements.sort()
         for element in elements:
             string = string + str(self.elementsPresent[element]) + ' ' + element + ',  '
-        return string[0:-2]
+        return string[0:-3]
 
     def get_graph(self):
         if self.should_use_weak_comparison:

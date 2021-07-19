@@ -1,25 +1,18 @@
-def to_sup(s):
-    sups = {u'0': u'\u2070',
-            u'1': u'\xb9',
-            u'2': u'\xb2',
-            u'3': u'\xb3',
-            u'4': u'\u2074',
-            u'5': u'\u2075',
-            u'6': u'\u2076',
-            u'7': u'\u2077',
-            u'8': u'\u2078',
-            u'9': u'\u2079'}
+from pymongo import MongoClient
 
-    return ''.join(sups.get(char, char) for char in s)  # lose the list comprehension
+from GUI import DB_util
+
+cat_before = {'name': 'Whiskers', 'color': 'calico', 'personality': 'bold'}
+cat_middle = {'name': 'Void', 'color': 'black', 'personality': 'cuddly'}
+cat_after = {'name': 'Spook', 'color': 'grey', 'personality': 'lethal'}
 
 
-SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
+DB_util.run_mongod()
 
-
-def to_sub(s):
-    return s.translate(SUB)
-
-
-if __name__ == '__main__':
-    test_strings= ['0123456789', 'C', '12 C', 'C12']
-    print(*[to_sub(string) for string in test_strings])
+client = MongoClient('mongodb://localhost:27017/')
+database = client.test_database
+collection = database['scratch_paper_cats']
+collection.insert_one(cat_middle)
+print(list(collection.find()))
+DB_util.stop_mongod('scratch_paper_cats')
+collection.insert_one(cat_after)
