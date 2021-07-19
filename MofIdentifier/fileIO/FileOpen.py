@@ -3,19 +3,27 @@ import platform
 import subprocess
 
 from GUI import Settings
-from MofIdentifier.fileIO import MoleculeWriter
+from MofIdentifier.fileIO import MoleculeWriter, CifWriter
+from MofIdentifier.Molecules import MOF
 
 
 def make_and_open(molecule):
-    path = Settings.get_download_filepath()
-    MoleculeWriter.write_one(molecule, path)
+    path = make_file(molecule)
     open_file(os.path.join(path, molecule.label))
 
 
 def make_and_see(molecule):
-    path = Settings.get_download_filepath()
-    MoleculeWriter.write_one(molecule, path)
+    path = make_file(molecule)
     see_file(os.path.join(path, molecule.label))
+
+
+def make_file(molecule):
+    path = Settings.get_download_filepath()
+    if not Settings.keep_solvent and isinstance(molecule, MOF.MOF):
+        CifWriter.write_without_solvent(molecule, path)
+    else:
+        MoleculeWriter.write_one(molecule, path)
+    return path
 
 
 def open_file(filepath):

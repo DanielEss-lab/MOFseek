@@ -85,3 +85,6 @@ class Root(tk.Tk):
             self.search_page.show_sbu_search()
         else:
             self.search_page.hide_sbu_search()
+
+    def toggle_solvent(self):
+        self.search_page.refresh_elements_shown()

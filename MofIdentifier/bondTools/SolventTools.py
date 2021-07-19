@@ -37,3 +37,21 @@ def count_solvents(atom_groups):
                 j += 1
         i += 1
     return new_groups_list
+
+
+def get_file_content_without_solvents(mof):
+    if len(mof.solvents) == 0:
+        return mof.file_content
+    file_content: str = mof.file_content
+    atoms_to_remove = []
+    for solvent_atoms in mof.solvent_components:
+        atoms_to_remove.extend(solvent_atoms)
+    file_lines = file_content.split('\n')
+    line_index = 0
+    while line_index < len(file_lines):
+        line = file_lines[line_index]
+        if any(line.startswith(atom.label) for atom in atoms_to_remove):
+            file_lines.pop(line_index)
+        else:
+            line_index += 1
+    return '\n'.join(file_lines)

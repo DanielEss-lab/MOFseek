@@ -3,6 +3,7 @@ from tkinter import messagebox
 import tkinter.filedialog as fd
 
 download_filepath = ""
+keep_solvent = True
 
 
 def change_download_filepath():
@@ -22,3 +23,8 @@ def get_download_filepath():
                                                  "the prompt that will appear when you hit 'okay'.")
         change_download_filepath()
         return get_download_filepath()
+
+
+def toggle_solvent(enabled):
+    global keep_solvent
+    keep_solvent = enabled

@@ -37,21 +37,12 @@ def reduce_duplicates(sbu_list, is_duplicate):
     return new_sbu_list
 
 
-<<<<<<< HEAD
-def check_for_infinite_band(cluster_atoms):
-    # If any molecule can traverse the cluster and get to itself by crossing cell boundary panes an odd number of times,
-    # then all molecules can, and then they are an infinite band.
-    for starting_atom in cluster_atoms: # Mark
-        if len(in_cluster_neighbors(starting_atom, cluster_atoms)) > 1:  # If it only has one neighbor, algorithm won't work
-            if check_for_inf_recurse(cluster_atoms, set(), starting_atom, starting_atom, 0):
-=======
 def check_for_infinite_band(sbu_atoms):
     # If any molecule can traverse the cluster or connector and get to itself by crossing cell boundary
     # panes an odd number of times, then all molecules can, and then they are an infinite band.
     for starting_atom in sbu_atoms:
         if len(in_sbu_neighbors(starting_atom, sbu_atoms)) > 1:  # If it only has one neighbor, algorithm won't work
             if check_for_inf_recurse(sbu_atoms, set(), starting_atom, starting_atom, 0):
->>>>>>> gui-useful
                 return True
     return False
 
