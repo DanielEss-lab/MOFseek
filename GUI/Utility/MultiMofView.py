@@ -56,3 +56,7 @@ class View(tk.Frame):
     def refresh_all_attributes(self):
         for widget in self.mofs_frame.winfo_children():
             widget.refresh_attributes()
+
+    def refresh_all_elements(self):
+        for widget in self.mofs_frame.winfo_children():
+            widget.refresh_elements()

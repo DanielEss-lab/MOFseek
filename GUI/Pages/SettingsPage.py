@@ -23,6 +23,13 @@ class Page(tk.Frame):
         self.download_filepath_option_row = self.make_download_filepath_option_row()
         self.download_filepath_option_row.grid(sticky=tk.W)
 
+        def solvent_button_action(enabled):
+            Settings.toggle_solvent(enabled)
+            self.winfo_toplevel().toggle_solvent()
+        Page.Setting(self, 'Keep Solvent', 'Export and view any solvent molecules that were in the original file '
+                                           'along with the MOF itself', Settings.keep_solvent, solvent_button_action)\
+            .grid(sticky=tk.W, pady=(20, 20))
+
     class Setting(tk.Frame):
         def __init__(self, parent, name, description, starts_enabled, function):
             self.parent = parent

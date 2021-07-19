@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
-from GUI import os_specific_settings, Attributes
+from GUI import os_specific_settings, Attributes, Settings
 from GUI.Utility import Tooltips
 from MofIdentifier.fileIO import FileOpen
 from MofIdentifier.subbuilding import SBUCollectionManager
@@ -24,18 +24,22 @@ class View(tk.Frame):
 
         name = tk.Label(self, text=mof.label, width=48, anchor=tk.W)
         name.grid(sticky=tk.W, row=0, column=0)
-        elements = tk.Label(self, text=mof.atoms_string())
-        elements.grid(row=0, column=1)
+        self.elements = tk.Label(self, text=mof.atoms_string_with_solvents() if Settings.keep_solvent
+                            else mof.atoms_string_without_solvents())
+        self.elements.grid(row=0, column=1)
         row_icon_btns = tk.Frame(master=self)
-        open = tk.Label(row_icon_btns, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+        open = tk.Label(row_icon_btns, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR,
+                        padx=2, font=("Arial", 16), height=0)
         open.bind('<Button-1>', lambda e: FileOpen.make_and_open(mof))
         open.pack(side='right')
         tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
-        see = tk.Label(row_icon_btns, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+        see = tk.Label(row_icon_btns, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR,
+                       padx=2, font=("Arial", 16), height=0)
         see.bind('<Button-1>', lambda e: FileOpen.make_and_see(mof))
         see.pack(side='right')
         tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
-        edit = tk.Label(row_icon_btns, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
+        edit = tk.Label(row_icon_btns, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR,
+                        padx=2, font=("Arial", 16), height=0)
         edit.bind('<Button-1>', lambda e: select_for_edit(parent, mof))
         edit.pack(side='right')
         row_icon_btns.grid(sticky=tk.E, row=0, column=2)
@@ -74,18 +78,27 @@ class View(tk.Frame):
     def have_page_highlight(self, clicked_node):
         def fun(*args):
             self.top_page.highlight_molecule(clicked_node)
+
         return fun
 
     def refresh_attributes(self):
         self.attribute_row.grid_forget()
         self.attribute_row = self.generate_attribute_row()
 
+    def refresh_elements(self):
+        if self.elements is not None:
+            self.elements.grid_forget()
+        self.elements = tk.Label(self, text=self.mof.atoms_string_with_solvents() if Settings.keep_solvent
+                                 else self.mof.atoms_string_without_solvents())
+        self.elements.grid(row=0, column=1)
+
     def generate_attribute_row(self):
         row = tk.Frame(master=self, height=20)
         i = 0
         for text, attr in Attributes.attributes.items():
             if attr.enabled:
-                _attribute_view(row, text, attr.calculate(self.mof), attr.description).grid(column=i, row=0, sticky=tk.EW)
+                _attribute_view(row, text, attr.calculate(self.mof), attr.description).grid(column=i, row=0,
+                                                                                            sticky=tk.EW)
                 row.grid_columnconfigure(i, weight=1)
                 i += 1
         row.grid(sticky=tk.EW, row=1, columnspan=3)
@@ -94,7 +107,8 @@ class View(tk.Frame):
 
 def _attribute_view(parent, name, value, description):
     view = tk.Frame(parent, bd=0, relief=tk.SOLID)
-    view.config(highlightbackground=os_specific_settings.secondary_color, highlightcolor=os_specific_settings.secondary_color, highlightthickness=1)
+    view.config(highlightbackground=os_specific_settings.secondary_color,
+                highlightcolor=os_specific_settings.secondary_color, highlightthickness=1)
     top = tk.Label(view, text=name)
     Tooltips.create_tool_tip(top, description)
     top.pack()

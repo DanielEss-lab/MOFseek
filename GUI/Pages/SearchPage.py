@@ -27,6 +27,9 @@ class SearchPage(tk.Frame):
     def display_search_results(self, results):
         self.search_results_v.start_process(results)
 
+    def refresh_elements_shown(self):
+        self.search_results_v.main_body.refresh_all_elements()
+
     def refresh_attributes_shown(self):
         self.search_results_v.main_body.refresh_all_attributes()
         self.search_results_v.rebuild_sort_dropdown()
