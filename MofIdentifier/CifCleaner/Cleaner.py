@@ -53,8 +53,11 @@ def fix_atoms_too_close(mof, atom):
     #       else:
     #           fix_poorly_placed_functional_groups()
 
+
 def fix_wobble(mof, atom):
     pass
 
+
 def fix_poorly_placed_functional_groups():
     pass
+
