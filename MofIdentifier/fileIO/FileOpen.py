@@ -2,6 +2,21 @@ import os
 import platform
 import subprocess
 
+from GUI import Settings
+from MofIdentifier.fileIO import MoleculeWriter
+
+
+def make_and_open(molecule):
+    path = Settings.get_download_filepath()
+    MoleculeWriter.write_one(molecule, path)
+    open_file(os.path.join(path, molecule.label))
+
+
+def make_and_see(molecule):
+    path = Settings.get_download_filepath()
+    MoleculeWriter.write_one(molecule, path)
+    see_file(os.path.join(path, molecule.label))
+
 
 def open_file(filepath):
     if platform.system() == 'Windows':  # Windows

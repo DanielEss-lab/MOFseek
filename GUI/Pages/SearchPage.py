@@ -29,6 +29,7 @@ class SearchPage(tk.Frame):
 
     def refresh_attributes_shown(self):
         self.search_results_v.main_body.refresh_all_attributes()
+        self.search_results_v.rebuild_sort_dropdown()
         self.search_v.regenerate_attribute_row()
 
     def show_sbu_search(self):

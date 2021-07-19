@@ -37,29 +37,38 @@ def reduce_duplicates(sbu_list, is_duplicate):
     return new_sbu_list
 
 
+<<<<<<< HEAD
 def check_for_infinite_band(cluster_atoms):
     # If any molecule can traverse the cluster and get to itself by crossing cell boundary panes an odd number of times,
     # then all molecules can, and then they are an infinite band.
     for starting_atom in cluster_atoms: # Mark
         if len(in_cluster_neighbors(starting_atom, cluster_atoms)) > 1:  # If it only has one neighbor, algorithm won't work
             if check_for_inf_recurse(cluster_atoms, set(), starting_atom, starting_atom, 0):
+=======
+def check_for_infinite_band(sbu_atoms):
+    # If any molecule can traverse the cluster or connector and get to itself by crossing cell boundary
+    # panes an odd number of times, then all molecules can, and then they are an infinite band.
+    for starting_atom in sbu_atoms:
+        if len(in_sbu_neighbors(starting_atom, sbu_atoms)) > 1:  # If it only has one neighbor, algorithm won't work
+            if check_for_inf_recurse(sbu_atoms, set(), starting_atom, starting_atom, 0):
+>>>>>>> gui-useful
                 return True
     return False
 
 
-def in_cluster_neighbors(atom, cluster_atoms):
-    return [neighbor for neighbor in atom.bondedAtoms if neighbor in cluster_atoms]
+def in_sbu_neighbors(atom, sbu_atoms):
+    return [neighbor for neighbor in atom.bondedAtoms if neighbor in sbu_atoms]
 
 
-def check_for_inf_recurse(cluster_atoms, visited, target_atom, atom, panes_crossed):
+def check_for_inf_recurse(sbu_atoms, visited, target_atom, atom, panes_crossed):
     visited.add(atom)
-    for neighbor in in_cluster_neighbors(atom, cluster_atoms):
+    for neighbor in in_sbu_neighbors(atom, sbu_atoms):
         if neighbor == target_atom and panes_crossed + panes_crossed_in_bond(atom, neighbor) % 2 == 1:
             # if panes_crossed (plus possible pane in traversal from atom to neighbor) is odd:
             return True
         if neighbor not in visited:
             crosses_pane = panes_crossed_in_bond(atom, neighbor)
-            if check_for_inf_recurse(cluster_atoms, visited, target_atom, neighbor, panes_crossed + crosses_pane):
+            if check_for_inf_recurse(sbu_atoms, visited, target_atom, neighbor, panes_crossed + crosses_pane):
                 return True
     return False
 
@@ -203,7 +212,10 @@ class SBUIdentifier:
             ligand_type = UnitType.CONNECTOR
         else:
             ligand_type = UnitType.AUXILIARY
-        return changeableSBU(self.next_group_id, ligand_type, atoms, 1, adjacent_cluster_ids)
+        if check_for_infinite_band(atoms):
+            return changeableSBU(self.next_group_id, ligand_type, atoms, float('inf'), adjacent_cluster_ids)
+        else:
+            return changeableSBU(self.next_group_id, ligand_type, atoms, 1, adjacent_cluster_ids)
 
     def identify_ligand_recurse(self, nonmetal_atom, ligand_atoms, adjacent_cluster_ids):
         ligand_atoms.add(nonmetal_atom)

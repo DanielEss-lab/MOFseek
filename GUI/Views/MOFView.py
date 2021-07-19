@@ -1,9 +1,8 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
-from GUI import os_specific_settings
+from GUI import os_specific_settings, Attributes
 from GUI.Utility import Tooltips
-from GUI.Search import Attributes
 from MofIdentifier.fileIO import FileOpen
 from MofIdentifier.subbuilding import SBUCollectionManager
 
@@ -18,7 +17,7 @@ class View(tk.Frame):
         self.mof = mof
         self.top_page = parent.winfo_toplevel()
         tk.Frame.__init__(self, self.parent, height=40, bd=1, relief=tk.SOLID)
-        self.sbus = SBUCollectionManager.process_new_mof(mof)
+        # self.sbus = SBUCollectionManager.process_new_mof(mof)   # Temporarily disabled for speed (part 1/2)
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
@@ -29,11 +28,11 @@ class View(tk.Frame):
         elements.grid(row=0, column=1)
         row_icon_btns = tk.Frame(master=self)
         open = tk.Label(row_icon_btns, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
-        open.bind('<Button-1>', lambda e: FileOpen.open_file(mof.filepath))
+        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(mof))
         open.pack(side='right')
         tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
         see = tk.Label(row_icon_btns, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
-        see.bind('<Button-1>', lambda e: FileOpen.see_file(mof.filepath))
+        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(mof))
         see.pack(side='right')
         tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
         edit = tk.Label(row_icon_btns, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
@@ -43,7 +42,7 @@ class View(tk.Frame):
 
         self.attribute_row = self.generate_attribute_row()
 
-        self.generate_sbu_row().grid(sticky=tk.EW, columnspan=3)
+        # self.generate_sbu_row().grid(sticky=tk.EW, columnspan=3) # Temporarily disabled for speed (part 2/2)
 
         row4 = tk.Frame(master=self, height=20)
         ligand_label = tk.Label(row4, text="Ligands:")
@@ -51,16 +50,16 @@ class View(tk.Frame):
         row4.grid(sticky=tk.EW, columnspan=3)
 
     def generate_sbu_row(self):
-        attribute_row = tk.Frame(master=self, height=20)
-        sbu_label = tk.Label(attribute_row, text="SBUs:")
+        sbu_row = tk.Frame(master=self, height=20)
+        sbu_label = tk.Label(sbu_row, text="SBUs:")
         sbu_label.pack(side='left')
         for node in self.sbus.clusters:
-            self.display_sbu_name(attribute_row, node, '#0000a0')
+            self.display_sbu_name(sbu_row, node, '#0000a0')
         for conn in self.sbus.connectors:
-            self.display_sbu_name(attribute_row, conn, '#008100')
+            self.display_sbu_name(sbu_row, conn, '#008100')
         for aux in self.sbus.auxiliaries:
-            self.display_sbu_name(attribute_row, aux, '#810000')
-        return attribute_row
+            self.display_sbu_name(sbu_row, aux, '#810000')
+        return sbu_row
 
     def display_sbu_name(self, parent, sbu, color):
         text = f"{sbu.frequency}x {sbu.label} ({sbu.connections()}*)"
