@@ -1,5 +1,5 @@
 import time
-from io import FileIO
+from io import FileIO, StringIO
 from pathlib import Path
 
 import pandas as pd
@@ -16,10 +16,26 @@ def get_molecule(filename):
     return mol
 
 
+def get_molecule_from_string(string, name):
+    mol = read_string(string, name)
+    bond_creator.connect_atoms(mol)
+    return mol
+
+
 def read_xyz(file):
-    molecule = pd.read_table(file, skiprows=2, delim_whitespace=True,
-                             names=['atom', 'x', 'y', 'z'])
+    atoms = get_atoms(file)
     file_str = Path(file).read_text()
+    return Ligand(file, atoms, file_str)
+
+
+def read_string(file_content, name):
+    atoms = get_atoms(StringIO(file_content))
+    return Ligand(name, atoms, file_content)
+
+
+def get_atoms(file_like):
+    molecule = pd.read_table(file_like, skiprows=2, delim_whitespace=True,
+                             names=['atom', 'x', 'y', 'z'])
     atoms = list(())
     index = 0
     for atomData in molecule.values:
@@ -30,26 +46,11 @@ def read_xyz(file):
                                    float(atomData[3]))
         atoms.append(atom)
         index += 1
-    return Ligand(file, atoms, file_str)
+    return atoms
 
 
 if __name__ == '__main__':
-    # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-
-    before_read_time = time.time()
-    ligand = read_xyz('../ligands/test_resources/Benzene.xyz')
-    between_time = time.time()
-    bond_creator = XyzBondCreator()
-    bond_creator.connect_atoms(ligand)
-    numBonds, numCompared = bond_creator.get_extra_information()
-    end_time = time.time()
-
-    print('number of atoms: {}'.format(len(ligand.atoms)))
-    print('number of bonds determined to exist: {}'.format(numBonds))
-    print('number of atom comparisons made: {}'.format(numCompared))
-    possibleComparisons = len(ligand.atoms) ** 2
-    print('num comparisons in a naive approach: {}'.format(possibleComparisons))
-    print('time to read from cif: {}'.format(between_time - before_read_time))
-    print('time for algorithm to run on mof: {}'.format(end_time - between_time))
-    print('\n\tAtoms and their bonds:')
-    print(*ligand.atoms, sep="\n")
+    file = '../ligands/M6_node_alternate.xyz'
+    string = Path(file).read_text()
+    print(read_string(string, 'name'))
+    print(read_xyz(file))

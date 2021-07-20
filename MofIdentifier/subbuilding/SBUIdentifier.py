@@ -1,5 +1,6 @@
 import MofIdentifier
 from MofIdentifier.bondTools import Distances
+from MofIdentifier.fileIO import XyzWriter
 from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
 
 
@@ -158,6 +159,7 @@ class SBUIdentifier:
         auxiliaries = reduce_duplicates(auxiliaries, lambda x, y: x == y)
         for sbu in clusters + connectors + auxiliaries:
             sbu.normalize_atoms(self.mof)
+            sbu.file_content = XyzWriter.atoms_to_xyz_string(sbu.atoms, '')
         return SBUCollection(clusters, connectors, auxiliaries)
 
     def identify_cluster(self, metal_atom):
