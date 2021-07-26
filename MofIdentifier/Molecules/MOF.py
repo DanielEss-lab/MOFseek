@@ -1,5 +1,7 @@
+import copy
+
 from MofIdentifier.Molecules import Molecule
-from MofIdentifier.Molecules.atom import conversion_to_Cartesian
+from MofIdentifier.Molecules.atom import conversion_to_Cartesian, Atom
 from MofIdentifier.bondTools import SolventTools
 from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
 from MofIdentifier.subbuilding import SBUIdentifier
@@ -72,3 +74,10 @@ class MOF(Molecule.Molecule):
                 return
             else:
                 atoms.extend(components[comp_index])
+
+    def without_atom(self, atom_to_delete):
+        atoms = [Atom(atom.label, atom.type_symbol, atom.x, atom.y, atom.z, atom.a, atom.b, atom.c)
+                 for atom in self.atoms]
+        atoms.remove(atom_to_delete)
+        return MOF(self.filepath, atoms, self.symmetry, self.fractional_lengths[0], self.fractional_lengths[1],
+                   self.fractional_lengths[2], self.angles[0], self.angles[1], self.angles[2], self.file_content)
