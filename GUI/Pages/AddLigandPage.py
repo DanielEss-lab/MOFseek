@@ -42,7 +42,7 @@ class AddLigandPage(FrameWithProcess.Frame):
                 self.molecule_v.destroy()
             try:
                 self.mol = LigandReader.get_mol_from_file(str(Path(filename)))
-                self.molecule_v = LigandView.make_view(self.frm_ligand_preview, self.mol)
+                self.molecule_v = LigandView.View(self.frm_ligand_preview, self.mol)
                 self.add_btn['state'] = "normal"
                 self.molecule_v.pack()
             except:

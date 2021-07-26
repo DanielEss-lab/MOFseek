@@ -84,5 +84,5 @@ class Page(FrameWithProcess.Frame):
         self.mol = mol
         if self.molecule_v is not None:
             self.molecule_v.destroy()
-        self.molecule_v = SBUView.make_view(self, self.mol)
+        self.molecule_v = SBUView.View(self, self.mol)
         self.molecule_v.pack(side=tk.BOTTOM)

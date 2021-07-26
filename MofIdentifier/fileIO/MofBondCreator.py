@@ -105,7 +105,7 @@ class MofBondCreator:
     def compare_for_bond(self, atom_a, atom_b):
         self.num_compared = self.num_compared + 1
         dist = Distances.distance(atom_a, atom_b)
-        if Distances.is_bond_distance(dist, atom_a, atom_b):
+        if Distances.distance_is_less_than_bond_distance(dist, atom_a, atom_b):
             self.num_bonds += 1
             if not atom_a.is_in_unit_cell() or not atom_b.is_in_unit_cell():
                 if not atom_a.is_in_unit_cell() and not atom_b.is_in_unit_cell():

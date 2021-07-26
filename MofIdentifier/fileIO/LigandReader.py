@@ -12,6 +12,7 @@ def get_mol_from_file(filepath):
     else:
         return None
 
+
 def get_all_mols_from_directory(filepath):
     mols = []
     # Change the directory
