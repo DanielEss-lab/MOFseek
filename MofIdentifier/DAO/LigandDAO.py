@@ -79,8 +79,6 @@ def search_all_ligand_names():
 
 
 def search_specific_ligand_by_name(ligand_name):
-    print("This is the data of", ligand_name, ":")
-
     try:
         ligand_obj = ligand_collection.find_one({"ligand_name": ligand_name})
         # ligand = ligand_collection.find({}, {"ligand_name": ligand_name, "_id": 0})
@@ -90,8 +88,14 @@ def search_specific_ligand_by_name(ligand_name):
         print("error: ", e.args)
 
 
-if __name__ == '__main__':
+def rename_ligand(old_name, new_name):
+    try:
+        ligand_collection.find_one_and_update({"ligand_name": old_name}, {"$set": {"ligand_name": new_name}})
+    except Exception as e:
+        print("error: ", e.args)
 
+
+if __name__ == '__main__':
     # --worked--
     # ligand, matched_mofs, ligand_for_db = read_ligand(
     #     "\\Users\\shers\\Desktop\\School stuff\\Chem Lab\\Esslab-P66\\MofIdentifier\\ligands\\Benzene.smiles")
@@ -100,4 +104,6 @@ if __name__ == '__main__':
 
     # --worked--
     # search_all_ligand_names()
-    search_specific_ligand_by_name("Benzene.smiles")
+    print(search_specific_ligand_by_name("Benzene.smiles"))
+    # rename_ligand("hi.smiles", "Benzene.smiles")
+

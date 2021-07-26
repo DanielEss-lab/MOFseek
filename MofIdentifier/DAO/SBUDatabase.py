@@ -2,11 +2,11 @@ from MofIdentifier.fileIO import XyzReader
 
 
 class SBUDatabase:
-    def __init__(self, name, file_content, mofs):
-        self.name = name
+    def __init__(self, sbu_name, file_content, MOFs):
+        self.name = sbu_name
         self.file_content = file_content
-        self.mofs = mofs
-        self.frequency = len(mofs)
+        self.mofs = MOFs
+        self.frequency = len(MOFs)
         self._sbu = None
 
     def set_name(self, name):
