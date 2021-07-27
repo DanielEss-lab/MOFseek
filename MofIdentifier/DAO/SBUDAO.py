@@ -26,11 +26,19 @@ def get_all_names():
 
 
 def get_sbu(name):
-    pass
+    try:
+        sbu_obj = sbu_collection.find_one({"sbu_name": name})
+        sbu = SBUDatabase(sbu_obj["sbu_name"], sbu_obj["file_content"], sbu_obj["MOFs"])
+        return sbu
+    except Exception as e:
+        print("error: ", e.args)
 
 
 def rename_sbu(old_name, new_name):
-    pass
+    try:
+        sbu_collection.find_one_and_update({"sbu_name": old_name}, {"$set": {"sbu_name": new_name}})
+    except Exception as e:
+        print("error: ", e.args)
 
 
 # Returns the name, either new name because it was added or old name because it matched an existing one

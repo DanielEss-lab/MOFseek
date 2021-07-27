@@ -12,8 +12,10 @@ class SBUDAOTest(unittest.TestCase):
         self.assertEqual(1, len(SBUDAO.get_all_names()))
         self.assertEqual('cluster_0', name)
 
-
-
+    def test_get_sbu(self):
+        sbu = SBUDAO.get_sbu("cluster_0")
+        self.assertIsNotNone(sbu)
+        print(sbu)
 
 
 if __name__ == '__main__':
