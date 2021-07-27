@@ -11,22 +11,22 @@ import sys
 def replace_metal(input_cif_file_path, output_cif_file_path, new_metal_symbol):
     mof = CifReader.get_mof(input_cif_file_path)
     num_needed = 2  # Todo: get number of protons based on new_metal_symbol
-    nodes = SBUIdentifier.split(mof).clusters
-    nodes = [node for node in nodes if len(node.atoms) > 1]
-    assert (len(nodes) > 0)
-    assert (all(node == nodes[0] for node in nodes))
-    num_protons = count_added_protons(nodes[0])
-    previous_metal_symbol = get_metal_of_node(nodes[0])
+    clusters = SBUIdentifier.split(mof, True).nodes_with_auxiliaries().items()
+    clusters = [cluster for cluster in clusters if len(cluster[0].atoms) > 1]
+    assert (len(clusters) > 0)
+    assert (all(cluster[0] == clusters[0][0] for cluster in clusters))
+    num_protons = count_added_protons(clusters[0])
+    previous_metal_symbol = get_metal_of_node(clusters[0][0])
     if num_protons > num_needed:
         num_to_delete = num_protons - num_needed
         atoms_to_delete = []
-        for node in nodes:
-            atoms_to_delete.extend(get_atoms_to_delete(node, num_to_delete))
+        for cluster in clusters:
+            atoms_to_delete.extend(get_atoms_to_delete(cluster, num_to_delete))
         file_content = get_file_content_without_atoms(mof.file_content, atoms_to_delete)
     elif num_protons < num_needed:
         num_to_add = num_needed - num_protons
         atoms_to_add = []
-        for node in nodes:
+        for node in clusters:
             atoms_to_add.extend(get_atoms_to_add(node, num_to_add, mof))
         file_content = get_file_content_with_atoms(mof.file_content, atoms_to_add)
     else:
@@ -34,20 +34,26 @@ def replace_metal(input_cif_file_path, output_cif_file_path, new_metal_symbol):
     # Finally, replace the metal:
     file_lines = file_content.split('\n')
     approximate_main_section = '\n'.join(file_lines[16:])
-    approximate_main_section.replace(previous_metal_symbol, new_metal_symbol)
+    approximate_main_section = approximate_main_section.replace(previous_metal_symbol, new_metal_symbol)
     file_content = '\n'.join(file_lines[0:16]) + '\n' + approximate_main_section
 
     with open(output_cif_file_path, "w") as f:
         f.write(file_content)
 
 
-def count_added_protons(node):
+def count_added_protons(cluster):
+    node = cluster[0]
+    auxiliaries = cluster[1]
     num = 0
     for atom in node.atoms:
         if atom.type_symbol == 'O' and len([neighbor for neighbor in atom.bondedAtoms if neighbor.is_metal()]) > 2:
             for neighbor in atom.bondedAtoms:
                 if neighbor.type_symbol == 'H':
                     num += 1
+    for aux in auxiliaries:
+        for atom in aux.atoms:
+            if atom.type_symbol == 'H':
+                num += 1
     return num
 
 
@@ -61,8 +67,9 @@ def get_metal_of_node(node):
     return type
 
 
-def get_atoms_to_delete(node, num_to_delete):
+def get_atoms_to_delete(cluster, num_to_delete):
     eligible_atoms = []
+    node = cluster[0]
     for atom in node.atoms:
         if atom.type_symbol == 'H':
             assert (len(atom.bondedAtoms) == 1)
@@ -73,6 +80,7 @@ def get_atoms_to_delete(node, num_to_delete):
     sorted_eligible = list(eligible_atoms)
     sorted_eligible.sort()
     atoms_to_delete = sorted_eligible[0:num_to_delete]
+    assert(len(atoms_to_delete) == num_to_delete)
     return atoms_to_delete
 
 
@@ -127,7 +135,7 @@ def get_file_content_without_atoms(file_content, atoms_to_delete):
     line_index = 0
     while line_index < len(file_lines):
         line = file_lines[line_index]
-        if any(line.startswith(atom.label) for atom in atoms_to_delete):
+        if any(line.startswith(atom.label + ' ') for atom in atoms_to_delete):
             file_lines.pop(line_index)
         else:
             line_index += 1

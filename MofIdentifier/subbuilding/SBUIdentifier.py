@@ -3,9 +3,9 @@ from MofIdentifier.bondTools import Distances
 from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
 
 
-def split(mof, show_duplicates=False):
-    identifier = SBUIdentifier(mof)
-    return identifier.run_algorithm(show_duplicates)
+def split(mof, show_duplicates=False, aux_as_part_of_node=False):
+    identifier = SBUIdentifier(mof, show_duplicates)
+    return identifier.run_algorithm()
 
 
 def mof_has_all_sbus(mof, sbus):
@@ -103,13 +103,14 @@ def panes_between_recurse(atom, end, visited, num_panes, cluster):
 
 
 class SBUIdentifier:
-    def __init__(self, mof):
+    def __init__(self, mof, show_duplicates):
         self.atoms = mof.atoms
         self.mof = mof
         self.atom_to_SBU = dict()
         self.next_group_id = 1
         self.groups = dict()
         self.allow_two_steps = True
+        self.show_duplicates = show_duplicates
 
     def been_visited(self, atom):
         return atom.label in self.atom_to_SBU
@@ -120,7 +121,7 @@ class SBUIdentifier:
     def group_id_of(self, atom):
         return self.atom_to_SBU[atom.label]
 
-    def run_algorithm(self, show_duplicates):
+    def run_algorithm(self):
         clusters = list(())
         connectors = list(())
         auxiliaries = list(())
@@ -129,7 +130,7 @@ class SBUIdentifier:
                 sbu = self.identify_cluster(atom)
                 if sbu.frequency == float('inf') and self.allow_two_steps:
                     # Try algorithm again, from the top, but with stricter cluster definition
-                    identifier = SBUIdentifier(self.mof)
+                    identifier = SBUIdentifier.copy_from(self)
                     identifier.allow_two_steps = False
                     return identifier.run_algorithm()
                 else:
@@ -153,7 +154,7 @@ class SBUIdentifier:
             self.set_adj_ids(cluster)
         if len(connectors) == 0:
             raise Exception('Exiting algorithm early because no connectors found')
-        if not show_duplicates:
+        if not self.show_duplicates:
             clusters = reduce_duplicates(clusters, lambda x, y: x == y)
             connectors = reduce_duplicates(connectors, lambda x, y: x == y)
             auxiliaries = reduce_duplicates(auxiliaries, lambda x, y: x == y)
@@ -286,3 +287,7 @@ class SBUIdentifier:
         for starting_atom in ligand_atoms:
             self.correct_adjacent_recurse(ligand_atoms, adjacent_cluster_ids, set(), dict(), starting_atom, 0, dict())
             break
+
+    @classmethod
+    def copy_from(cls, other):
+        return SBUIdentifier(other.mof, other.show_duplicates)
