@@ -3,9 +3,9 @@ from MofIdentifier.bondTools import Distances
 from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
 
 
-def split(mof):
+def split(mof, show_duplicates=False):
     identifier = SBUIdentifier(mof)
-    return identifier.run_algorithm()
+    return identifier.run_algorithm(show_duplicates)
 
 
 def mof_has_all_sbus(mof, sbus):
@@ -120,7 +120,7 @@ class SBUIdentifier:
     def group_id_of(self, atom):
         return self.atom_to_SBU[atom.label]
 
-    def run_algorithm(self):
+    def run_algorithm(self, show_duplicates):
         clusters = list(())
         connectors = list(())
         auxiliaries = list(())
@@ -153,9 +153,10 @@ class SBUIdentifier:
             self.set_adj_ids(cluster)
         if len(connectors) == 0:
             raise Exception('Exiting algorithm early because no connectors found')
-        clusters = reduce_duplicates(clusters, lambda x, y: x == y)
-        connectors = reduce_duplicates(connectors, lambda x, y: x == y)
-        auxiliaries = reduce_duplicates(auxiliaries, lambda x, y: x == y)
+        if not show_duplicates:
+            clusters = reduce_duplicates(clusters, lambda x, y: x == y)
+            connectors = reduce_duplicates(connectors, lambda x, y: x == y)
+            auxiliaries = reduce_duplicates(auxiliaries, lambda x, y: x == y)
         for sbu in clusters + connectors + auxiliaries:
             sbu.normalize_atoms(self.mof)
         return SBUCollection(clusters, connectors, auxiliaries)
