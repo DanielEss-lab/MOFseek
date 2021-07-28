@@ -36,9 +36,9 @@ def conversion_to_Cartesian(atom_a, atom_b, atom_c, angles, lengths):
 
 
 def convert_to_fractional(atom_x, atom_y, atom_z, mof):
-    alpha = mof.angles[0]
-    beta = mof.angles[1]
-    gamma = mof.angles[2]
+    alpha = np.deg2rad(mof.angles[0])
+    beta = np.deg2rad(mof.angles[1])
+    gamma = np.deg2rad(mof.angles[2])
     a = mof.fractional_lengths[0]
     b = mof.fractional_lengths[1]
     c = mof.fractional_lengths[2]

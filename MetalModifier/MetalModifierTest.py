@@ -1,6 +1,7 @@
 import unittest
 
 from MetalModifier.main import replace_metal, count_added_protons, protons_needed
+from MofIdentifier.Molecules.atom import Atom
 from MofIdentifier.fileIO import CifReader
 from MofIdentifier.subbuilding import SBUIdentifier
 
@@ -14,7 +15,23 @@ def count_node_protons(mof):
     return num_protons
 
 
-class MyTestCase(unittest.TestCase):
+class WriteAtomTest(unittest.TestCase):
+    def test_cartesian_to_fractional(self):
+        replace_metal(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\mofsForTests\smod7-pos-1.cif',
+                      r'C:\Users\mdavid4\Downloads\smod7-except-Y.cif', 'Y')
+        mof = CifReader.get_mof(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\mofsForTests\smod7-pos-1.cif')
+        original_atom = mof.atoms[0]
+        fractional_atom = Atom.from_fractional(original_atom.label, original_atom.type_symbol, original_atom.a,
+                                               original_atom.b, original_atom.c, mof.angles, mof.fractional_lengths)
+        cartesian_atom = Atom.from_cartesian(original_atom.label, original_atom.type_symbol, original_atom.x,
+                                             original_atom.y, original_atom.z, mof)
+        self.assertAlmostEqual(original_atom.x, fractional_atom.x)
+        self.assertAlmostEqual(original_atom.x, cartesian_atom.x)
+        self.assertAlmostEqual(original_atom.a, fractional_atom.a)
+        self.assertAlmostEqual(original_atom.a, cartesian_atom.a)
+
+
+class ChangeMetalTest(unittest.TestCase):
     def test_change_metal(self):
         replace_metal(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\mofsForTests\smod7-pos-1.cif',
                       r'C:\Users\mdavid4\Downloads\smod7-except-Y.cif', 'Y')

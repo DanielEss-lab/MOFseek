@@ -1,3 +1,4 @@
+from MetalModifier import TetrahedronTools
 from MofIdentifier.Molecules.atom import Atom
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import CifReader
@@ -160,39 +161,32 @@ def get_atoms_to_add(cluster, num_to_add, mof):
 
 def make_proton_by(oxygen, mof):
     distance = CovalentRadiusLookup.lookup('O') + CovalentRadiusLookup.lookup('H')
+    O = np.array([oxygen.x, oxygen.y, oxygen.z])
     if len(oxygen.bondedAtoms) == 1:
-        O = np.array([oxygen.x, oxygen.y, oxygen.z])
-        A = np.array([oxygen.bondedAtoms[0].x, oxygen.bondedAtoms[0].y, oxygen.bondedAtoms[0].z])
+        A = get_close_numpy_vector(oxygen, oxygen.bondedAtoms[0], mof)
         line = normalize(O - A)
         # Rotate the line to make it more accurate when we need to add one here, then add another later.
         R = np.array([[1, 0, 0], [0, 0.87, -0.5], [0, 0.5, 0.87]])
-        rotated_line = np.matmul(line, R)
+        rotated_line = line * R
         H = O + (rotated_line * distance)
         return Atom.from_cartesian('unlabeled', 'H', H[0], H[1], H[2], mof)
     elif len(oxygen.bondedAtoms) == 2:
-        O = np.array([oxygen.x, oxygen.y, oxygen.z])
-        A = np.array([oxygen.bondedAtoms[0].x, oxygen.bondedAtoms[0].y, oxygen.bondedAtoms[0].z])
-        B = np.array([oxygen.bondedAtoms[1].x, oxygen.bondedAtoms[1].y, oxygen.bondedAtoms[1].z])
-        midpoint = (B - A)/2 + B
+        A = get_close_numpy_vector(oxygen, oxygen.bondedAtoms[0], mof)
+        B = get_close_numpy_vector(oxygen, oxygen.bondedAtoms[1], mof)
+        midpoint = (B + A)/2
         line = normalize(O - midpoint)
         H = O + (line * distance)
         return Atom.from_cartesian('unlabeled', 'H', H[0], H[1], H[2], mof)
     elif len(oxygen.bondedAtoms) == 3:
-        O = np.array([oxygen.x, oxygen.y, oxygen.z])
-        A = np.array([oxygen.bondedAtoms[0].x, oxygen.bondedAtoms[0].y, oxygen.bondedAtoms[0].z])
-        B = np.array([oxygen.bondedAtoms[1].x, oxygen.bondedAtoms[1].y, oxygen.bondedAtoms[1].z])
-        C = np.array([oxygen.bondedAtoms[2].x, oxygen.bondedAtoms[2].y, oxygen.bondedAtoms[2].z])
-        u1 = B - A
-        c_minus_a = C - A
-        w1 = np.matmul(c_minus_a, u1)  #TODO: why is this not a vector?
-        u = normalize(u1)
-        w = normalize(w1)
-        v = np.matmul(w, u)
-        b = np.array([np.dot(u1, u), 0])
-        c = np.array([np.dot(c_minus_a, u), np.dot(c_minus_a, v)])
-        h = ((c[0]-b[0]/2)**2 + (c[1])**2 - (b[0]/2)**2) / (2*c[1])
-        center = A + (b[0]/2) * u + h * v
-        line = normalize(O - center)
+        A = get_close_numpy_vector(oxygen, oxygen.bondedAtoms[0], mof)
+        B = get_close_numpy_vector(oxygen, oxygen.bondedAtoms[1], mof)
+        C = get_close_numpy_vector(oxygen, oxygen.bondedAtoms[2], mof)
+        possible_points = TetrahedronTools.find_fourth_vertex(A, B, C, 2.85, 2.85, 2.85)
+        if np.linalg.norm(O - possible_points[0]) < np.linalg.norm(O - possible_points[1]):
+            counterpoint = possible_points[1]
+        else:
+            counterpoint = possible_points[0]
+        line = normalize(O - counterpoint)
         H = O + (line * distance)
         return Atom.from_cartesian('unlabeled', 'H', H[0], H[1], H[2], mof)
     else:
@@ -204,6 +198,25 @@ def normalize(v):
     if norm < 0.00001:
         return v
     return v / norm
+
+
+def get_close_numpy_vector(base_atom, neighbor, mof):
+    da = db = dc = 0
+    if neighbor.a - base_atom.a > 0.5:
+        da -= 1.0
+    elif neighbor.a - base_atom.a < -0.5:
+        da += 1.0
+    if neighbor.b - base_atom.b > 0.5:
+        db -= 1.0
+    elif neighbor.b - base_atom.b < -0.5:
+        db += 1.0
+    if neighbor.c - base_atom.c > 0.5:
+        dc -= 1.0
+    elif neighbor.c - base_atom.c < -0.5:
+        dc += 1.0
+    neighbor_in_right_place = neighbor.copy_to_relative_position(da, db, dc, mof.angles,
+                                                                 mof.fractional_lengths)
+    return np.array([neighbor_in_right_place.x, neighbor_in_right_place.y, neighbor_in_right_place.z])
 
 
 def get_file_content_without_atoms(file_content, atoms_to_delete):
@@ -223,7 +236,7 @@ def get_file_content_with_atoms(file_content, atoms_to_add):
     greatest_existing_H_index = -1
     for line in file_lines:
         if line.startswith('H') and line[1].isdigit():
-            index = re.search(r'\d+', line).group(0)
+            index = int(re.search(r'\d+', line).group(0))
             greatest_existing_H_index = max(greatest_existing_H_index, index)
     for atom in atoms_to_add:
         greatest_existing_H_index += 1

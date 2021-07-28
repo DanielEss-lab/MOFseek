@@ -199,7 +199,7 @@ class SBUIdentifier:
     def identify_ligand(self, nonmetal_atom):
         atoms = set()
         adjacent_cluster_ids = set()
-        self.identify_ligand_recurse(nonmetal_atom, atoms, adjacent_cluster_ids)
+        self.identify_ligand_recurse(nonmetal_atom, atoms, adjacent_cluster_ids)  # Todo: see why one of these was set to 9 in the test
         self.correct_adjacent_cluster_ids(atoms, adjacent_cluster_ids)
         if len(adjacent_cluster_ids) > 1:
             ligand_type = UnitType.CONNECTOR
