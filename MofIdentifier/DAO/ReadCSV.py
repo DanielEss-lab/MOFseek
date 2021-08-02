@@ -1,11 +1,5 @@
-import pymongo
 import csv
-from pymongo import MongoClient
-
-cluster = MongoClient(
-    "mongodb+srv://db_admin:EHfbvgmVEJ9g0Mgk@cluster0.r0otj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-database = cluster["Database"]
-cif_collection = database["test"]
+from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
 
 
 def read_CSV():

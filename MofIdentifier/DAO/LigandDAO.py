@@ -1,18 +1,9 @@
-import certifi as certifi
-
-from MofIdentifier.DAO import ReadCIFs
 from MofIdentifier.DAO.LigandDatabase import LigandDatabase
 from MofIdentifier.DAO.MOFDatabase import MOFDatabase
+from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import CifReader, LigandReader
-from pymongo import MongoClient
+from MofIdentifier.fileIO import LigandReader
 
-cluster = MongoClient(
-    "mongodb+srv://db_admin:EHfbvgmVEJ9g0Mgk@cluster0.r0otj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    tlsCAFile=certifi.where())
-database = cluster["Database"]
-cif_collection = database["test"]
-ligand_collection = database["test_ligands"]
 
 
 def add_ligand_to_db_from_file(ligand_file_path):
@@ -54,8 +45,6 @@ def add_ligands_to_database(ligand, matched_mofs):
 
 def add_ligand_info_to_ligand_collection(ligand_for_db: LigandDatabase):
     print("Start adding ligand information into Ligand Collection")
-    ligand_collection.create_index("ligand_name", unique="True")
-    # TODO: try this code without the above line, to see if it still enforces no-duplicates
     try:
         ligand_collection.update_one({"ligand_name": ligand_for_db.ligand_name},
                                      {"$set": {"ligand_file_content": ligand_for_db.ligand_file},
@@ -66,8 +55,7 @@ def add_ligand_info_to_ligand_collection(ligand_for_db: LigandDatabase):
     print("Done")
 
 
-def search_all_ligand_names():
-    print("This is the all ligand names list from database:")
+def get_all_names():
     names = list()
     try:
         ligand_names_object = ligand_collection.find({}, {"ligand_name": 1, "_id": 0})
@@ -78,7 +66,7 @@ def search_all_ligand_names():
     return names
 
 
-def search_specific_ligand_by_name(ligand_name):
+def get_ligand(ligand_name):
     try:
         ligand_obj = ligand_collection.find_one({"ligand_name": ligand_name})
         # ligand = ligand_collection.find({}, {"ligand_name": ligand_name, "_id": 0})
@@ -95,6 +83,13 @@ def rename_ligand(old_name, new_name):
         print("error: ", e.args)
 
 
+def scan_all_for_mof(mof):
+    for ligand in cif_collection.find():
+        if SubGraphMatcher.find_ligand_in_mof(ligand, mof):
+            ligand_collection.update_one({"ligand_name": ligand.label}, {"$addToSet": {"MOFs": mof.label}})
+            cif_collection.update_one({"filename": ligand.label}, {"$addToSet": {"ligand_names": mof.label}})
+
+
 if __name__ == '__main__':
     # --worked--
     # ligand, matched_mofs, ligand_for_db = read_ligand(
@@ -104,6 +99,6 @@ if __name__ == '__main__':
 
     # --worked--
     # search_all_ligand_names()
-    print(search_specific_ligand_by_name("Benzene.smiles"))
+    print(get_ligand("Benzene.smiles"))
     # rename_ligand("hi.smiles", "Benzene.smiles")
 

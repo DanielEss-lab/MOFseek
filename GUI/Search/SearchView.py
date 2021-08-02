@@ -9,7 +9,7 @@ from GUI import Attributes
 from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
 from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
 from MofIdentifier import SearchMOF
-from MofIdentifier.DAO import LigandDAO
+from MofIdentifier.DAO import LigandDAO, MOFDAO
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUCollectionManager
 
@@ -164,7 +164,7 @@ class View(FrameWithProcess.Frame):
             self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
             self.redo_search_selected.set(value))
             self.search_to_results[search] = 'ongoing'
-            results = search_in_mofsForGUI_temp(search)  # TODO: this will change with db integration
+            results = MOFDAO.get_passing_MOFs(search)
             self.search_to_results[search] = results
             self.parent.display_search_results(results)
 
@@ -199,7 +199,7 @@ class View(FrameWithProcess.Frame):
         return {entry.name: entry.get() for entry in self.attribute_entries}  # FIXME: don't use deselected attributes
 
     def all_ligands_names(self):  # Will change with adding DB
-        return LigandDAO.search_all_ligand_names()
+        return LigandDAO.get_all_names()
 
     def all_sbu_names(self):  # Will change with adding DB
         path_1 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/cluster")

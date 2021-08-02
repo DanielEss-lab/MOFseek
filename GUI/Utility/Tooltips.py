@@ -31,7 +31,6 @@ if platform.system() == 'Windows':  # Windows
 
           Tested on Ubuntu 16.04/16.10, running Python 3.5.2
 
-        TODO: themes styles support
         '''
 
         def __init__(self, widget,

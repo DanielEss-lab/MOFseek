@@ -43,11 +43,10 @@ def make_view(parent, sbu):
     row2.pack(fill=tk.X)
 
     row3 = tk.Frame(master=view, height=10)
-    # FIXME: change when it I connect to DB, so that I always get SBU objects and I actually show frequency
-    sbu_label = tk.Label(row3, text="<NYI> Occurrences in DB")
+    sbu_label = tk.Label(row3, text=f"{sbu.frequency} occurrences in DB")
     sbu_label.pack(side='left')
-    # type = tk.Label(row3, text=str(sbu.type))  # TODO_Also uncomment this
-    # type.pack(side='right')
+    type = tk.Label(row3, text=str(sbu.type))
+    type.pack(side='right')
     row3.pack(fill=tk.X)
 
     row4 = tk.Frame(master=view, height=20)

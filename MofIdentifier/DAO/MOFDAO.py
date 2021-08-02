@@ -1,11 +1,6 @@
-from pymongo import MongoClient
-
+from MofIdentifier.DAO import SBUDAO, LigandDAO
 from MofIdentifier.DAO.MOFDatabase import MOFDatabase
-
-cluster = MongoClient(
-    "mongodb+srv://db_admin:EHfbvgmVEJ9g0Mgk@cluster0.r0otj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
-database = cluster["Database"]
-cif_collection = database["test"]
+from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
 
 
 def get_MOF(name):
@@ -21,6 +16,20 @@ def get_passing_MOFs(search):
         if search.passes(mof):
             results.append(mof)
     return results
+
+
+def add_MOF(mof):
+    _add_mof_to_collection(mof)
+    for sbu in mof.sbus():
+        sbu_name = SBUDAO.process_sbu(sbu, mof)
+        cif_collection.update_one({"$addToSet": {"sbu_names": sbu_name}})
+    ligand_names = LigandDAO.scan_all_for_mof(mof)
+
+
+def _add_mof_to_collection(mof):
+    file_name = mof.label
+    file_name = file_name.split('.', 1)[0]
+    cif_collection.update_one({"filename": file_name}, {"$set": {'cif_content': mof.file_content}})
 
 
 if __name__ == "__main__":

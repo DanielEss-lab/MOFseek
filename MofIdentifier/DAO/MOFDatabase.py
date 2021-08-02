@@ -1,3 +1,4 @@
+from MofIdentifier.DAO import SBUDAO
 from MofIdentifier.fileIO import CifReader
 
 
@@ -29,8 +30,11 @@ class MOFDatabase:
         try:
             self.sbu_names = dictionary['sbu_names']
         except KeyError:
-            self.sbu_names = set()
-            # TODO: attempt to figure them out by splitting mof and comparing to sbus in da
+            if self.get_mof() is not None:
+                sbus = self.get_mof().sbus()
+                self.sbu_names = SBUDAO.process_sbus(sbus, self.get_mof())
+            else:
+                self.sbu_names = set()
         self.LCD = dictionary['LCD']
         self.PLD = dictionary['PLD']
         self.LFPD = dictionary['LFPD']
@@ -61,7 +65,7 @@ class MOFDatabase:
         try:
             self.ligand_names = dictionary['ligand_names']
         except KeyError:
-            self.sbu_names = set()
+            self.ligand_names = set()
 
     def get_mof(self):
         if self._mof is None:

@@ -1,19 +1,10 @@
-import certifi
 from pymongo import errors
-from pymongo import MongoClient
 
 from MofIdentifier.Molecules.SBU import SBU
 from MofIdentifier.Molecules.MOF import MOF
 from MofIdentifier.DAO.SBUDatabase import SBUDatabase
+from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
-
-cluster = MongoClient(
-    "mongodb+srv://db_admin:EHfbvgmVEJ9g0Mgk@cluster0.r0otj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-    tlsCAFile=certifi.where())
-database = cluster["Database"]
-cif_collection = database["test"]
-ligand_collection = database["test_ligands"]
-sbu_collection = database["test_sbus"]
 
 
 def get_all_names():
@@ -56,6 +47,13 @@ def process_sbu(input_sbu, mof):
     name = generic_name_prefix + '_' + str(highest_existing_index + 1)
     add_new_sbu(input_sbu, mof, name)
     return name
+
+
+def process_sbus(sbus, mof):
+    names = []
+    for sbu in sbus:
+        names.append(process_sbu(sbu, mof))
+    return names
 
 
 def update_sbu(sbu: SBU, mof_containing_it):
