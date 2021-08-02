@@ -59,10 +59,12 @@ def count_added_protons(cluster):
     auxiliaries = cluster[1]
     num = 0
     for atom in node.atoms:
-        if atom.type_symbol == 'O' and len([neighbor for neighbor in atom.bondedAtoms if neighbor.is_metal()]) > 2:
-            for neighbor in atom.bondedAtoms:
-                if neighbor.type_symbol == 'H':
-                    num += 1
+        # if atom.type_symbol == 'O' and len([neighbor for neighbor in atom.bondedAtoms if neighbor.is_metal()]) > 2:
+        #     for neighbor in atom.bondedAtoms:
+        #         if neighbor.type_symbol == 'H':
+        #             num += 1
+        if atom.type_symbol == 'H':
+            num += 1
     for aux in auxiliaries:
         for atom in aux.atoms:
             if atom.type_symbol == 'H':
@@ -89,23 +91,33 @@ def get_atoms_to_delete(cluster, num_to_delete):
             if oxygen.type_symbol == 'O' and len([neighbor for neighbor in oxygen.bondedAtoms
                                                   if neighbor.is_metal()]) > 2:
                 priority_atoms.append(atom)
-    sorted_priority = list(priority_atoms)
-    sorted_priority.sort()
-    if len(sorted_priority) >= num_to_delete:
-        atoms_to_delete = sorted_priority[0:num_to_delete]
+    priority_atoms.sort()
+    if len(priority_atoms) >= num_to_delete:
+        atoms_to_delete = priority_atoms[0:num_to_delete]
     else:
         eligible_atoms = []
+        second_hydrogens = []
         for aux in cluster[1]:
             if any(atom.type_symbol == 'S' or atom.type_symbol == 'P' for atom in aux.atoms):
                 continue
             else:
+                num_hydrogens_marked_for_deletion = 0
                 for atom in aux.atoms:
                     if atom.type_symbol == 'H':
-                        eligible_atoms.append(atom)
-        sorted_eligible = list(eligible_atoms)
-        sorted_eligible.sort()
-        sorted_priority.extend(sorted_eligible)
-        atoms_to_delete = sorted_priority[0:num_to_delete]
+                        if num_hydrogens_marked_for_deletion == 0:
+                            eligible_atoms.append(atom)
+                            num_hydrogens_marked_for_deletion += 1
+                        elif num_hydrogens_marked_for_deletion == 1:
+                            second_hydrogens.append(atom)
+                            num_hydrogens_marked_for_deletion += 1
+                        else:
+                            raise Exception('The developer did not account for aux groups with 3 or more Hydrogens. '
+                                            'Please ask him to update the progrm if you need to use it with such.')
+        second_hydrogens.sort()
+        eligible_atoms.sort()
+        priority_atoms.extend(second_hydrogens)
+        priority_atoms.extend(eligible_atoms)
+        atoms_to_delete = priority_atoms[0:num_to_delete]
     assert(len(atoms_to_delete) == num_to_delete)
     return atoms_to_delete
 
@@ -151,10 +163,8 @@ def get_atoms_to_add(cluster, num_to_add, mof):
         if atom.type_symbol == 'O' and len([neighbor for neighbor in atom.bondedAtoms if neighbor.is_metal()]) > 2 \
                 and len([neighbor for neighbor in atom.bondedAtoms if neighbor.type_symbol == 'H']) == 0:
             eligible_oxygens.append(atom)
-    sorted_eligible = list(eligible_oxygens)
-    sorted_eligible.sort()
-    atoms_to_add = []
-    for oxygen in sorted_eligible[0:num_to_add]:
+    eligible_oxygens.sort()
+    for oxygen in eligible_oxygens[0:num_to_add]:
         atoms_to_add.append(make_proton_by(oxygen, mof))
     return atoms_to_add
 

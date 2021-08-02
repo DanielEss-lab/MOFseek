@@ -217,8 +217,7 @@ class SBUIdentifier:
             if not self.been_visited(neighbor):
                 self.identify_ligand_recurse(neighbor, ligand_atoms, adjacent_cluster_ids)
             elif MofIdentifier.Molecules.atom.is_metal(neighbor.type_symbol):
-                adjacent_cluster_ids.add(
-                    self.group_id_of(neighbor))
+                adjacent_cluster_ids.add(self.group_id_of(neighbor))
 
     def successfully_adds_to_cluster(self, atom):
         num_cluster_neighbors = 0
@@ -236,6 +235,7 @@ class SBUIdentifier:
             else:
                 num_noncluster_neighbors += 1
         if atom.type_symbol == 'H':
+            assert len(atom.bondedAtoms) <= 1
             for neighbor in atom.bondedAtoms:
                 if self.successfully_adds_to_cluster(neighbor):
                     cluster = self.groups[self.group_id_of(neighbor)]

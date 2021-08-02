@@ -32,12 +32,19 @@ class WriteAtomTest(unittest.TestCase):
 
 
 class ChangeMetalTest(unittest.TestCase):
-    def test_change_metal(self):
+    def test_Zr_to_Y(self):
         replace_metal(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\mofsForTests\smod7-pos-1.cif',
                       r'C:\Users\mdavid4\Downloads\smod7-except-Y.cif', 'Y')
         new_mof = CifReader.get_mof(r'C:\Users\mdavid4\Downloads\smod7-except-Y.cif')
         self.assertTrue('Y' in new_mof.atoms_string())
         self.assertEqual(protons_needed('Y'), count_node_protons(new_mof))
+
+    def test_Zr_to_V(self):
+        replace_metal(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\mofsForTests\smod7-pos-1.cif',
+                      r'C:\Users\mdavid4\Downloads\smod7-except-V.cif', 'V')
+        new_mof = CifReader.get_mof(r'C:\Users\mdavid4\Downloads\smod7-except-V.cif')
+        self.assertTrue('V' in new_mof.atoms_string())
+        self.assertEqual(protons_needed('V'), count_node_protons(new_mof))
 
 
 if __name__ == '__main__':
