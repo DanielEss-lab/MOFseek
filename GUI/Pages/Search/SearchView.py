@@ -9,6 +9,7 @@ from GUI import Attributes
 from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
 from GUI.Pages.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
 from MofIdentifier import SearchMOF
+from MofIdentifier.DAO import LigandDAO
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUCollectionManager
 
@@ -198,9 +199,7 @@ class View(FrameWithProcess.Frame):
         return {entry.name: entry.get() for entry in self.attribute_entries}  # FIXME: don't use deselected attributes
 
     def all_ligands_names(self):  # Will change with adding DB
-        path = str(Path(__file__).parent / "../../../MofIdentifier/ligands")
-        ligands = LigandReader.get_all_mols_from_directory(path)
-        return [ligand.label for ligand in ligands]
+        return LigandDAO.search_all_ligand_names()
 
     def all_sbu_names(self):  # Will change with adding DB
         path_1 = str(Path(__file__).parent / "../../../MofIdentifier/subbuilding/cluster")
