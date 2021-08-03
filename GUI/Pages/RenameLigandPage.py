@@ -4,6 +4,7 @@ from pathlib import Path
 from GUI.Views import MoleculeView
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess, StyledButton
 from MofIdentifier import SearchMOF
+from MofIdentifier.DAO import LigandDAO
 from MofIdentifier.fileIO import LigandReader
 
 instruction_text = """Renaming a ligand in the database takes several minutes, so please be patient."""
@@ -38,9 +39,9 @@ class Page(FrameWithProcess.Frame):
             if new_name != '':
                 if new_name.find(' ') < 0 and new_name.find('.') < 0:
                     self.combobox.set('')
-                    self.new_name_ent.delete(0,tk.END)
+                    self.new_name_ent.delete(0, tk.END)
                     new_name = new_name + self.extension_text['text']
-                    # TODO: link to DAO
+                    LigandDAO.rename_ligand(self.mol.label, new_name)
                     pass
                 else:
                     self._show_error('Name cannot contain a period or a space')

@@ -48,7 +48,7 @@ def write_sbus(new_sbus, file_counts):
     def write_some_sbus(sbus, type_name, num_type):
         sbus_to_write = SBUIdentifier.reduce_duplicates(sbus, lambda x, y: x.graph_equals(y))
         for sbu in sbus_to_write:
-            file_name = type_name + '_' + str(num_type)  # TODO: fix so that it never overwrites files (even after deleting a file)
+            file_name = type_name + '_' + str(num_type)
             sbu.label = file_name
             file_path = os.path.join(Path(__file__).parent, type_name, file_name + '.xyz')
             sbu.filepath = file_path

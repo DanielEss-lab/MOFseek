@@ -4,6 +4,7 @@ from tkinter.filedialog import askopenfilename
 
 from GUI.Utility import FrameWithProcess, StyledButton
 from GUI.Views import LigandView
+from MofIdentifier.DAO import LigandDAO
 from MofIdentifier.fileIO import LigandReader
 
 instruction_text = """Choose from your computer a .xyz file or a .smiles plaintext file whose first line 
@@ -33,7 +34,7 @@ class AddLigandPage(FrameWithProcess.Frame):
         self.mol = None
         self.molecule_v.destroy()
         if self.mol is not None:
-            self.winfo_toplevel().add_custom_ligand(mol)  # TODO: hook up to DB
+            LigandDAO.add_ligand_to_db(mol)
 
     def open_file(self):
         filename = askopenfilename(filetypes=[('XYZ Files', '*.xyz'), ('SMILES Files', '*.smiles')])
@@ -42,7 +43,7 @@ class AddLigandPage(FrameWithProcess.Frame):
                 self.molecule_v.destroy()
             try:
                 self.mol = LigandReader.get_mol_from_file(str(Path(filename)))
-                self.molecule_v = LigandView.make_view(self.frm_ligand_preview, self.mol)
+                self.molecule_v = LigandView.View(self.frm_ligand_preview, self.mol)
                 self.add_btn['state'] = "normal"
                 self.molecule_v.pack()
             except:

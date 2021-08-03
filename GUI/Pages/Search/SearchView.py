@@ -7,7 +7,7 @@ from tkinter import ttk
 
 from GUI import Attributes
 from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
-from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
+from GUI.Pages.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
 from MofIdentifier import SearchMOF
 from MofIdentifier.DAO import LigandDAO, MOFDAO
 from MofIdentifier.fileIO import LigandReader
@@ -196,15 +196,15 @@ class View(FrameWithProcess.Frame):
         self.attribute_row.grid(column=0, row=3, columnspan=12, pady=2)
 
     def get_attribute_parameters(self):
-        return {entry.name: entry.get() for entry in self.attribute_entries}  # FIXME: don't use deselected attributes
+        return {entry.name: entry.get() for entry in self.attribute_entries}
 
     def all_ligands_names(self):  # Will change with adding DB
         return LigandDAO.get_all_names()
 
     def all_sbu_names(self):  # Will change with adding DB
-        path_1 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/cluster")
-        path_2 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/connector")
-        path_3 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/auxiliary")
+        path_1 = str(Path(__file__).parent / "../../../MofIdentifier/subbuilding/cluster")
+        path_2 = str(Path(__file__).parent / "../../../MofIdentifier/subbuilding/connector")
+        path_3 = str(Path(__file__).parent / "../../../MofIdentifier/subbuilding/auxiliary")
         sbus = LigandReader.get_all_mols_from_directory(path_1) + \
                LigandReader.get_all_mols_from_directory(path_2) + \
                LigandReader.get_all_mols_from_directory(path_3)

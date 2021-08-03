@@ -2,7 +2,9 @@ import tkinter as tk
 from pathlib import Path
 from tkinter.filedialog import askopenfilenames
 
-from GUI.Utility import FrameWithProcess, MultiMofView, StyledButton
+from GUI.Utility import FrameWithProcess, StyledButton
+from GUI.Views import MultiMofView
+from MofIdentifier.DAO import MOFDAO
 from MofIdentifier.fileIO import CifReader
 
 instruction_text = """Choose one or more .cif files from your computer. The MOFs will be loaded onto the database, and 
@@ -44,10 +46,8 @@ class Page(FrameWithProcess.Frame):
         self.add_btn['state'] = "disabled"
         self.mofs = []
         self.mof_preview.display_results(self.mofs)
-        print(*mofs)
-        pass  # TODO: hook this up to DB
-        # Once I upload the mof to the DB, I also need to get the sbus from the DB in case some were added
-        # And make sure that new searches will also search the newly added MOFs
+        for mof in mofs:
+            MOFDAO.add_MOF(mof)
 
     def refresh_attributes_shown(self):
         self.mof_preview.display_results(self.mofs)

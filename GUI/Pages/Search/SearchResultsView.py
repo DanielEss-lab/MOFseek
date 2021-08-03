@@ -3,7 +3,8 @@ import time
 import tkinter as tk
 import tkinter.filedialog as fd
 
-from GUI.Utility import MultiMofView, FrameWithProcess, StyledButton
+from GUI.Utility import FrameWithProcess, StyledButton
+from GUI.Views import MultiMofView
 from GUI import Attributes, Settings
 from MofIdentifier.fileIO import MoleculeWriter, CifWriter
 

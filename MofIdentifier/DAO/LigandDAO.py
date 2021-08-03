@@ -5,15 +5,18 @@ from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import LigandReader
 
 
+def add_ligand_to_db(ligand):
+    ligand_name, matched_mofs, ligand_for_db = read_ligand(ligand)
+    update_mof_collection(ligand_name, matched_mofs)
+    update_ligand_collection(ligand_for_db)
 
-def add_ligand_to_db_from_file(ligand_file_path):
-    ligand, matched_mofs, ligand_for_db = read_ligand(ligand_file_path)
-    add_ligands_to_database(ligand, matched_mofs)
-    add_ligand_info_to_ligand_collection(ligand_for_db)
 
-
-def read_ligand(ligand_file_path):
+def add_ligand_to_db_from_filepath(ligand_file_path):
     ligand_file = LigandReader.get_mol_from_file(ligand_file_path)
+    add_ligand_to_db(ligand_file)
+
+
+def read_ligand(ligand_file):
     mofs_from_database = []
     matched_mofs = []
     matched_mof_names = []
@@ -33,26 +36,19 @@ def read_ligand(ligand_file_path):
     return ligand_file.label, matched_mofs, ligand_for_database
 
 
-def add_ligands_to_database(ligand, matched_mofs):
-    print("Start adding ligand information into database")
-
+def update_mof_collection(ligand, matched_mofs):
     for mof in matched_mofs:
         # if the cif does not have ligands field yet -> set the ligands field and value
         cif_collection.update_one({"filename": mof.filename}, {"$addToSet": {"ligand_names": ligand}})
 
-    print("Done")
 
-
-def add_ligand_info_to_ligand_collection(ligand_for_db: LigandDatabase):
-    print("Start adding ligand information into Ligand Collection")
+def update_ligand_collection(ligand_for_db: LigandDatabase):
     try:
         ligand_collection.update_one({"ligand_name": ligand_for_db.ligand_name},
                                      {"$set": {"ligand_file_content": ligand_for_db.ligand_file},
                                       "$addToSet": {"MOFs": {"$each": ligand_for_db.Mofs}}}, upsert=True)
     except Exception as e:
         print("error: ", e.args)
-
-    print("Done")
 
 
 def get_all_names():

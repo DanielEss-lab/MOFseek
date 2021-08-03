@@ -3,6 +3,7 @@ from pathlib import Path
 
 from GUI.Views import MoleculeView, SBUView
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess
+from MofIdentifier.DAO import SBUDAO
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUCollectionManager
 
@@ -39,7 +40,7 @@ class Page(FrameWithProcess.Frame):
                     self.combobox.set('')
                     self.new_name_ent.delete(0, tk.END)
                     new_name = new_name + self.extension_text['text']
-                    # TODO: link to DAO
+                    SBUDAO.rename_sbu(self.mol.label, new_name)
                     pass
                 else:
                     self._show_error('Name cannot contain a period or a space')
@@ -84,5 +85,5 @@ class Page(FrameWithProcess.Frame):
         self.mol = mol
         if self.molecule_v is not None:
             self.molecule_v.destroy()
-        self.molecule_v = SBUView.make_view(self, self.mol)
+        self.molecule_v = SBUView.View(self, self.mol)
         self.molecule_v.pack(side=tk.BOTTOM)
