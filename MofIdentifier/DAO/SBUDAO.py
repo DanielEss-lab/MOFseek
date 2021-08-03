@@ -5,6 +5,7 @@ from MofIdentifier.Molecules.MOF import MOF
 from MofIdentifier.DAO.SBUDatabase import SBUDatabase
 from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
+from MofIdentifier.subbuilding.SBUTools import SBUCollection
 
 
 def get_all_names():
@@ -49,9 +50,9 @@ def process_sbu(input_sbu, mof):
     return name
 
 
-def process_sbus(sbus, mof):
+def process_sbus(sbus: SBUCollection, mof):
     names = []
-    for sbu in sbus:
+    for sbu in sbus.all():
         names.append(process_sbu(sbu, mof))
     return names
 

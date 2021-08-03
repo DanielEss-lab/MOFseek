@@ -1,4 +1,4 @@
-from MofIdentifier.DAO import SBUDAO
+from MofIdentifier.DAO import SBUDAO, LigandDAO
 from MofIdentifier.fileIO import CifReader
 
 
@@ -13,7 +13,7 @@ class MOFDatabase:
 
         def set_from_dictionary_or_mof(attribute_name):
             try:
-                setattr(self, attribute_name, dictionary['attribute_name'])
+                setattr(self, attribute_name, dictionary[attribute_name])
             except KeyError:
                 if self.get_mof() is not None:
                     # use cif content to make MOF object, get attribute from that
@@ -21,20 +21,25 @@ class MOFDatabase:
                 else:
                     setattr(self, attribute_name, None)
 
+        def get_or_calculate(attribute_name, calculator):
+            try:
+                return dictionary[attribute_name]
+            except KeyError:
+                if self.get_mof() is not None:
+                    # use cif content to make MOF object, calculate attribute from that
+                    return calculator(self.get_mof())
+                else:
+                    return None
+
         set_from_dictionary_or_mof('symmetry')
         set_from_dictionary_or_mof('fractional_lengths')
         set_from_dictionary_or_mof('angles')
         set_from_dictionary_or_mof('unit_volume')
         set_from_dictionary_or_mof('cartesian_lengths')
         set_from_dictionary_or_mof('elementsPresent')
-        try:
-            self.sbu_names = dictionary['sbu_names']
-        except KeyError:
-            if self.get_mof() is not None:
-                sbus = self.get_mof().sbus()
-                self.sbu_names = SBUDAO.process_sbus(sbus, self.get_mof())
-            else:
-                self.sbu_names = set()
+        set_from_dictionary_or_mof('atoms_string_with_solvents')
+        self.ligand_names = get_or_calculate('ligand_names', lambda mof: LigandDAO.scan_all_for_mof(mof))
+        self.sbu_names = get_or_calculate('sbu_names', lambda mof: SBUDAO.process_sbus(mof.sbus(), mof))
         self.LCD = dictionary['LCD']
         self.PLD = dictionary['PLD']
         self.LFPD = dictionary['LFPD']
@@ -62,10 +67,14 @@ class MOFDatabase:
         self.Note = dictionary['Note']
         self.Matched_CSD_of_CoRE = dictionary['Matched_CSD_of_CoRE']
         self.Possible_List_CSD_of_CoRE = dictionary['Possible_List_CSD_of_CoRE']
-        try:
-            self.ligand_names = dictionary['ligand_names']
-        except KeyError:
-            self.ligand_names = set()
+
+        self.num_atoms = get_or_calculate('num_atoms', lambda mof: len(mof.atoms))
+        self.conn_node_atom_ratio = get_or_calculate('conn_node_atom_ratio', lambda mof:
+                mof.sbus().num_connector_atoms / mof.sbus().num_cluster_atoms)
+        self.aux_density = get_or_calculate('aux_density', lambda mof: len(mof.sbus().auxiliaries) / mof.unit_volume)
+        self.conn_connectivity = get_or_calculate('conn_connectivity', lambda mof: mof.sbus().avg_conn_connectivity)
+        self.node_connectivity = get_or_calculate('node_connectivity', lambda mof: mof.sbus().avg_node_connectivity)
+        self.elements_present = get_or_calculate('elements_present', lambda mof: mof.elementsPresent)
 
     def get_mof(self):
         if self._mof is None:

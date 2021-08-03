@@ -22,7 +22,7 @@ class View(tk.Frame):
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
 
-        name = tk.Label(self, text=mof.label, width=48, anchor=tk.W)
+        name = tk.Label(self, text=mof.filename, width=48, anchor=tk.W)
         name.grid(sticky=tk.W, row=0, column=0)
         self.elements = tk.Label(self, text=mof.atoms_string_with_solvents() if Settings.keep_solvent
                             else mof.atoms_string_without_solvents())

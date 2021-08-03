@@ -43,11 +43,13 @@ class SearchTerms:
         self.label_substring = label
 
     def passes(self, MOF):
+        if MOF is None or MOF.get_mof() is None:
+            return False
         for element in self.element_symbols:
-            if element not in MOF.elementsPresent:
+            if element not in MOF.elements_present:
                 return False
         for element in self.excl_element_symbols:
-            if element in MOF.elementsPresent:
+            if element in MOF.elements_present:
                 return False
         for attr_name in self.numerical_attr:
             if self.numerical_attr[attr_name][0] is not None:
@@ -56,24 +58,25 @@ class SearchTerms:
             if self.numerical_attr[attr_name][1] is not None:
                 if Attributes.attributes[attr_name].calculate(MOF) > self.numerical_attr[attr_name][1]:
                     return False  # More than the maximum
-        if MOF.label.find(self.label_substring) < 0:
+        if MOF.filename.find(self.label_substring) < 0:
             return False
-        if SBUIdentifier.mof_has_all_sbus(MOF, self.sbus) and SBUIdentifier.mof_has_no_sbus(MOF, self.excl_sbus):
+        if all(sbu.label in MOF.sbu_names for sbu in self.sbus) and \
+                not any(sbu.label in MOF.sbu_names for sbu in self.excl_sbus):
             pass
         else:
             return False
-        if SubGraphMatcher.mof_has_all_ligands(MOF, self.ligands) \
-                and SubGraphMatcher.mof_has_no_ligands(MOF, self.excl_ligands):
+        if all(ligand.label in MOF.ligand_names for ligand in self.ligands) and \
+                not any(ligand.label in MOF.ligand_names for ligand in self.excl_ligands):
             pass
         else:
             return False
         return True
 
     def __str__(self):
-        ligands = [ligand.label for ligand in self.ligands]
-        excl_ligands = [ligand.label for ligand in self.excl_ligands]
-        sbus = [sbu.label for sbu in self.sbus]
-        excl_sbus = [sbu.label for sbu in self.excl_sbus]
+        ligands = [ligand.name for ligand in self.ligands]
+        excl_ligands = [ligand.name for ligand in self.excl_ligands]
+        sbus = [sbu.name for sbu in self.sbus]
+        excl_sbus = [sbu.name for sbu in self.excl_sbus]
         return f"lig:{ligands}-{excl_ligands}, " + \
                f"elem:{self.element_symbols}-{self.excl_element_symbols}" + \
                f"sbus:{sbus}-{excl_sbus}" + \

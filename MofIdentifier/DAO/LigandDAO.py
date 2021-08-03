@@ -1,6 +1,6 @@
 from MofIdentifier.DAO.LigandDatabase import LigandDatabase
 from MofIdentifier.DAO.MOFDatabase import MOFDatabase
-from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
+from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import LigandReader
 
@@ -66,7 +66,7 @@ def get_ligand(ligand_name):
     try:
         ligand_obj = ligand_collection.find_one({"ligand_name": ligand_name})
         # ligand = ligand_collection.find({}, {"ligand_name": ligand_name, "_id": 0})
-        ligand = LigandDatabase(ligand_obj["ligand_name"], ligand_obj["ligand_file_content"], ligand_obj["MOFs"])
+        ligand = LigandDatabase.from_dict(ligand_obj)
         return ligand
     except Exception as e:
         print("error: ", e.args)
@@ -80,10 +80,14 @@ def rename_ligand(old_name, new_name):
 
 
 def scan_all_for_mof(mof):
-    for ligand in cif_collection.find():
-        if SubGraphMatcher.find_ligand_in_mof(ligand, mof):
-            ligand_collection.update_one({"ligand_name": ligand.label}, {"$addToSet": {"MOFs": mof.label}})
-            cif_collection.update_one({"filename": ligand.label}, {"$addToSet": {"ligand_names": mof.label}})
+    ligands = []
+    for ligand in ligand_collection.find():
+        ligand = LigandDatabase.from_dict(ligand)
+        if SubGraphMatcher.find_ligand_in_mof(ligand.get_ligand(), mof):
+            ligand_collection.update_one({"ligand_name": ligand.name}, {"$addToSet": {"MOFs": mof.filename}})
+            cif_collection.update_one({"filename": ligand.name}, {"$addToSet": {"ligand_names": mof.filename}})
+            ligands.append(ligand.label)
+    return ligands
 
 
 if __name__ == '__main__':
