@@ -18,12 +18,27 @@ def get_passing_MOFs(search):
     return results
 
 
-def add_MOF(mof):
+def add_mof(mof):
     _add_mof_to_collection(mof)
-    for sbu in mof.sbus():
+    for sbu in mof.sbus().clusters:
         sbu_name = SBUDAO.process_sbu(sbu, mof)
-        cif_collection.update_one({"$addToSet": {"sbu_names": sbu_name}})
-    ligand_names = LigandDAO.scan_all_for_mof(mof)
+        sbu_freq = sbu.frequency
+        sbu_connectivity = sbu.connections()
+        sbu_info = sbu_freq + ' ' + sbu_connectivity + ' ' + sbu_name
+        cif_collection.update_one({"$addToSet": {"sbu_node_info": sbu_info}})
+    for sbu in mof.sbus().connectors:
+        sbu_name = SBUDAO.process_sbu(sbu, mof)
+        sbu_freq = sbu.frequency
+        sbu_connectivity = sbu.connections()
+        sbu_info = sbu_freq + ' ' + sbu_connectivity + ' ' + sbu_name
+        cif_collection.update_one({"$addToSet": {"sbu_connector_info": sbu_info}})
+    for sbu in mof.sbus().auxiliaries:
+        sbu_name = SBUDAO.process_sbu(sbu, mof)
+        sbu_freq = sbu.frequency
+        sbu_connectivity = sbu.connections()
+        sbu_info = sbu_freq + ' ' + sbu_connectivity + ' ' + sbu_name
+        cif_collection.update_one({"$addToSet": {"sbu_aux_info": sbu_info}})
+    ligand_names = LigandDAO.scan_all_for_mof(mof)  # TODO: use ligand names
 
 
 def _add_mof_to_collection(mof):

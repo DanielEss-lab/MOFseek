@@ -58,7 +58,7 @@ class Page(FrameWithProcess.Frame):
             except FileNotFoundError as ex:
                 self._show_error(ex)
 
-    def all_ligands_names(self):  # Will change with adding DB
+    def all_ligands_names(self):  # TODO: Will change with adding DB
         path = str(Path(__file__).parent / "../../MofIdentifier/ligands")
         ligands = LigandReader.get_all_mols_from_directory(path)
         return [ligand.label for ligand in ligands]
@@ -71,7 +71,8 @@ class Page(FrameWithProcess.Frame):
                 ligands.append(self.custom_ligands[ligand_name])
             else:
                 other_ligands.append(ligand_name)
-        ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
+        for name in other_ligands:
+            ligands.append(LigandDAO.get_ligand(name))
         return ligands
 
     def add_custom_ligand(self, mol):

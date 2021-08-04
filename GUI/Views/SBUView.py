@@ -1,6 +1,7 @@
 import tkinter as tk
 
 from GUI import os_specific_settings
+from MofIdentifier.DAO import SBUDatabase
 from MofIdentifier.fileIO import FileOpen
 import tkinter.font as tkFont
 
@@ -10,19 +11,19 @@ def select_for_edit(parent, sbu):
 
 
 class View(tk.Frame):
-    def __init__(self, parent, sbu):
+    def __init__(self, parent, sbu: SBUDatabase.SBUDatabase):
         self.parent = parent
         tk.Frame.__init__(self, self.parent, height=40, width=120, bd=1, relief=tk.SOLID)
 
         row1 = tk.Frame(master=self)
-        name = tk.Label(row1, text=sbu.label)
+        name = tk.Label(row1, text=sbu.name)
         name.pack(side='left')
         open = tk.Label(row1, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
-        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(sbu))
+        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(sbu.get_sbu()))
         open.pack(side='right')
         tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
         see = tk.Label(row1, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
-        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(sbu))
+        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(sbu.get_sbu()))
         see.pack(side='right')
         tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
         edit = tk.Label(row1, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
@@ -40,7 +41,7 @@ class View(tk.Frame):
         file_first_line = sbu.file_content.partition('\n')[0]
         first_line_label = tk.Label(row2, text=file_first_line)
         first_line_label.pack(side=tk.RIGHT)
-        elements = tk.Label(row2, text=sbu.atoms_string())
+        elements = tk.Label(row2, text=sbu.get_sbu().atoms_string())
         elements.pack(side=tk.LEFT)
         row2.pack(fill=tk.X)
 

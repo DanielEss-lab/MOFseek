@@ -9,18 +9,20 @@ from MofIdentifier.subbuilding.SBUTools import SBUCollection
 
 
 def get_all_names():
+    names = list()
     try:
         names_object = sbu_collection.find({}, {"sbu_name": 1, "_id": 0})
-        return list(names_object)
-
-    except errors.OperationFailure as e:
+        for name in names_object:
+            names.append(name["sbu_name"])
+    except Exception as e:
         print("error: ", e.args)
+    return names
 
 
 def get_sbu(name):
     try:
         sbu_obj = sbu_collection.find_one({"sbu_name": name})
-        sbu = SBUDatabase(sbu_obj["sbu_name"], sbu_obj["file_content"], sbu_obj["MOFs"])
+        sbu = SBUDatabase(sbu_obj["sbu_name"], sbu_obj["file_content"], sbu_obj["MOFs"], sbu_obj["type"])
         return sbu
     except Exception as e:
         print("error: ", e.args)
@@ -38,7 +40,9 @@ def process_sbu(input_sbu, mof):
     generic_name_prefix = str(input_sbu.type)  # + '_' + str(num_type)
     highest_existing_index = -1
     for document in sbu_collection.find():
-        existing_sbu = SBUDatabase(document["sbu_name"], document["file_content"], document["MOFs"])
+        existing_sbu = SBUDatabase(document["sbu_name"], document["file_content"], document["MOFs"], document["type"])
+        if input_sbu.type != existing_sbu.type:
+            continue
         existing_sbu = existing_sbu.get_sbu()
         if SubGraphMatcher.match(input_sbu, existing_sbu):
             update_sbu(existing_sbu, mof)
@@ -50,9 +54,9 @@ def process_sbu(input_sbu, mof):
     return name
 
 
-def process_sbus(sbus: SBUCollection, mof):
+def process_sbus(sbus, mof):
     names = []
-    for sbu in sbus.all():
+    for sbu in sbus:
         names.append(process_sbu(sbu, mof))
     return names
 
@@ -64,9 +68,13 @@ def update_sbu(sbu: SBU, mof_containing_it):
 
 
 def add_new_sbu(sbu: SBU, first_mof_to_contain_it: MOF, name: str):
-    sbu_collection.update_one({"sbu_name": name},
+    sbu_collection.update_one({"sbu_name": name, "type": str(sbu.type)},
                               {"$set": {"file_content": sbu.file_content, "frequency": 1},
                                "$addToSet": {"MOFs": first_mof_to_contain_it.label}}, upsert=True)
+
+
+def delete_all_sbus():
+    sbu_collection.delete_many({})
 
 
 if __name__ == '__main__':

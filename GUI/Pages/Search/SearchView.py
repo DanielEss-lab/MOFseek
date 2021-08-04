@@ -126,7 +126,8 @@ class View(FrameWithProcess.Frame):
                 ligands.append(self.custom_ligands[ligand_name])
             else:
                 other_ligands.append(ligand_name)
-        ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
+        for name in other_ligands:
+            ligands.append(LigandDAO.get_ligand(name))
         return ligands
 
     def get_sbus(self, sbu_names):
@@ -137,7 +138,8 @@ class View(FrameWithProcess.Frame):
                 sbus.append(self.custom_ligands[sbu_name])
             else:
                 other_sbus.append(sbu_name)
-        sbus.extend(SBUCollectionManager.read_sbus_from_files(other_sbus))
+        for name in other_sbus:
+            sbus.append(SBUDAO.get_sbu(name))
         return sbus
 
     def search_from_input(self, search):

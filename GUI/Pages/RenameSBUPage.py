@@ -57,7 +57,7 @@ class Page(FrameWithProcess.Frame):
             except FileNotFoundError as ex:
                 self._show_error(ex)
 
-    def all_sbu_names(self):  # Will change with adding DB
+    def all_sbu_names(self):  # TODO: Will change with adding DB
         path_1 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/cluster")
         path_2 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/connector")
         path_3 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/auxiliary")
@@ -74,7 +74,8 @@ class Page(FrameWithProcess.Frame):
                 sbus.append(self.custom_sbus[sbu_name])
             else:
                 other_sbus.append(sbu_name)
-        sbus.extend(SBUCollectionManager.read_sbus_from_files(other_sbus))
+        for name in other_sbus:
+            sbus.append(SBUDAO.get_sbu(name))
         return sbus
 
     def select_sbu(self, sbu):

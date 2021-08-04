@@ -47,7 +47,7 @@ class Page(FrameWithProcess.Frame):
         self.mofs = []
         self.mof_preview.display_results(self.mofs)
         for mof in mofs:
-            MOFDAO.add_MOF(mof)
+            MOFDAO.add_mof(mof)
 
     def refresh_attributes_shown(self):
         self.mof_preview.display_results(self.mofs)

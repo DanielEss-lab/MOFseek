@@ -62,6 +62,8 @@ class changeableSBU(Molecule.Molecule):
         # Right now, SBUs are constructed with atoms as sets; a refactor to lists wouldn't break much though
         if adjacent_cluster_ids is None:
             adjacent_cluster_ids = set()
+        # file_content will get set to something other than '' as part of SBUIdentifier.run_algorithm(),
+        # which also creates the changeableSBU to start
         self.file_content = file_content
         self.sbu_id = sbu_id
         self.adjacent_cluster_ids = adjacent_cluster_ids

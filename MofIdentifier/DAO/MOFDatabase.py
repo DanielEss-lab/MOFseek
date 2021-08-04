@@ -2,6 +2,11 @@ from MofIdentifier.DAO import SBUDAO, LigandDAO
 from MofIdentifier.fileIO import CifReader
 
 
+class ContainedSBU:
+    def __init__(self, info_string):
+        self.frequency, self.connectivity, self.name = info_string.split(' ', 2)
+
+
 class MOFDatabase:
     def __init__(self, dictionary):
         self.filename = dictionary['filename']
@@ -38,8 +43,19 @@ class MOFDatabase:
         set_from_dictionary_or_mof('cartesian_lengths')
         set_from_dictionary_or_mof('elementsPresent')
         set_from_dictionary_or_mof('atoms_string_with_solvents')
+        set_from_dictionary_or_mof('atoms_string_without_solvents')
+
         self.ligand_names = get_or_calculate('ligand_names', lambda mof: LigandDAO.scan_all_for_mof(mof))
-        self.sbu_names = get_or_calculate('sbu_names', lambda mof: SBUDAO.process_sbus(mof.sbus(), mof))
+        if self.get_mof() is not None:
+            sbu_node_info = get_or_calculate('sbu_node_info', lambda mof: SBUDAO.process_sbus(mof.sbus().clusters, mof))
+            self.sbu_nodes = [ContainedSBU(info) for info in sbu_node_info]
+            sbu_conn_info = get_or_calculate('sbu_connector_info', lambda mof: SBUDAO.process_sbus(mof.sbus().connectors, mof))
+            self.sbu_connectors = [ContainedSBU(info) for info in sbu_conn_info]
+            sbu_aux_info = get_or_calculate('sbu_aux_info', lambda mof: SBUDAO.process_sbus(mof.sbus().auxiliaries, mof))
+            self.sbu_auxiliaries = [ContainedSBU(info) for info in sbu_aux_info]
+        else:
+            self.sbu_nodes = self.sbu_connectors = self.sbu_auxiliaries = None
+
         self.LCD = dictionary['LCD']
         self.PLD = dictionary['PLD']
         self.LFPD = dictionary['LFPD']
