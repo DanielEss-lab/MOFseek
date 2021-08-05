@@ -43,46 +43,53 @@ class MOFDatabase:
         set_from_dictionary_or_mof('cartesian_lengths')
         set_from_dictionary_or_mof('elementsPresent')
         set_from_dictionary_or_mof('atoms_string_with_solvents')
-        set_from_dictionary_or_mof('atoms_string_without_solvents')
+        self.atoms_string_with_solvents = get_or_calculate('atoms_string_with_solvents',
+                                                           lambda mof: mof.atoms_string_with_solvents())
+        self.atoms_string_without_solvents = get_or_calculate('atoms_string_without_solvents',
+                                                           lambda mof: mof.atoms_string_without_solvents())
 
         self.ligand_names = get_or_calculate('ligand_names', lambda mof: LigandDAO.scan_all_for_mof(mof))
         if self.get_mof() is not None:
-            sbu_node_info = get_or_calculate('sbu_node_info', lambda mof: SBUDAO.process_sbus(mof.sbus().clusters, mof))
+            sbu_node_info = dictionary['sbu_node_info']
             self.sbu_nodes = [ContainedSBU(info) for info in sbu_node_info]
-            sbu_conn_info = get_or_calculate('sbu_connector_info', lambda mof: SBUDAO.process_sbus(mof.sbus().connectors, mof))
+            sbu_conn_info = dictionary['sbu_conn_info']
             self.sbu_connectors = [ContainedSBU(info) for info in sbu_conn_info]
-            sbu_aux_info = get_or_calculate('sbu_aux_info', lambda mof: SBUDAO.process_sbus(mof.sbus().auxiliaries, mof))
+            sbu_aux_info = dictionary['sbu_aux_info']
             self.sbu_auxiliaries = [ContainedSBU(info) for info in sbu_aux_info]
+            self.sbu_names = [SBU.name for SBU in self.sbu_nodes]
+            self.sbu_names.extend([SBU.name for SBU in self.sbu_connectors])
+            self.sbu_names.extend([SBU.name for SBU in self.sbu_auxiliaries])
         else:
             self.sbu_nodes = self.sbu_connectors = self.sbu_auxiliaries = None
+            self.sbu_names = []
 
-        self.LCD = dictionary['LCD']
-        self.PLD = dictionary['PLD']
-        self.LFPD = dictionary['LFPD']
-        self.cm3_g = dictionary['cm3_g']
-        self.ASA_m2_cm3 = dictionary['ASA_m2_cm3']
-        self.ASA_m2_g = dictionary['ASA_m2_g']
-        self.NASA_m2_cm3 = dictionary['NASA_m2_cm3']
-        self.NASA_m2_g = dictionary['NASA_m2_g']
-        self.AV_VF = dictionary['AV_VF']
-        self.AV_cm3_g = dictionary['AV_cm3_g']
-        self.NAV_cm3_g = dictionary['NAV_cm3_g']
-        self.All_Metals = dictionary['All_Metals']
-        self.Has_OMS = dictionary['Has_OMS']
-        self.Open_Metal_Sites = dictionary['Open_Metal_Sites']
-        self.Extension = dictionary['Extension']
-        self.FSR_overlap = dictionary['FSR_overlap']
-        self.from_CSD = dictionary['from_CSD']
-        self.public = dictionary['public']
-        self.DISORDER = dictionary['DISORDER']
-        self.CSD_overlap_inCoRE = dictionary['CSD_overlap_inCoRE']
-        self.CSD_of_WoS_inCoRE = dictionary['CSD_of_WoS_inCoRE']
-        self.CSD_overlap_inCCDC = dictionary['CSD_overlap_inCCDC']
-        self.date_CSD = dictionary['date_CSD']
-        self.DOI_public = dictionary['DOI_public']
-        self.Note = dictionary['Note']
-        self.Matched_CSD_of_CoRE = dictionary['Matched_CSD_of_CoRE']
-        self.Possible_List_CSD_of_CoRE = dictionary['Possible_List_CSD_of_CoRE']
+        self.LCD = dictionary.get('LCD')
+        self.PLD = dictionary.get('PLD')
+        self.LFPD = dictionary.get('LFPD')
+        self.cm3_g = dictionary.get('cm3_g')
+        self.ASA_m2_cm3 = dictionary.get('ASA_m2_cm3')
+        self.ASA_m2_g = dictionary.get('ASA_m2_g')
+        self.NASA_m2_cm3 = dictionary.get('NASA_m2_cm3')
+        self.NASA_m2_g = dictionary.get('NASA_m2_g')
+        self.AV_VF = dictionary.get('AV_VF')
+        self.AV_cm3_g = dictionary.get('AV_cm3_g')
+        self.NAV_cm3_g = dictionary.get('NAV_cm3_g')
+        self.All_Metals = dictionary.get('All_Metals')
+        self.Has_OMS = dictionary.get('Has_OMS')
+        self.Open_Metal_Sites = dictionary.get('Open_Metal_Sites')
+        self.Extension = dictionary.get('Extension')
+        self.FSR_overlap = dictionary.get('FSR_overlap')
+        self.from_CSD = dictionary.get('from_CSD')
+        self.public = dictionary.get('public')
+        self.DISORDER = dictionary.get('DISORDER')
+        self.CSD_overlap_inCoRE = dictionary.get('CSD_overlap_inCoRE')
+        self.CSD_of_WoS_inCoRE = dictionary.get('CSD_of_WoS_inCoRE')
+        self.CSD_overlap_inCCDC = dictionary.get('CSD_overlap_inCCDC')
+        self.date_CSD = dictionary.get('date_CSD')
+        self.DOI_public = dictionary.get('DOI_public')
+        self.Note = dictionary.get('Note')
+        self.Matched_CSD_of_CoRE = dictionary.get('Matched_CSD_of_CoRE')
+        self.Possible_List_CSD_of_CoRE = dictionary.get('Possible_List_CSD_of_CoRE')
 
         self.num_atoms = get_or_calculate('num_atoms', lambda mof: len(mof.atoms))
         self.conn_node_atom_ratio = get_or_calculate('conn_node_atom_ratio', lambda mof:

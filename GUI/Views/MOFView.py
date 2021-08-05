@@ -3,9 +3,8 @@ import tkinter.font as tkFont
 
 from GUI import os_specific_settings, Attributes, Settings
 from GUI.Utility import Tooltips
-from MofIdentifier.DAO import MOFDatabase, SBUDAO
+from MofIdentifier.DAO import MOFDatabase, SBUDAO, LigandDAO
 from MofIdentifier.fileIO import FileOpen
-from MofIdentifier.subbuilding import SBUCollectionManager
 
 
 def select_for_edit(parent, mof):
@@ -46,16 +45,13 @@ class View(tk.Frame):
 
         self.attribute_row = self.generate_attribute_row()
 
-        self.generate_sbu_row().grid(sticky=tk.EW, columnspan=3) # Temporarily disabled for speed (part 2/2)
+        self.generate_sbu_row().grid(sticky=tk.EW, columnspan=3)
 
-        row4 = tk.Frame(master=self, height=20)
-        ligand_label = tk.Label(row4, text="Ligands:")
-        ligand_label.pack(side='left')
-        row4.grid(sticky=tk.EW, columnspan=3)
+        self.generate_ligand_row().grid(sticky=tk.EW, columnspan=3)
 
     def generate_sbu_row(self):
         sbu_row = tk.Frame(master=self, height=20)
-        sbu_label = tk.Label(sbu_row, text="SBUs:")
+        sbu_label = tk.Label(sbu_row, text=f"{len(self.mof.sbu_names)} SBUs:")
         sbu_label.pack(side='left')
         for node in self.mof.sbu_nodes:
             self.display_sbu_name(sbu_row, node, '#0000a0')
@@ -71,14 +67,39 @@ class View(tk.Frame):
         f = tkFont.Font(sbu_label, sbu_label["font"])
         f.configure(underline=True)
         sbu_label.configure(font=f)
-        event_function = self.have_page_highlight(sbu.name)
+        event_function = self.have_page_highlight_sbu(sbu.name)
         sbu_label.bind('<Button-1>', event_function)
         sbu_label.pack(side='left')
 
-    def have_page_highlight(self, clicked_name):
+    def have_page_highlight_sbu(self, clicked_name):
         def fun(*args):
             sbu = SBUDAO.get_sbu(clicked_name)
             self.top_page.highlight_molecule(sbu)
+
+        return fun
+
+    def generate_ligand_row(self):
+        ligand_row = tk.Frame(master=self, height=20)
+        ligand_label = tk.Label(ligand_row, text=f"{len(self.mof.ligand_names)} ligands:")
+        ligand_label.pack(side='left')
+        for name in self.mof.ligand_names:
+            self.display_ligand_name(ligand_row, name)
+        return ligand_row
+
+    def display_ligand_name(self, parent, name):
+        text = name
+        ligand_label = tk.Label(parent, text=text, cursor=os_specific_settings.LINK_CURSOR, padx=3)
+        f = tkFont.Font(ligand_label, ligand_label["font"])
+        f.configure(underline=True)
+        ligand_label.configure(font=f)
+        event_function = self.have_page_highlight_ligand(name)
+        ligand_label.bind('<Button-1>', event_function)
+        ligand_label.pack(side='left')
+
+    def have_page_highlight_ligand(self, clicked_name):
+        def fun(*args):
+            ligand = LigandDAO.get_ligand(clicked_name)
+            self.top_page.highlight_molecule(ligand)
 
         return fun
 

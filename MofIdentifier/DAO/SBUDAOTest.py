@@ -9,7 +9,7 @@ class SBUDAOTest(unittest.TestCase):
         # SBUDAO.delete_all_sbus()  # this WILL actually delete everything, so don't uncomment this unless you need to
         mof = CifReader.get_mof("../mofsForTests/smod7-pos-1.cif")
         sbu = mof.sbus().clusters[0]
-        name = SBUDAO.process_sbu(sbu, mof)
+        name = SBUDAO.process_sbu(sbu, 'smod7-pos-1')
         self.assertEqual(1, len(SBUDAO.get_all_names()))
         self.assertEqual('cluster_0', name)
 

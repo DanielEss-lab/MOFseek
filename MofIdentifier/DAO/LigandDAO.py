@@ -44,8 +44,8 @@ def update_mof_collection(ligand, matched_mofs):
 
 def update_ligand_collection(ligand_for_db: LigandDatabase):
     try:
-        ligand_collection.update_one({"ligand_name": ligand_for_db.ligand_name},
-                                     {"$set": {"ligand_file_content": ligand_for_db.ligand_file},
+        ligand_collection.update_one({"ligand_name": ligand_for_db.name},
+                                     {"$set": {"ligand_file_content": ligand_for_db.file_content},
                                       "$addToSet": {"MOFs": {"$each": ligand_for_db.Mofs}}}, upsert=True)
     except Exception as e:
         print("error: ", e.args)
@@ -84,10 +84,17 @@ def scan_all_for_mof(mof):
     for ligand in ligand_collection.find():
         ligand = LigandDatabase.from_dict(ligand)
         if SubGraphMatcher.find_ligand_in_mof(ligand.get_ligand(), mof):
-            ligand_collection.update_one({"ligand_name": ligand.name}, {"$addToSet": {"MOFs": mof.filename}})
-            cif_collection.update_one({"filename": ligand.name}, {"$addToSet": {"ligand_names": mof.filename}})
-            ligands.append(ligand.label)
+            mof_name = mof.label
+            if mof_name.endswith('.cif'):
+                mof_name = mof_name[:-4]
+            ligand_collection.update_one({"ligand_name": ligand.name}, {"$addToSet": {"MOFs": mof_name}})
+            cif_collection.update_one({"filename": ligand.name}, {"$addToSet": {"ligand_names": mof_name}})
+            ligands.append(ligand.name)
     return ligands
+
+
+def delete_all_ligands():
+    ligand_collection.delete_many({})
 
 
 if __name__ == '__main__':

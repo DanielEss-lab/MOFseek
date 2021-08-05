@@ -1,7 +1,7 @@
 import tkinter as tk
 
 from GUI import os_specific_settings
-from MofIdentifier.DAO import SBUDatabase
+from MofIdentifier.DAO import SBUDatabase, MOFDAO
 from MofIdentifier.fileIO import FileOpen
 import tkinter.font as tkFont
 
@@ -14,7 +14,7 @@ class View(tk.Frame):
     def __init__(self, parent, sbu: SBUDatabase.SBUDatabase):
         self.parent = parent
         tk.Frame.__init__(self, self.parent, height=40, width=120, bd=1, relief=tk.SOLID)
-
+        self.sbu = sbu
         row1 = tk.Frame(master=self)
         name = tk.Label(row1, text=sbu.name)
         name.pack(side='left')
@@ -29,11 +29,17 @@ class View(tk.Frame):
         edit = tk.Label(row1, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
         edit.bind('<Button-1>', lambda e: select_for_edit(parent, sbu))
         edit.pack(side='right')
-        search = tk.Label(row1, text="Search as Ligand", cursor=os_specific_settings.LINK_CURSOR, padx=8)
+        search_as_ligand = tk.Label(row1, text="Search as Ligand", cursor=os_specific_settings.LINK_CURSOR, padx=8)
+        f = tkFont.Font(search_as_ligand, search_as_ligand["font"])
+        f.configure(underline=True)
+        search_as_ligand.configure(font=f)
+        search_as_ligand.bind('<Button-1>', lambda e: parent.winfo_toplevel().force_search_ligand(sbu))
+        search_as_ligand.pack(side='right')
+        search = tk.Label(row1, text="Search", cursor=os_specific_settings.LINK_CURSOR, padx=8)
         f = tkFont.Font(search, search["font"])
         f.configure(underline=True)
         search.configure(font=f)
-        search.bind('<Button-1>', lambda e: parent.winfo_toplevel().force_search_ligand(sbu))
+        search.bind('<Button-1>', lambda e: parent.winfo_toplevel().force_search_sbu(sbu))
         search.pack(side='right')
         row1.pack(fill=tk.X)
 
@@ -52,13 +58,31 @@ class View(tk.Frame):
         type.pack(side='right')
         row3.pack(fill=tk.X)
 
-        row4 = tk.Frame(master=self, height=20)
-        mof_label = tk.Label(row4, text="MOFs:")
+        self.generate_mof_row().pack(side='left')
+
+
+
+    def generate_mof_row(self):
+        mof_row = tk.Frame(master=self, height=20)
+        mof_label = tk.Label(mof_row, text=f"In {len(self.sbu.mofs)} MOFs: ")
         mof_label.pack(side='left')
-        sbu_search = tk.Label(row4, text="Search", cursor=os_specific_settings.LINK_CURSOR, padx=8)
-        f = tkFont.Font(sbu_search, sbu_search["font"])
+        for name in self.sbu.mofs:
+            self.display_mof_name(mof_row, name)
+        return mof_row
+
+    def display_mof_name(self, parent, name):
+        text = name
+        mof_label = tk.Label(parent, text=text, cursor=os_specific_settings.LINK_CURSOR, padx=3)
+        f = tkFont.Font(mof_label, mof_label["font"])
         f.configure(underline=True)
-        sbu_search.configure(font=f)
-        sbu_search.bind('<Button-1>', lambda e: parent.winfo_toplevel().force_search_sbu(sbu))
-        sbu_search.pack(side='right')
-        row4.pack(fill=tk.X)
+        mof_label.configure(font=f)
+        event_function = self.have_page_highlight_mof(name)
+        mof_label.bind('<Button-1>', event_function)
+        mof_label.pack(side='left')
+
+    def have_page_highlight_mof(self, clicked_name):
+        def fun(*args):
+            mof = MOFDAO.get_MOF(clicked_name)
+            self.top_page.highlight_molecule(mof)
+
+        return fun

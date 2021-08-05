@@ -118,37 +118,13 @@ class View(FrameWithProcess.Frame):
         else:
             self.start_process(search)
 
-    def get_ligands(self, ligand_names):
-        ligands = list()
-        other_ligands = list()
-        for ligand_name in ligand_names:
-            if ligand_name in self.custom_ligands:
-                ligands.append(self.custom_ligands[ligand_name])
-            else:
-                other_ligands.append(ligand_name)
-        for name in other_ligands:
-            ligands.append(LigandDAO.get_ligand(name))
-        return ligands
-
-    def get_sbus(self, sbu_names):
-        sbus = list()
-        other_sbus = list()
-        for sbu_name in sbu_names:
-            if sbu_name in self.custom_ligands:
-                sbus.append(self.custom_ligands[sbu_name])
-            else:
-                other_sbus.append(sbu_name)
-        for name in other_sbus:
-            sbus.append(SBUDAO.get_sbu(name))
-        return sbus
-
     def search_from_input(self, search):
         # Generate SearchTerms object from entries if needed
         if search is None:
-            ligands = self.get_ligands(self.ent_ligand.get_values())
-            forbidden_ligands = self.get_ligands(self.ent_excl_ligand.get_values())
-            sbus = self.get_sbus(self.ent_sbus.get_values())
-            forbidden_sbus = self.get_sbus(self.ent_excl_sbus.get_values())
+            ligands = self.ent_ligand.get_values()
+            forbidden_ligands = self.ent_excl_ligand.get_values()
+            sbus = self.ent_sbus.get_values()
+            forbidden_sbus = self.ent_excl_sbus.get_values()
             element_symbols_text = self.ent_elements.get()
             element_symbols = re.findall(r"[\w']+", element_symbols_text)
             forbidden_element_symbols_text = self.ent_excl_elements.get()
