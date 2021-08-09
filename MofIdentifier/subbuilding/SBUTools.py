@@ -14,10 +14,16 @@ class SBUCollection:
         self.num_connector_atoms = sum(len(sbu.atoms) * sbu.frequency for sbu in connectors)
         self.auxiliaries = auxiliaries
         self.num_auxiliary_atoms = sum(len(sbu.atoms) * sbu.frequency for sbu in auxiliaries)
-        self.avg_node_connectivity = sum(len(sbu.adjacent_connector_ids) * sbu.frequency for sbu in clusters) / \
-            sum(sbu.frequency for sbu in clusters)
-        self.avg_conn_connectivity = sum(len(sbu.adjacent_cluster_ids) * sbu.frequency for sbu in connectors) / \
-            sum(sbu.frequency for sbu in connectors)
+        try:
+            self.avg_node_connectivity = sum(len(sbu.adjacent_connector_ids) * sbu.frequency for sbu in clusters) / \
+                sum(sbu.frequency for sbu in clusters)
+        except ZeroDivisionError:
+            self.avg_node_connectivity = float('inf')
+        try:
+            self.avg_conn_connectivity = sum(len(sbu.adjacent_cluster_ids) * sbu.frequency for sbu in connectors) / \
+                sum(sbu.frequency for sbu in connectors)
+        except ZeroDivisionError:
+            self.avg_node_connectivity = float('inf')
 
     def __str__(self):
         string = ""
@@ -51,7 +57,7 @@ class SBUCollection:
             for node_id in aux.adjacent_cluster_ids:
                 node = node_by_id[node_id]
                 clusters[node].append(aux)
-        return clusters
+        return clusters.items()
 
     def __add__(self, other):
         return SBUCollection(self.clusters + other.clusters, self.connectors

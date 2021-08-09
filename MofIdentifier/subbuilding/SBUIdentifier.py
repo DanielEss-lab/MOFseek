@@ -152,8 +152,6 @@ class SBUIdentifier:
                 self.next_group_id += 1
         for cluster in clusters:
             self.set_adj_ids(cluster)
-        if len(connectors) == 0:
-            raise Exception('Exiting algorithm early because no connectors found')
         if not self.show_duplicates:
             clusters = reduce_duplicates(clusters, lambda x, y: x == y)
             connectors = reduce_duplicates(connectors, lambda x, y: x == y)
@@ -231,7 +229,7 @@ class SBUIdentifier:
                     num_cluster_neighbors += 1
                     cluster_ids.add(cluster.sbu_id)
                 else:
-                    num_noncluster_neighbors += 1
+                    num_noncluster_neighbors += 1  # TODO: clarify in comment when this scenario occurs
             else:
                 num_noncluster_neighbors += 1
         if atom.type_symbol == 'H':
@@ -242,6 +240,10 @@ class SBUIdentifier:
                     cluster.add_atom(atom)
                     self.mark_group(atom, cluster.sbu_id)
                     return True
+        if atom.type_symbol == 'O' and len(atom.bondedAtoms) == 1:
+            for neighbor in atom.bondedAtoms:
+                if neighbor.is_metal():
+                    return False
         if num_cluster_neighbors > 1 + num_noncluster_neighbors and len(cluster_ids) == 1:
             # if num_noncluster_neighbors == 1 then it's likely to be part of an aux sbu, not part of the cluster
             cluster.add_atom(atom)
