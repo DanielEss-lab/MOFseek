@@ -1,3 +1,5 @@
+import csv
+
 from MofIdentifier.DAO import SBUDAO, LigandDAO
 from MofIdentifier.DAO.MOFDatabase import MOFDatabase
 from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
@@ -56,6 +58,15 @@ def _add_mof_to_collection(mof):
                                                                 "sbu_conn_info": [],
                                                                 "sbu_aux_info": []}}, upsert=True)
     return mof_name
+
+
+def add_csv_info(csv_file_path):
+    with open(csv_file_path, 'r') as file:
+        csv_file = csv.DictReader(file)
+        for row in csv_file:
+            items = dict(row)
+            name = items['filename']
+            cif_collection.update_one({"filename": name}, {"$set": items})
 
 
 if __name__ == "__main__":

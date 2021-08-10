@@ -47,7 +47,7 @@ class SearchTerms:
     def passes(self, MOF):
         if MOF is None or MOF.get_mof() is None:
             return False
-        if MOF.disorder and not Settings.allow_disorder:
+        if MOF.DISORDER and not Settings.allow_disorder:
             return False
         for element in self.element_symbols:
             if element not in MOF.elements_present:

@@ -1,4 +1,4 @@
-from MofIdentifier.DAO import SBUDAO, LigandDAO, MOFDAO
+from MofIdentifier import DAO
 from MofIdentifier.fileIO import CifReader
 
 
@@ -23,7 +23,7 @@ class MOFDatabase:
                 if self.get_mof() is not None:
                     # use cif content to make MOF object, get attribute from that
                     value = getattr(self.get_mof(), attribute_name)
-                    MOFDAO.store_value(self.filename, attribute_name, value)
+                    DAO.MOFDAO.store_value(self.filename, attribute_name, value)
                     setattr(self, attribute_name, value)
                 else:
                     setattr(self, attribute_name, None)
@@ -35,7 +35,7 @@ class MOFDatabase:
                 if self.get_mof() is not None:
                     # use cif content to make MOF object, calculate attribute from that
                     value = calculator(self.get_mof())
-                    MOFDAO.store_value(self.filename, attribute_name, value)
+                    DAO.MOFDAO.store_value(self.filename, attribute_name, value)
                     return value
                 else:
                     return None
@@ -51,7 +51,7 @@ class MOFDatabase:
         self.atoms_string_without_solvents = get_or_calculate('atoms_string_without_solvents',
                                                            lambda mof: mof.atoms_string_without_solvents())
 
-        self.ligand_names = get_or_calculate('ligand_names', lambda mof: LigandDAO.scan_all_for_mof(mof))
+        self.ligand_names = get_or_calculate('ligand_names', lambda mof: DAO.LigandDAO.scan_all_for_mof(mof))
         if self.get_mof() is not None:
             sbu_node_info = dictionary['sbu_node_info']
             self.sbu_nodes = [ContainedSBU(info) for info in sbu_node_info]
@@ -66,17 +66,23 @@ class MOFDatabase:
             self.sbu_nodes = self.sbu_connectors = self.sbu_auxiliaries = None
             self.sbu_names = []
 
-        self.LCD = dictionary.get('LCD')
-        self.PLD = dictionary.get('PLD')
-        self.LFPD = dictionary.get('LFPD')
-        self.cm3_g = dictionary.get('cm3_g')
-        self.ASA_m2_cm3 = dictionary.get('ASA_m2_cm3')
-        self.ASA_m2_g = dictionary.get('ASA_m2_g')
-        self.NASA_m2_cm3 = dictionary.get('NASA_m2_cm3')
-        self.NASA_m2_g = dictionary.get('NASA_m2_g')
-        self.AV_VF = dictionary.get('AV_VF')
-        self.AV_cm3_g = dictionary.get('AV_cm3_g')
-        self.NAV_cm3_g = dictionary.get('NAV_cm3_g')
+        def try_float(v):
+            try:
+                return float(v)
+            except TypeError:
+                return None
+
+        self.LCD = try_float(dictionary.get('LCD'))
+        self.PLD = try_float(dictionary.get('PLD'))
+        self.LFPD = try_float(dictionary.get('LFPD'))
+        self.cm3_g = try_float(dictionary.get('cm3_g'))
+        self.ASA_m2_cm3 = try_float(dictionary.get('ASA_m2_cm3'))
+        self.ASA_m2_g = try_float(dictionary.get('ASA_m2_g'))
+        self.NASA_m2_cm3 = try_float(dictionary.get('NASA_m2_cm3'))
+        self.NASA_m2_g = try_float(dictionary.get('NASA_m2_g'))
+        self.AV_VF = try_float(dictionary.get('AV_VF'))
+        self.AV_cm3_g = try_float(dictionary.get('AV_cm3_g'))
+        self.NAV_cm3_g = try_float(dictionary.get('NAV_cm3_g'))
         # self.All_Metals = dictionary.get('All_Metals')  # Not relevant, but perhaps we'll want to add it back someday
         self.Has_OMS = True if dictionary.get('Has_OMS') == 'Yes' else False
         open_sites = dictionary.get('Open_Metal_Sites')

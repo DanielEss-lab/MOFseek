@@ -84,7 +84,8 @@ def mof_from_cf(cf, filename, file_str):
 
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-    MOF = get_mof(r'C:\Users\mdavid4\Desktop\CIFs\structure_10143\ABAVIJ_clean.cif')
+    MOF = get_mof(r'/Users/davidl/Desktop/Work/test_mol/acs.cgd.6b00163_UKEBOD1448508_clean.cif')
 
     print(MOF.unit_volume)
     print(MOF.cartesian_lengths[0] * MOF.cartesian_lengths[1] * MOF.cartesian_lengths[2])
+    print(MOF.sbus().clusters[0])
