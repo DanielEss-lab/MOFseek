@@ -1,4 +1,4 @@
-from MofIdentifier.DAO import SBUDAO, LigandDAO
+from MofIdentifier.DAO import SBUDAO, LigandDAO, MOFDAO
 from MofIdentifier.fileIO import CifReader
 
 
@@ -22,7 +22,9 @@ class MOFDatabase:
             except KeyError:
                 if self.get_mof() is not None:
                     # use cif content to make MOF object, get attribute from that
-                    setattr(self, attribute_name, getattr(self.get_mof(), attribute_name))
+                    value = getattr(self.get_mof(), attribute_name)
+                    MOFDAO.store_value(self.filename, attribute_name, value)
+                    setattr(self, attribute_name, value)
                 else:
                     setattr(self, attribute_name, None)
 
@@ -32,7 +34,9 @@ class MOFDatabase:
             except KeyError:
                 if self.get_mof() is not None:
                     # use cif content to make MOF object, calculate attribute from that
-                    return calculator(self.get_mof())
+                    value = calculator(self.get_mof())
+                    MOFDAO.store_value(self.filename, attribute_name, value)
+                    return value
                 else:
                     return None
 
@@ -42,7 +46,6 @@ class MOFDatabase:
         set_from_dictionary_or_mof('unit_volume')
         set_from_dictionary_or_mof('cartesian_lengths')
         set_from_dictionary_or_mof('elementsPresent')
-        set_from_dictionary_or_mof('atoms_string_with_solvents')
         self.atoms_string_with_solvents = get_or_calculate('atoms_string_with_solvents',
                                                            lambda mof: mof.atoms_string_with_solvents())
         self.atoms_string_without_solvents = get_or_calculate('atoms_string_without_solvents',
@@ -74,17 +77,19 @@ class MOFDatabase:
         self.AV_VF = dictionary.get('AV_VF')
         self.AV_cm3_g = dictionary.get('AV_cm3_g')
         self.NAV_cm3_g = dictionary.get('NAV_cm3_g')
-        self.All_Metals = dictionary.get('All_Metals')
-        self.Has_OMS = dictionary.get('Has_OMS')
-        self.Open_Metal_Sites = dictionary.get('Open_Metal_Sites')
+        # self.All_Metals = dictionary.get('All_Metals')  # Not relevant, but perhaps we'll want to add it back someday
+        self.Has_OMS = True if dictionary.get('Has_OMS') == 'Yes' else False
+        open_sites = dictionary.get('Open_Metal_Sites')
+        self.Open_Metal_Sites = [] if open_sites is None else open_sites.split(',')
         self.Extension = dictionary.get('Extension')
-        self.FSR_overlap = dictionary.get('FSR_overlap')
-        self.from_CSD = dictionary.get('from_CSD')
-        self.public = dictionary.get('public')
-        self.DISORDER = dictionary.get('DISORDER')
-        self.CSD_overlap_inCoRE = dictionary.get('CSD_overlap_inCoRE')
+        self.FSR_overlap = True if dictionary.get('FSR_overlap') == 'Y' else False
+        self.from_CSD = True if dictionary.get('from_CSD') == 'Y' else False
+        self.public = True if dictionary.get('public') == 'Y' else False
+        self.DISORDER = True if dictionary.get('DISORDER') == 'DISORDER' else False
+        self.CSD_overlap_inCoRE = True if dictionary.get('CSD_overlap_inCoRE') == 'Y' else False
         self.CSD_of_WoS_inCoRE = dictionary.get('CSD_of_WoS_inCoRE')
-        self.CSD_overlap_inCCDC = dictionary.get('CSD_overlap_inCCDC')
+        CSD_o_inCCDC = dictionary.get('CSD_overlap_inCCDC')
+        self.CSD_overlap_inCCDC = True if CSD_o_inCCDC == 'Y' else False if CSD_o_inCCDC == 'N' else CSD_o_inCCDC
         self.date_CSD = dictionary.get('date_CSD')
         self.DOI_public = dictionary.get('DOI_public')
         self.Note = dictionary.get('Note')

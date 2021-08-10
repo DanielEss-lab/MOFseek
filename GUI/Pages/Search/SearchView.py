@@ -158,17 +158,17 @@ class View(FrameWithProcess.Frame):
             view = tk.Frame(parent)
             top = tk.Label(view, text='')
             top.pack()
-            middle = tk.Label(view, text='Maximum')
+            middle = tk.Label(view, text='Maximum/Include')
             middle.pack()
-            bottom = tk.Label(view, text='Minimum')
+            bottom = tk.Label(view, text='Minimum/Exclude')
             bottom.pack()
             return view
 
         self.attribute_row = tk.Frame(self)
         attribute_heading(self.attribute_row).pack(side='left')
-        for attr in Attributes.attributes:
-            if Attributes.attributes[attr].enabled:
-                entry = AttributeEntry(self.attribute_row, attr, Attributes.attributes[attr].description)
+        for name, attr in Attributes.attributes.items():
+            if attr.enabled:
+                entry = make_attribute_entry(self.attribute_row, name, attr)
                 self.attribute_entries.append(entry)
                 entry.pack(side='left')
         self.attribute_row.grid(column=0, row=3, columnspan=12, pady=2)
@@ -212,14 +212,30 @@ class View(FrameWithProcess.Frame):
         self.attribute_entries = list()
         self.add_attribute_search_entries()
 
+    def clear_previous_results(self):
+        self.search_to_results = dict()
+        self.redo_search_selected.set('History')
+        self.dropdown_redo_search['menu'].delete(0, 'end')
 
-class AttributeEntry(tk.Frame):
-    def __init__(self, parent, name, description):
+
+def make_attribute_entry(parent, name, attr):
+    if attr.var_type is int or attr.var_type is float:
+        return NumericAttributeEntry(parent, name, attr)
+    elif attr.var_type is bool:
+        return BooleanAttributeEntry(parent, name, attr)
+    elif attr.var_type is str:
+        return StringAttributeEntry(parent, name, attr)
+    else:
+        raise Exception(f'Error: {name} is instance of {attr.var_type}, which is not supported.')
+
+
+class NumericAttributeEntry(tk.Frame):
+    def __init__(self, parent, name, attr):
         self.parent = parent
         self.name = name
         tk.Frame.__init__(self, self.parent, bd=1, relief=tk.SOLID)
         self.top = tk.Label(self, text=name)
-        Tooltips.create_tool_tip(self.top, description)
+        Tooltips.create_tool_tip(self.top, attr.description)
         self.top.grid()
         vcmd = (self.register(self.is_numeric_input))
         self.max = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=max(7, len(name)))
@@ -249,3 +265,51 @@ class AttributeEntry(tk.Frame):
         else:
             min = float(self.min.get())
         return min, max
+
+
+class StringAttributeEntry(tk.Frame):
+    def __init__(self, parent, name, attr):
+        self.parent = parent
+        self.name = name
+        tk.Frame.__init__(self, self.parent, bd=1, relief=tk.SOLID)
+        self.top = tk.Label(self, text=name)
+        Tooltips.create_tool_tip(self.top, attr.description)
+        self.top.grid()
+        self.include = tk.Entry(self, width=max(7, len(name)))
+        self.include.grid(padx=4)
+        self.exclude = tk.Entry(self, width=max(7, len(name)))
+        self.exclude.grid(padx=4)
+
+    def get(self):
+        if len(self.include.get()) == 0:
+            include = None
+        else:
+            include = self.include.get()
+        if len(self.exclude.get()) == 0:
+            exclude = None
+        else:
+            exclude = self.exclude.get()
+        return exclude, include
+
+
+class BooleanAttributeEntry(tk.Frame):
+    def __init__(self, parent, name, attr):
+        self.parent = parent
+        self.name = name
+        tk.Frame.__init__(self, self.parent, bd=1, relief=tk.SOLID)
+        self.top = tk.Label(self, text=name)
+        Tooltips.create_tool_tip(self.top, attr.description)
+        self.top.grid()
+        self.value = tk.StringVar(self, "-")
+        values = {'Either': '-', "Yes": 'Y', "No": 'N'}
+        for text, value in values.items():
+            ttk.Radiobutton(self, text=text, variable = self.value, value=value).grid()
+
+    def get(self):
+        v = self.value.get()
+        if v == '-':
+            return None
+        elif v == 'Y':
+            return True
+        else:
+            return False

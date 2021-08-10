@@ -1,3 +1,4 @@
+import platform
 import tkinter as tk
 
 from GUI.Views import MoleculeView
@@ -48,3 +49,6 @@ class SearchPage(tk.Frame):
         self.search_v.ent_excl_sbus.grid_forget()
         self.search_v.ent_sbus.clear()
         self.search_v.ent_excl_sbus.clear()
+
+    def forget_history(self):
+        self.search_v.clear_previous_results()
