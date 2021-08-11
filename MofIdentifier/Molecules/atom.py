@@ -26,13 +26,29 @@ def conversion_to_Cartesian(atom_a, atom_b, atom_c, angles, lengths):
 
     volume_of_cell = length_a * length_b * length_c * math.sqrt(
         1 - (np.cos(alpha) ** 2) - (np.cos(beta) ** 2) - (np.cos(gamma) ** 2) + (
-                    2 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)))
+                2 * np.cos(alpha) * np.cos(beta) * np.cos(gamma)))
 
     matrix = np.array([[length_a, (length_b * np.cos(gamma)), (length_c * np.cos(beta))],
                        [0, (length_b * np.sin(gamma)), length_c * value_of_trig],
                        [0, 0, volume_of_cell / (length_a * length_b * np.sin(gamma))]])
 
     return np.matmul(matrix, np.array([atom_a, atom_b, atom_c]))
+
+
+def convert_to_fractional(atom_x, atom_y, atom_z, mof):
+    alpha = np.deg2rad(mof.angles[0])
+    beta = np.deg2rad(mof.angles[1])
+    gamma = np.deg2rad(mof.angles[2])
+    a = mof.fractional_lengths[0]
+    b = mof.fractional_lengths[1]
+    c = mof.fractional_lengths[2]
+    omega = mof.unit_volume
+    conversion_matrix = np.array([[1 / a, -np.cos(gamma) / (a * np.sin(gamma)),
+                                   b * c * (np.cos(alpha) * np.cos(gamma) - np.cos(beta)) / (omega * np.sin(gamma))],
+                                  [0, 1 / (b * np.sin(gamma)),
+                                   a * c * (np.cos(beta) * np.cos(gamma) - np.cos(alpha)) / (omega * np.sin(gamma))],
+                                  [0, 0, a * b * np.sin(gamma) / omega]])
+    return np.matmul(conversion_matrix, np.array([atom_x, atom_y, atom_z]))
 
 
 class Atom:
@@ -49,8 +65,12 @@ class Atom:
         self.original = None  # Used when an atom is copied outside of unit cell
 
     @classmethod
-    def from_cartesian(cls, label, type_symbol, x, y, z):
-        return cls(label, type_symbol, x, y, z, float('inf'), float('inf'), float('inf'))
+    def from_cartesian(cls, label, type_symbol, x, y, z, mof=None):
+        if mof is None:
+            return cls(label, type_symbol, x, y, z, float('inf'), float('inf'), float('inf'))
+        else:
+            (a, b, c) = convert_to_fractional(x, y, z, mof)
+            return cls(label, type_symbol, x, y, z, a, b, c)
 
     @classmethod
     def from_fractional(cls, label, type_symbol, a, b, c, angles, lengths):
@@ -59,7 +79,8 @@ class Atom:
 
     @classmethod
     def without_location(cls, label, type_symbol):
-        return cls(label, type_symbol, float('inf'), float('inf'), float('inf'), float('inf'), float('inf'), float('inf'))
+        return cls(label, type_symbol, float('inf'), float('inf'), float('inf'), float('inf'), float('inf'),
+                   float('inf'))
 
     def __str__(self):
         bonds_string = ''
@@ -76,6 +97,9 @@ class Atom:
 
     def __hash__(self):
         return hash(self.label)
+
+    def is_metal(self):
+        return self.type_symbol in metals
 
     def is_in_unit_cell(self):
         return self.original is None

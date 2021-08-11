@@ -4,8 +4,8 @@ from MofIdentifier.fileIO import XyzWriter
 from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
 
 
-def split(mof):
-    identifier = SBUIdentifier(mof)
+def split(mof, show_duplicates=False, aux_as_part_of_node=False):
+    identifier = SBUIdentifier(mof, show_duplicates)
     return identifier.run_algorithm()
 
 
@@ -104,13 +104,14 @@ def panes_between_recurse(atom, end, visited, num_panes, cluster):
 
 
 class SBUIdentifier:
-    def __init__(self, mof):
+    def __init__(self, mof, show_duplicates):
         self.atoms = mof.atoms
         self.mof = mof
         self.atom_to_SBU = dict()
         self.next_group_id = 1
         self.groups = dict()
         self.allow_two_steps = True
+        self.show_duplicates = show_duplicates
 
     def been_visited(self, atom):
         return atom.label in self.atom_to_SBU
@@ -130,7 +131,7 @@ class SBUIdentifier:
                 sbu = self.identify_cluster(atom)
                 if sbu.frequency == float('inf') and self.allow_two_steps:
                     # Try algorithm again, from the top, but with stricter cluster definition
-                    identifier = SBUIdentifier(self.mof)
+                    identifier = SBUIdentifier.copy_from(self)
                     identifier.allow_two_steps = False
                     return identifier.run_algorithm()
                 else:
@@ -152,11 +153,10 @@ class SBUIdentifier:
                 self.next_group_id += 1
         for cluster in clusters:
             self.set_adj_ids(cluster)
-        if len(connectors) == 0:
-            raise Exception('Exiting algorithm early because no connectors found')
-        clusters = reduce_duplicates(clusters, lambda x, y: x == y)
-        connectors = reduce_duplicates(connectors, lambda x, y: x == y)
-        auxiliaries = reduce_duplicates(auxiliaries, lambda x, y: x == y)
+        if not self.show_duplicates:
+            clusters = reduce_duplicates(clusters, lambda x, y: x == y)
+            connectors = reduce_duplicates(connectors, lambda x, y: x == y)
+            auxiliaries = reduce_duplicates(auxiliaries, lambda x, y: x == y)
         for sbu in clusters + connectors + auxiliaries:
             sbu.normalize_atoms(self.mof)
             sbu.file_content = XyzWriter.atoms_to_xyz_string(sbu.atoms, '')
@@ -199,7 +199,7 @@ class SBUIdentifier:
     def identify_ligand(self, nonmetal_atom):
         atoms = set()
         adjacent_cluster_ids = set()
-        self.identify_ligand_recurse(nonmetal_atom, atoms, adjacent_cluster_ids)
+        self.identify_ligand_recurse(nonmetal_atom, atoms, adjacent_cluster_ids)  # Todo: see why one of these was set to 9 in the test
         self.correct_adjacent_cluster_ids(atoms, adjacent_cluster_ids)
         if len(adjacent_cluster_ids) > 1:
             ligand_type = UnitType.CONNECTOR
@@ -217,8 +217,7 @@ class SBUIdentifier:
             if not self.been_visited(neighbor):
                 self.identify_ligand_recurse(neighbor, ligand_atoms, adjacent_cluster_ids)
             elif MofIdentifier.Molecules.atom.is_metal(neighbor.type_symbol):
-                adjacent_cluster_ids.add(
-                    self.group_id_of(neighbor))
+                adjacent_cluster_ids.add(self.group_id_of(neighbor))
 
     def successfully_adds_to_cluster(self, atom):
         num_cluster_neighbors = 0
@@ -232,16 +231,21 @@ class SBUIdentifier:
                     num_cluster_neighbors += 1
                     cluster_ids.add(cluster.sbu_id)
                 else:
-                    num_noncluster_neighbors += 1
+                    num_noncluster_neighbors += 1  # TODO: clarify in comment when this scenario occurs
             else:
                 num_noncluster_neighbors += 1
         if atom.type_symbol == 'H':
+            assert len(atom.bondedAtoms) <= 1
             for neighbor in atom.bondedAtoms:
                 if self.successfully_adds_to_cluster(neighbor):
                     cluster = self.groups[self.group_id_of(neighbor)]
                     cluster.add_atom(atom)
                     self.mark_group(atom, cluster.sbu_id)
                     return True
+        if atom.type_symbol == 'O' and len(atom.bondedAtoms) == 1:
+            for neighbor in atom.bondedAtoms:
+                if neighbor.is_metal():
+                    return False
         if num_cluster_neighbors > 1 + num_noncluster_neighbors and len(cluster_ids) == 1:
             # if num_noncluster_neighbors == 1 then it's likely to be part of an aux sbu, not part of the cluster
             cluster.add_atom(atom)
@@ -287,3 +291,7 @@ class SBUIdentifier:
         for starting_atom in ligand_atoms:
             self.correct_adjacent_recurse(ligand_atoms, adjacent_cluster_ids, set(), dict(), starting_atom, 0, dict())
             break
+
+    @classmethod
+    def copy_from(cls, other):
+        return SBUIdentifier(other.mof, other.show_duplicates)

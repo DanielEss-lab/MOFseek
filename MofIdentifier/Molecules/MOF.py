@@ -22,11 +22,12 @@ class MOF(Molecule.Molecule):
         bond_creator.connect_atoms()
         self._sbus = None
 
-        components = SolventTools.get_connected_components(atoms)
+        components = SolventTools.get_connected_components(self.atoms)
         self.atoms = []
         self.solvents = dict()
         self.solvent_components = []
         self.assign_components(components, self.atoms)
+        assert(len(atoms) > 0)
 
         # self.sbu_names
         # self.identified_ligand_names
