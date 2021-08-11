@@ -138,7 +138,7 @@ class SBUIdentifier:
                     self.groups[self.next_group_id] = sbu
                     self.next_group_id += 1
         if len(clusters) == 0:
-            raise Exception('Exiting algorithm early because no metal atoms found')
+            raise Exception(f'Exiting algorithm early because no metal atoms found for mof {self.mof.label}')
         for atom in self.atoms:
             if not self.been_visited(atom):
                 if self.successfully_adds_to_cluster(atom):
