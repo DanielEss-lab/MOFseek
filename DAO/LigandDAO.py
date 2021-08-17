@@ -1,14 +1,18 @@
-from MofIdentifier.DAO.LigandDatabase import LigandDatabase
-from MofIdentifier.DAO.MOFDatabase import MOFDatabase
-from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection
+from DAO.LigandDatabase import LigandDatabase
+from DAO.MOFDatabase import MOFDatabase
+from DAO.DBConnection import cif_collection, ligand_collection
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import LigandReader
 
 
 def add_ligand_to_db(ligand):
-    ligand_name, matched_mofs, ligand_for_db = read_ligand(ligand)
-    update_mof_collection(ligand_name, matched_mofs)
-    update_ligand_collection(ligand_for_db)
+    ligand_for_db = _read_ligand(ligand)
+    try:
+        ligand_collection.update_one({"ligand_name": ligand_for_db.name},
+                                     {"$set": {"ligand_file_content": ligand_for_db.file_content},
+                                      "$addToSet": {"MOFs": {"$each": ligand_for_db.Mofs}}}, upsert=True)
+    except Exception as e:
+        print("error: ", e.args)
 
 
 def add_ligand_to_db_from_filepath(ligand_file_path):
@@ -16,8 +20,7 @@ def add_ligand_to_db_from_filepath(ligand_file_path):
     add_ligand_to_db(ligand_file)
 
 
-def read_ligand(ligand_file):
-    matched_mofs = []
+def _read_ligand(ligand_file):
     matched_mof_names = []
     i = 0
     for document in cif_collection.find():
@@ -25,30 +28,17 @@ def read_ligand(ligand_file):
         i += 1
         if i % 100 == 0:
             print(f"{ligand_file.label} compared with {i} mofs, and counting...")
+        if i < 4775:
+            continue
         print(f"\n{ligand_file.label} comparing with {mof.filename}")
         if mof.file_content is not None:
             if SubGraphMatcher.find_ligand_in_mof(ligand_file, mof.get_mof()):
-                matched_mofs.append(mof)
                 matched_mof_names.append(mof.filename)
+                cif_collection.update_one({"filename": mof.filename}, {"$addToSet": {"ligand_names": ligand_file.label}})
 
     ligand_for_database = LigandDatabase(ligand_file.label, ligand_file.file_content, matched_mof_names)
 
-    return ligand_file.label, matched_mofs, ligand_for_database
-
-
-def update_mof_collection(ligand, matched_mofs):
-    for mof in matched_mofs:
-        # if the cif does not have ligands field yet -> set the ligands field and value
-        cif_collection.update_one({"filename": mof.filename}, {"$addToSet": {"ligand_names": ligand}})
-
-
-def update_ligand_collection(ligand_for_db: LigandDatabase):
-    try:
-        ligand_collection.update_one({"ligand_name": ligand_for_db.name},
-                                     {"$set": {"ligand_file_content": ligand_for_db.file_content},
-                                      "$addToSet": {"MOFs": {"$each": ligand_for_db.Mofs}}}, upsert=True)
-    except Exception as e:
-        print("error: ", e.args)
+    return ligand_for_database
 
 
 def get_all_names():

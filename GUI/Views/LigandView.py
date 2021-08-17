@@ -1,8 +1,8 @@
 import tkinter as tk
 
 from GUI import os_specific_settings
-from MofIdentifier.DAO import MOFDAO
-from MofIdentifier.DAO.LigandDatabase import LigandDatabase
+from DAO import MOFDAO
+from DAO.LigandDatabase import LigandDatabase
 from MofIdentifier.fileIO import FileOpen
 import tkinter.font as tkFont
 

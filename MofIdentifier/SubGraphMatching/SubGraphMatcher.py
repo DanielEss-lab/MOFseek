@@ -93,7 +93,7 @@ def does_assign_label_from_set(molecule, mol_set):
 def mol_are_isomorphic(mol_1, mol_2):
     graph_a = mol_1.get_graph()
     graph_b = mol_2.get_graph()
-    match = graph_a.isomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
+    match = graph_a.isomorphic_vf2(graph_b, node_compat_fn=timed_vertices_are_equal(time.time()))
     return match
 
 
@@ -102,6 +102,6 @@ def mol_near_isomorphic(mol_1, mol_2):
     graph_b = mol_2.get_hydrogenless_graph()
     if graph_a.vcount() != graph_b.vcount():
         return False
-    match = (graph_a.subisomorphic_vf2(graph_b, node_compat_fn=vertices_are_equal)
-             or graph_b.subisomorphic_vf2(graph_a, node_compat_fn=vertices_are_equal))
+    match = (graph_a.subisomorphic_vf2(graph_b, node_compat_fn=timed_vertices_are_equal(time.time()))
+             or graph_b.subisomorphic_vf2(graph_a, node_compat_fn=timed_vertices_are_equal(time.time())))
     return match

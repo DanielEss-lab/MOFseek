@@ -4,7 +4,7 @@ from tkinter.filedialog import askopenfilename
 
 from GUI.Utility import FrameWithProcess, StyledButton
 from GUI.Views import LigandView
-from MofIdentifier.DAO import LigandDAO
+from DAO import LigandDAO
 from MofIdentifier.fileIO import LigandReader
 
 instruction_text = """Choose from your computer a .xyz file or a .smiles plaintext file whose first line 

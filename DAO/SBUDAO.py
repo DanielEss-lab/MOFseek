@@ -1,11 +1,7 @@
-from pymongo import errors
-
 from MofIdentifier.Molecules.SBU import SBU
-from MofIdentifier.Molecules.MOF import MOF
-from MofIdentifier.DAO.SBUDatabase import SBUDatabase
-from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
+from DAO.SBUDatabase import SBUDatabase
+from DAO.DBConnection import sbu_collection
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.subbuilding.SBUTools import SBUCollection
 
 
 def get_all_names():

@@ -3,8 +3,7 @@ from pathlib import Path
 
 from GUI.Views import MoleculeView
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess, StyledButton
-from MofIdentifier import SearchMOF
-from MofIdentifier.DAO import LigandDAO
+from DAO import LigandDAO
 from MofIdentifier.fileIO import LigandReader
 
 instruction_text = """Renaming a ligand in the database takes several minutes, so please be patient."""

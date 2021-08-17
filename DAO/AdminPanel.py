@@ -2,8 +2,7 @@ import os
 import platform
 from pathlib import Path
 
-from MofIdentifier.DAO import SBUDAO, LigandDAO, MOFDAO
-from MofIdentifier.DAO import DBConnection
+from DAO import MOFDAO, SBUDAO, DBConnection, LigandDAO
 from MofIdentifier.fileIO import CifReader, LigandReader
 from MofIdentifier.fileIO.CifReader import get_mof
 
@@ -88,8 +87,8 @@ def refresh_active_collections_to_test():
     delete_all()
     create_indices()
     if platform.system() == 'Windows':  # Windows
-        add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\GUI\mofsForGui_temp')))
-        add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
+        add_all_mofs(str(Path(r'/GUI/mofsForGui_temp')))
+        add_test_ligands(str(Path(r'/MofIdentifier/ligands')))
         MOFDAO.add_csv_info('')
     elif platform.system() == 'Darwin':  # macOS
         add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/test_mol')))
@@ -106,9 +105,9 @@ def refresh_active_collections_to_full():
 
 def fill_db():
     if platform.system() == 'Windows':  # Windows
-        add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\GUI\mofsForGui_temp')))
-        add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
-        MOFDAO.add_csv_info('')
+        add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')))
+        # add_test_ligands(str(Path(r'/MofIdentifier/ligands')))
+        # MOFDAO.add_csv_info('')
     elif platform.system() == 'Darwin':  # macOS
         add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
         add_test_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
@@ -118,6 +117,7 @@ def fill_db():
 if __name__ == '__main__':
     # add_test_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
     # refresh_active_collections_to_test()
-    LigandDAO.add_ligand_to_db(LigandReader.get_mol_from_file(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66'
-                                                                       r'/MofIdentifier/ligands/BTC.smiles'))))
-    # print(MOFDAO.get_num_mofs(), "mofs in DB now")
+    # fill_db()
+    LigandDAO.add_ligand_to_db(LigandReader.get_mol_from_file(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66'
+                                                                       r'\MofIdentifier\ligands\BTC.smiles'))))
+    print(MOFDAO.get_num_mofs(), "mofs in DB now")

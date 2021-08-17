@@ -1,4 +1,4 @@
-from MofIdentifier import DAO
+from DAO import MOFDAO, LigandDAO
 from MofIdentifier.fileIO import CifReader
 
 
@@ -23,7 +23,7 @@ class MOFDatabase:
                 if self.get_mof() is not None:
                     # use cif content to make MOF object, get attribute from that
                     value = getattr(self.get_mof(), attribute_name)
-                    DAO.MOFDAO.store_value(self.filename, attribute_name, value)
+                    MOFDAO.store_value(self.filename, attribute_name, value)
                     setattr(self, attribute_name, value)
                 else:
                     setattr(self, attribute_name, None)
@@ -35,7 +35,7 @@ class MOFDatabase:
                 if self.get_mof() is not None:
                     # use cif content to make MOF object, calculate attribute from that
                     value = calculator(self.get_mof())
-                    DAO.MOFDAO.store_value(self.filename, attribute_name, value)
+                    MOFDAO.store_value(self.filename, attribute_name, value)
                     return value
                 else:
                     return None
@@ -51,7 +51,7 @@ class MOFDatabase:
         self.atoms_string_without_solvents = get_or_calculate('atoms_string_without_solvents',
                                                            lambda mof: mof.atoms_string_without_solvents())
 
-        self.ligand_names = get_or_calculate('ligand_names', lambda mof: DAO.LigandDAO.scan_all_for_mof(mof))
+        self.ligand_names = get_or_calculate('ligand_names', lambda mof: LigandDAO.scan_all_for_mof(mof))
         if self.get_mof() is not None:
             sbu_node_info = dictionary['sbu_node_info']
             self.sbu_nodes = [ContainedSBU(info) for info in sbu_node_info]

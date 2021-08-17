@@ -1,5 +1,5 @@
 from GUI.Views import LigandView, SBUView, MOFView
-from MofIdentifier.DAO import LigandDatabase, SBUDatabase, MOFDatabase
+from DAO import LigandDatabase, SBUDatabase, MOFDatabase
 from MofIdentifier.Molecules import Ligand, SBU, MOF
 
 

@@ -2,16 +2,12 @@ import platform
 import tkinter as tk
 import tkinter.font as tkFont
 import re
-from pathlib import Path
 from tkinter import ttk
 
 from GUI import Attributes
 from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
-from GUI.Pages.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
-from MofIdentifier import SearchMOF
-from MofIdentifier.DAO import LigandDAO, MOFDAO, SBUDAO
-from MofIdentifier.fileIO import LigandReader
-from MofIdentifier.subbuilding import SBUCollectionManager
+from GUI.Pages.Search.SearchTerms import SearchTerms
+from DAO import MOFDAO, SBUDAO, LigandDAO
 
 ROW_MAXIMUM = 6
 

@@ -1,5 +1,5 @@
 import csv
-from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
+from DAO.DBConnection import cif_collection
 
 
 def read_CSV():

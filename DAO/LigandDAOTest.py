@@ -1,14 +1,14 @@
 import unittest
 import time
 
-from MofIdentifier.DAO import LigandDAO, MOFDAO
+from DAO import MOFDAO
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import XyzReader
 
 
 class MyTestCase(unittest.TestCase):
     def test_possible_infinite_loop(self):
-        ligand = XyzReader.get_molecule('../ligands/L23_no_S.xyz')
+        ligand = XyzReader.get_molecule('../MofIdentifier/ligands/L23_no_S.xyz')
         assert(ligand is not None)
         mof = MOFDAO.get_MOF('LIQCUK_clean.cif')
         assert (mof is not None)

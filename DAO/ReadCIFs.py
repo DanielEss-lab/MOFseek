@@ -1,5 +1,5 @@
 from MofIdentifier.fileIO import CifReader
-from MofIdentifier.DAO.DBConnection import cif_collection, ligand_collection, sbu_collection
+from DAO.DBConnection import cif_collection
 
 
 def read_all_cifs_in_directory(cifs_path):

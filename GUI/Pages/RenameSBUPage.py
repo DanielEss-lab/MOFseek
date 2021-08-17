@@ -1,11 +1,10 @@
 import tkinter as tk
 from pathlib import Path
 
-from GUI.Views import MoleculeView, SBUView
+from GUI.Views import SBUView
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess
-from MofIdentifier.DAO import SBUDAO
+from DAO import SBUDAO
 from MofIdentifier.fileIO import LigandReader
-from MofIdentifier.subbuilding import SBUCollectionManager
 
 instruction_text = """Renaming a Secondary Building Unit in the database takes several minutes, so please be patient."""
 
