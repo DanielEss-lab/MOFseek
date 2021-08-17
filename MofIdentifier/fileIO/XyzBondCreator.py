@@ -25,7 +25,7 @@ class XyzBondCreator:
         dist = Distances.distance(atom_a, atom_b)
         if is_bond_numbered_wca(atom_b.type_symbol):
             pass
-        elif Distances.distance_is_less_than_bond_distance(dist, atom_a, atom_b):
+        elif Distances.is_bond_distance(dist, atom_a, atom_b):
             self.num_bonds = self.num_bonds + 1
             atom_a.bondedAtoms.append(atom_b)
             atom_b.bondedAtoms.append(atom_a)

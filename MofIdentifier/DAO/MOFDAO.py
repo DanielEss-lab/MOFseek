@@ -13,6 +13,14 @@ def get_MOF(name):
     return MOFDatabase(mof)
 
 
+def get_all_names():
+    names = list()
+    names_object = cif_collection.find({}, {"filename": 1})
+    for name_object in names_object:
+        names.append(name_object["filename"])
+    return names
+
+
 def get_passing_MOFs(search):
     results = []
     for document in cif_collection.find():
@@ -63,10 +71,16 @@ def _add_mof_to_collection(mof):
 def add_csv_info(csv_file_path):
     with open(csv_file_path, 'r') as file:
         csv_file = csv.DictReader(file)
+        i = 0
         for row in csv_file:
+            if i % 10 == 0:
+                print(i)
+            i += 1
             items = dict(row)
+            if '' in items:
+                items.pop('')
             name = items['filename']
-            cif_collection.update_one({"filename": name}, {"$set": items})
+            cif_collection.find_one_and_update({"filename": name}, {"$set": items})
 
 
 if __name__ == "__main__":

@@ -20,6 +20,8 @@ def get_all_names():
 
 
 def get_sbu(name):
+    if name.endswith('.xyz'):
+        name = name[:-4]
     try:
         sbu_obj = sbu_collection.find_one({"sbu_name": name})
         sbu = SBUDatabase(sbu_obj["sbu_name"], sbu_obj["file_content"], sbu_obj["MOFs"], sbu_obj["type"])

@@ -6,7 +6,6 @@ from MofIdentifier.DAO import SBUDAO, LigandDAO, MOFDAO
 from MofIdentifier.DAO import DBConnection
 from MofIdentifier.fileIO import CifReader, LigandReader
 from MofIdentifier.fileIO.CifReader import get_mof
-from MofIdentifier.fileIO.LigandReader import get_mol_from_file
 
 
 def delete_all():
@@ -25,8 +24,27 @@ def add_test_mofs(directory):
 def add_test_ligands(directory):
     ligands = LigandReader.get_all_mols_from_directory(directory)
     # C:\Users\mdavid4\Desktop\Esslab - P66\MofIdentifier\ligands
+    done_ligands = ['L23_no_S.xyz',
+                    'M6_node_alternate.xyz',
+                    'SingleMetal.xyz',
+                    'SO4_3.xyz',
+                    'SO4_2.xyz',
+                    'M6_node.xyz',
+                    'SO4_1.xyz',
+                    'HSO4_2.xyz',
+                    'H2O_bonded.xyz',
+                    'HSO4_1.xyz',
+                    'CO2_1.xyz',
+                    'Benzene.smiles',
+                    'L23.xyz'
+                    ]
     for ligand in ligands:
+        if ligand.label in done_ligands:
+            continue
         LigandDAO.add_ligand_to_db(ligand)
+        print(f'{ligand.label} is done being added')
+        done_ligands.append(ligand.label)
+    print(done_ligands)
 
 
 def create_indices():
@@ -40,12 +58,19 @@ def add_all_mofs(mofs_path):
     # Change the directory
     original_path = os.getcwd()
     os.chdir(mofs_path)
+    mofs_present = MOFDAO.get_all_names()
+    num_present = MOFDAO.get_num_mofs()
+    assert (num_present == len(mofs_present))
     for file_name in os.listdir(mofs_path):
         # Check whether file is in text format or not
         if file_name.endswith(".cif"):
+            name = file_name[:-4]
+            if name in mofs_present:
+                continue
             try:
                 filepath = Path(file_name).resolve()
                 filepath = str(filepath)
+                print(f"\n{filepath} will be read now...")
                 mof = get_mof(filepath)
                 MOFDAO.add_mof(mof)
                 i += 1
@@ -54,7 +79,7 @@ def add_all_mofs(mofs_path):
             except Exception as ex:
                 print("Error reading file: ", file_name)
                 print(ex)
-    print(i, "mofs uploaded")
+    print(i, "mofs uploaded. Finished!")
     # Return to original directory
     os.chdir(original_path)
 
@@ -75,6 +100,11 @@ def refresh_active_collections_to_test():
 def refresh_active_collections_to_full():
     delete_all()
     create_indices()
+    fill_db()
+    print(MOFDAO.get_num_mofs(), "mofs in DB now")
+
+
+def fill_db():
     if platform.system() == 'Windows':  # Windows
         add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\GUI\mofsForGui_temp')))
         add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
@@ -86,4 +116,8 @@ def refresh_active_collections_to_full():
 
 
 if __name__ == '__main__':
-    refresh_active_collections_to_full()
+    # add_test_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
+    # refresh_active_collections_to_test()
+    LigandDAO.add_ligand_to_db(LigandReader.get_mol_from_file(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66'
+                                                                       r'/MofIdentifier/ligands/BTC.smiles'))))
+    # print(MOFDAO.get_num_mofs(), "mofs in DB now")

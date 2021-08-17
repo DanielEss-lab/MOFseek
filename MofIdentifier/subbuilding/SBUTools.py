@@ -24,7 +24,7 @@ class SBUCollection:
             self.avg_conn_connectivity = sum(len(sbu.adjacent_cluster_ids) * sbu.frequency for sbu in connectors) / \
                 sum(sbu.frequency for sbu in connectors)
         except ZeroDivisionError:
-            self.avg_node_connectivity = float('inf')
+            self.avg_conn_connectivity = float('inf')
 
     def __str__(self):
         string = ""
@@ -117,7 +117,7 @@ class changeableSBU(Molecule.Molecule):
             atom = queue.popleft()
             for neighbor in (n for n in atom.bondedAtoms if n in atoms and n not in visited):
                 d = Distances.distance(atom, neighbor)
-                if not Distances.distance_is_less_than_bond_distance(d, atom, neighbor):
+                if not Distances.is_bond_distance(d, atom, neighbor):
                     da = db = dc = 0
                     if neighbor.a - atom.a > 0.5:
                         da -= 1.0
