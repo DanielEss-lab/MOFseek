@@ -107,18 +107,12 @@ def get_relevant_group_0_atoms(cluster):
     for aux in cluster[1]:
         if any(atom.type_symbol == 'S' or atom.type_symbol == 'P' or atom.type_symbol == 'C' for atom in aux.atoms):
             continue
-        oxygen = None
-        for atom in aux.atoms:
-            if atom.type_symbol == 'O' and oxygen is None:
-                oxygen = atom
-            elif atom.type_symbol == 'O':
-                continue  # Two oxygens, therefore doesn't fit requirements
-        hydrogen = None
-        for atom in oxygen.bondedAtoms:
-            if atom.type_symbol == 'H' and hydrogen is None:
-                hydrogen = atom
-            elif atom.type_symbol == 'H':
-                assert(len([neighbor for neighbor in oxygen.bondedAtoms if neighbor.type_symbol == 'H']) < 2)
+        oxygen = get_atom(aux.atoms, 'O')
+        if oxygen is None:
+            continue
+        hydrogen = get_atom(aux.atoms, 'H')
+        if len([neighbor for neighbor in oxygen.bondedAtoms if neighbor.type_symbol == 'H']) == 2:
+            continue
         if hydrogen is None:
             add_eligible_oxygens.append(oxygen)
         else:
@@ -128,32 +122,42 @@ def get_relevant_group_0_atoms(cluster):
     return PossibleAtoms(delete_eligible_hydrogens, add_eligible_oxygens)
 
 
+def get_atom(atoms, search_symbol):
+    target = None
+    for atom in atoms:
+        if atom.type_symbol == search_symbol and target is None:
+            target = atom
+        elif atom.type_symbol == search_symbol:
+            return None  # Two of atom, therefore doesn't fit requirements
+    return target
+
+
 def get_relevant_group_1_atoms(cluster, mof):
     # 1) The first 4 mew-3-oxyls
     delete_eligible_hydrogens = []
     add_eligible_oxygens = []
     for atom in cluster[0].atoms:
         if atom.type_symbol != 'O' or len([neighbor for neighbor in atom.bondedAtoms if neighbor.is_metal()]) != 3:
-            continue
-        hydrogen = None
-        for neighbor in atom.bondedAtoms:
-            if neighbor.type_symbol == 'H' and hydrogen is None:
-                hydrogen = neighbor
-            elif neighbor.type_symbol == 'H':
-                assert(len([neighbor for neighbor in atom.bondedAtoms if neighbor.type_symbol == 'H']) < 2)
+            continue  # Only look at oxygens with 3 metal neighbors
+        assert (len([neighbor for neighbor in atom.bondedAtoms if neighbor.type_symbol == 'H']) < 2)
+        hydrogen = get_atom(atom.bondedAtoms, 'H')
         if hydrogen is None:
             add_eligible_oxygens.append(atom)
         else:
             delete_eligible_hydrogens.append(hydrogen)
     # assert(len(delete_eligible_hydrogens) == 4 or len(delete_eligible_hydrogens) == 0)
     # assert(len(add_eligible_oxygens) == 8 or len(add_eligible_oxygens) == 4)
-    if add_eligible_oxygens == 8:
+    if len(add_eligible_oxygens) == 8:
         add_eligible_oxygens.sort()
         first_pole = add_eligible_oxygens[0]
         others = [(pole, Distances.distance_across_unit_cells(
-            first_pole, pole, mof.angles, mof.lengths)) for pole in add_eligible_oxygens[1:]]
+            first_pole, pole, mof.angles, mof.fractional_lengths)) for pole in add_eligible_oxygens[1:]]
         others.sort(key=lambda pair: pair[1])
-        add_eligible_oxygens = [first_pole].extend(others[3:6])  # Not the three closest, neither the one farthest
+        tetrahedral_oxygens = [other[0] for other in others[3:6]]  # Not the three closest, neither the one farthest
+        tetrahedral_oxygens.append(first_pole)
+        add_eligible_oxygens = tetrahedral_oxygens
+    elif len(add_eligible_oxygens) <= 4:
+        add_eligible_oxygens = []
     delete_eligible_hydrogens.sort()
     add_eligible_oxygens.sort()
     return PossibleAtoms(delete_eligible_hydrogens, add_eligible_oxygens)
@@ -168,12 +172,9 @@ def get_relevant_groups_2_and_3_atoms(cluster):
     for aux in cluster[1]:
         if any(atom.type_symbol == 'S' or atom.type_symbol == 'P' or atom.type_symbol == 'C' for atom in aux.atoms):
             continue
-        oxygen = None
-        for atom in aux.atoms:
-            if atom.type_symbol == 'O' and oxygen is None:
-                oxygen = atom
-            elif atom.type_symbol == 'O':
-                continue  # Two oxygens, therefore doesn't fit requirements
+        oxygen = get_atom(aux.atoms, 'O')
+        if oxygen is None:
+            continue
         metal = None
         for atom in oxygen.bondedAtoms:
             if atom.is_metal() and metal is None:
@@ -192,7 +193,7 @@ def get_relevant_groups_2_and_3_atoms(cluster):
         if metal in h_by_metal:
             h_by_metal[metal].extend(hydrogen)
         else:
-            h_by_metal[metal] = [hydrogen]
+            h_by_metal[metal] = hydrogen
     group_2_delete_hydrogens = []
     group_2_add_oxygens = []
     group_3_delete_hydrogens = []
@@ -200,8 +201,8 @@ def get_relevant_groups_2_and_3_atoms(cluster):
     for metal in h_by_metal:
         hydrogens = h_by_metal[metal]
         if len(hydrogens) == 2:
-            group_2_add_oxygens.append(o_by_metal[metal][0])
-            group_3_add_oxygens.append(o_by_metal[metal][1])
+            group_2_add_oxygens.append(o_by_metal[metal][0])  # Add 1st O of metal as candidate to receive its 2nd H
+            group_3_add_oxygens.append(o_by_metal[metal][1])  # Add other O as candidate to receive its 2nd H later
         elif len(hydrogens) == 3:
             if len([neighbor for neighbor in o_by_metal[metal][0].bondedAtoms if neighbor.type_symbol == 'H']) == 2:
                 occupied_oxygen = o_by_metal[metal][0]
@@ -230,16 +231,14 @@ def get_relevant_group_4_atoms(cluster):
     delete_eligible_hydrogens = []
     add_eligible_oxygens = []
     for aux in cluster[1]:
-        sulfur = None
-        for atom in aux.atoms:
-            if atom.type_symbol == 'S':
-                sulfur = atom
+        sulfur = get_atom(aux.atoms, 'S')
         if sulfur is None:
             continue
         eligible_oxygens = []
         for atom in sulfur.bondedAtoms:
             if atom.type_symbol == 'O' and len([neighbor for neighbor in atom.bondedAtoms if neighbor.is_metal()]) == 0:
                 eligible_oxygens.append(atom)
+        eligible_oxygens.sort()
         hydrogen = None
         for oxygen in eligible_oxygens:
             for neighbor in oxygen.bondedAtoms:
@@ -260,26 +259,24 @@ def get_relevant_group_5_atoms(cluster, mof):
     add_eligible_oxygens = []
     for atom in cluster[0].atoms:
         if atom.type_symbol != 'O' or len([neighbor for neighbor in atom.bondedAtoms if neighbor.is_metal()]) != 3:
-            continue
-        hydrogen = None
-        for neighbor in atom.bondedAtoms:
-            if neighbor.type_symbol == 'H' and hydrogen is None:
-                hydrogen = neighbor
-            elif neighbor.type_symbol == 'H':
-                assert(len([neighbor for neighbor in atom.bondedAtoms if neighbor.type_symbol == 'H']) < 2)
+            continue  # Only look at oxygens with 3 metal neighbors
+        assert (len([neighbor for neighbor in atom.bondedAtoms if neighbor.type_symbol == 'H']) < 2)
+        hydrogen = get_atom(atom.bondedAtoms, 'H')
         if hydrogen is None:
             add_eligible_oxygens.append(atom)
         else:
             delete_eligible_hydrogens.append(hydrogen)
-    # assert(len(delete_eligible_hydrogens) == 8 or len(delete_eligible_hydrogens) == 4)
-    # assert(len(add_eligible_oxygens) == 4 or len(add_eligible_oxygens) == 0)
-    if delete_eligible_hydrogens == 8:
+    if len(delete_eligible_hydrogens) == 8:  # Look at group 0 for example of how to fix this
         delete_eligible_hydrogens.sort()
         first_pole = delete_eligible_hydrogens[7]
         others = [(pole, Distances.distance_across_unit_cells(
-            first_pole, pole, mof.angles, mof.lengths)) for pole in delete_eligible_hydrogens[0:7]]
+            first_pole, pole, mof.angles, mof.fractional_lengths)) for pole in delete_eligible_hydrogens[0:7]]
         others.sort(key=lambda pair: pair[1])
-        delete_eligible_hydrogens = [first_pole].extend(others[3:6])  # Not the three closest, neither the one farthest
+        tetrahedral_hydrogens = [other[0] for other in others[3:6]]  # Not the three closest, neither the one farthest
+        tetrahedral_hydrogens.append(first_pole)
+        delete_eligible_hydrogens = tetrahedral_hydrogens
+    elif len(delete_eligible_hydrogens) <= 4:
+        delete_eligible_hydrogens = []
     delete_eligible_hydrogens.sort()
     add_eligible_oxygens.sort()
     return PossibleAtoms(delete_eligible_hydrogens, add_eligible_oxygens)
@@ -306,20 +303,18 @@ def get_atoms_to_delete(cluster, mof, num_to_delete):
 def get_atoms_to_add(cluster, mof, num_to_add):
     group_by_atom = index_atoms(cluster)
     group_0 = get_relevant_group_0_atoms(cluster).add_atoms
-    add_to_cluster(group_by_atom, group_0, mof)
+    add_0 = add_to_cluster(group_by_atom, group_0, mof)
     group_1 = get_relevant_group_1_atoms(cluster, mof).add_atoms
-    add_to_cluster(group_by_atom, group_1, mof)
+    add_1 = add_to_cluster(group_by_atom, group_1, mof)
     groups_2_and_3 = get_relevant_groups_2_and_3_atoms(cluster).add_atoms
-    add_to_cluster(group_by_atom, groups_2_and_3, mof)
+    add_2_3 = add_to_cluster(group_by_atom, groups_2_and_3, mof)
     group_4 = get_relevant_group_4_atoms(cluster).add_atoms
-    add_to_cluster(group_by_atom, group_4, mof)
+    add_4 = add_to_cluster(group_by_atom, group_4, mof)
     group_5 = get_relevant_group_5_atoms(cluster, mof).add_atoms
-    add_to_cluster(group_by_atom, group_5, mof)
-    atoms_in_add_order = group_0 + group_1 + groups_2_and_3 + group_4 + group_5
+    add_5 = add_to_cluster(group_by_atom, group_5, mof)
+    atoms_in_add_order = add_0 + add_1 + add_2_3 + add_4 + add_5
     assert (len(atoms_in_add_order) >= num_to_add)
-    atoms_to_add = []
-    for oxygen in atoms_in_add_order[0:num_to_add]:
-        atoms_to_add.append(make_proton_by(oxygen, mof))
+    atoms_to_add = atoms_in_add_order[0:num_to_add]
     return atoms_to_add
 
 
@@ -334,12 +329,15 @@ def index_atoms(cluster):
 
 
 def add_to_cluster(group_by_atom, oxygens_to_add_to, mof):
+    h_made = []
     for oxygen in oxygens_to_add_to:
         h = make_proton_by(oxygen, mof)
+        h_made.append(h)
         mof.atoms.append(h)
         h.bondedAtoms.append(oxygen)
         oxygen.bondedAtoms.append(h)
         group_by_atom[oxygen].atoms.add(h)
+    return h_made
 
 
 def remove_from_cluster(group_by_atom, hydrogens_to_remove, mof):
