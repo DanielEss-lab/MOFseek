@@ -15,6 +15,7 @@ class View(tk.Frame):
         self.parent = parent
         tk.Frame.__init__(self, self.parent, height=40, width=120, bd=1, relief=tk.SOLID)
         self.sbu = sbu
+        self.top_page = parent.winfo_toplevel()
         row1 = tk.Frame(master=self)
         name = tk.Label(row1, text=sbu.name)
         name.pack(side='left')

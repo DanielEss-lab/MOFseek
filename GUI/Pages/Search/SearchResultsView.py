@@ -77,7 +77,7 @@ class View(FrameWithProcess.Frame):
             for molecule in self.results:
                 CifWriter.write_without_solvent(molecule, path)
         else:
-            MoleculeWriter.write_many(self.results, path)
+            MoleculeWriter.write_many((mof.get_mof() for mof in self.results), path)
 
     def export_txt(self):
         if len(self.results) == 0:
@@ -86,7 +86,7 @@ class View(FrameWithProcess.Frame):
                              initialdir=os.getcwd(), initialfile='SearchOutput' + str(time.time()))
         if f is None:
             return
-        text_to_save = '\n'.join(mof.label for mof in self.results)
+        text_to_save = '\n'.join(mof.filename for mof in self.results)
         f.write(text_to_save)
         f.close()
 

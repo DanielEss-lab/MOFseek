@@ -22,17 +22,16 @@ def add_ligand_to_db_from_filepath(ligand_file_path):
 
 def _read_ligand(ligand_file):
     matched_mof_names = []
-    i = 0
+    # i = 0
     for document in cif_collection.find():
         mof = MOFDatabase(document)
-        i += 1
-        if i % 100 == 0:
-            print(f"{ligand_file.label} compared with {i} mofs, and counting...")
-        if i < 4775:
-            continue
-        print(f"\n{ligand_file.label} comparing with {mof.filename}")
+        # i += 1
+        # if i % 100 == 0:
+        #     print(f"{ligand_file.label} compared with {i} mofs, and counting...")
+        # print(f"\n{ligand_file.label} comparing with {mof.filename}")
         if mof.file_content is not None:
             if SubGraphMatcher.find_ligand_in_mof(ligand_file, mof.get_mof()):
+                print('match')
                 matched_mof_names.append(mof.filename)
                 cif_collection.update_one({"filename": mof.filename}, {"$addToSet": {"ligand_names": ligand_file.label}})
 
@@ -53,10 +52,6 @@ def get_all_names():
 
 
 def get_ligand(ligand_name):
-    if ligand_name.endswith('.xyz'):
-        ligand_name = ligand_name[:-4]
-    elif ligand_name.endswith('.smiles'):
-        ligand_name = ligand_name[:-7]
     try:
         ligand_obj = ligand_collection.find_one({"ligand_name": ligand_name})
         # ligand = ligand_collection.find({}, {"ligand_name": ligand_name, "_id": 0})

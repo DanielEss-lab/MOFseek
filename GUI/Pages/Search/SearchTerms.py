@@ -45,7 +45,7 @@ class SearchTerms:
         self.label_substring = label
 
     def passes(self, MOF):
-        if MOF is None or MOF.get_mof() is None:
+        if MOF is None:
             return False
         if MOF.DISORDER and not Settings.allow_disorder:
             return False
@@ -69,7 +69,7 @@ class SearchTerms:
                 if self.attr[attr_name][1] is not None:  # inclusion string
                     if not self.attr[attr_name][1] in attr.calculate(MOF):
                         return False
-            else:
+            else:  # A numeric attribute
                 if self.attr[attr_name][0] is not None:
                     if attr.calculate(MOF) < self.attr[attr_name][0]:
                         return False  # Less than the minimum

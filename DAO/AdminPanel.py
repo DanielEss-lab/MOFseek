@@ -1,8 +1,10 @@
 import os
 import platform
+import time
 from pathlib import Path
 
 from DAO import MOFDAO, SBUDAO, DBConnection, LigandDAO
+from DAO.MOFDatabase import MOFDatabase
 from MofIdentifier.fileIO import CifReader, LigandReader
 from MofIdentifier.fileIO.CifReader import get_mof
 
@@ -23,20 +25,7 @@ def add_test_mofs(directory):
 def add_test_ligands(directory):
     ligands = LigandReader.get_all_mols_from_directory(directory)
     # C:\Users\mdavid4\Desktop\Esslab - P66\MofIdentifier\ligands
-    done_ligands = ['L23_no_S.xyz',
-                    'M6_node_alternate.xyz',
-                    'SingleMetal.xyz',
-                    'SO4_3.xyz',
-                    'SO4_2.xyz',
-                    'M6_node.xyz',
-                    'SO4_1.xyz',
-                    'HSO4_2.xyz',
-                    'H2O_bonded.xyz',
-                    'HSO4_1.xyz',
-                    'CO2_1.xyz',
-                    'Benzene.smiles',
-                    'L23.xyz'
-                    ]
+    done_ligands = ['BTC.smiles']
     for ligand in ligands:
         if ligand.label in done_ligands:
             continue
@@ -105,19 +94,35 @@ def refresh_active_collections_to_full():
 
 def fill_db():
     if platform.system() == 'Windows':  # Windows
-        add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')))
-        # add_test_ligands(str(Path(r'/MofIdentifier/ligands')))
-        # MOFDAO.add_csv_info('')
+        # add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')))
+        # add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
+        MOFDAO.add_csv_info(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020.csv')
     elif platform.system() == 'Darwin':  # macOS
         add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
         add_test_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
         MOFDAO.add_csv_info('/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020.csv')
 
 
+def speed_measure():
+    print(MOFDAO.get_num_mofs(), "mofs in DB now")
+    start = time.time()
+    names = MOFDAO.get_all_names()
+    for name in names:
+        MOFDAO.get_MOF(name)
+    end = time.time()
+    print(f'{len(names)} names iterated in {round(end - start, 2)} seconds')
+    i = 0
+    for name in names:
+        if i == 100:
+            break
+        i += 1
+        MOFDatabase(MOFDAO.get_MOF(name))
+    start = time.time()
+    print(f'100 objects created in {round(start - end, 2)} seconds')
+
+
 if __name__ == '__main__':
-    # add_test_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
     # refresh_active_collections_to_test()
     # fill_db()
-    LigandDAO.add_ligand_to_db(LigandReader.get_mol_from_file(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66'
-                                                                       r'\MofIdentifier\ligands\BTC.smiles'))))
-    print(MOFDAO.get_num_mofs(), "mofs in DB now")
+    # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
+    speed_measure()
