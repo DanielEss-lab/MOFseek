@@ -1,5 +1,5 @@
-import pymongo
 import csv
+
 from pymongo import MongoClient
 
 cluster = MongoClient(

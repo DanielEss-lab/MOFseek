@@ -1,5 +1,6 @@
-import pymongo as pm
 import tkinter as tk
+
+import pymongo as pm
 from pymongo.errors import ServerSelectionTimeoutError
 
 maxSevSelDelay = 1

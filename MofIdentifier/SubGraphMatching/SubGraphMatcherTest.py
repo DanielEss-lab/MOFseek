@@ -1,7 +1,7 @@
 import unittest
 
-from MofIdentifier.fileIO import XyzReader, CifReader, LigandReader
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
+from MofIdentifier.fileIO import XyzReader, CifReader, LigandReader
 
 
 class StrongFindLigandInMofTest(unittest.TestCase):

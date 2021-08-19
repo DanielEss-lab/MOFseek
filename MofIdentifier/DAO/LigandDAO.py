@@ -1,11 +1,10 @@
-import certifi as certifi
+import certifi
+from pymongo import MongoClient
 
-from MofIdentifier.DAO import ReadCIFs
 from MofIdentifier.DAO.LigandDatabase import LigandDatabase
 from MofIdentifier.DAO.MOFDatabase import MOFDatabase
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import CifReader, LigandReader
-from pymongo import MongoClient
+from MofIdentifier.fileIO import LigandReader
 
 cluster = MongoClient(
     "mongodb+srv://db_admin:EHfbvgmVEJ9g0Mgk@cluster0.r0otj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
@@ -106,4 +105,3 @@ if __name__ == '__main__':
     # search_all_ligand_names()
     print(search_specific_ligand_by_name("Benzene.smiles"))
     # rename_ligand("hi.smiles", "Benzene.smiles")
-

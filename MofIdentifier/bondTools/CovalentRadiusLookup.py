@@ -26,6 +26,6 @@ def lookup(symbol):
 
 
 if __name__ == '__main__':
-    radius_1 = lookup('C')
-    radius_2 = lookup('N')
+    radius_1 = lookup('H')
+    radius_2 = lookup('Y')
     print((radius_1 + radius_2) * 1.10 + 0.05)

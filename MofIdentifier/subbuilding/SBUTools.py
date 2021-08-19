@@ -15,10 +15,16 @@ class SBUCollection:
         self.num_connector_atoms = sum(len(sbu.atoms) * sbu.frequency for sbu in connectors)
         self.auxiliaries = auxiliaries
         self.num_auxiliary_atoms = sum(len(sbu.atoms) * sbu.frequency for sbu in auxiliaries)
-        self.avg_node_connectivity = sum(len(sbu.adjacent_connector_ids) * sbu.frequency for sbu in clusters) / \
-            sum(sbu.frequency for sbu in clusters)
-        self.avg_conn_connectivity = sum(len(sbu.adjacent_cluster_ids) * sbu.frequency for sbu in connectors) / \
-            sum(sbu.frequency for sbu in connectors)
+        try:
+            self.avg_node_connectivity = sum(len(sbu.adjacent_connector_ids) * sbu.frequency for sbu in clusters) / \
+                sum(sbu.frequency for sbu in clusters)
+        except ZeroDivisionError:
+            self.avg_node_connectivity = float('inf')
+        try:
+            self.avg_conn_connectivity = sum(len(sbu.adjacent_cluster_ids) * sbu.frequency for sbu in connectors) / \
+                sum(sbu.frequency for sbu in connectors)
+        except ZeroDivisionError:
+            self.avg_node_connectivity = float('inf')
 
     def __str__(self):
         string = ""
@@ -41,6 +47,18 @@ class SBUCollection:
 
     def all(self):
         return self.clusters + self.connectors + self.auxiliaries
+
+    def nodes_with_auxiliaries(self):
+        clusters = dict()
+        node_by_id = dict()
+        for node in self.clusters:
+            node_by_id[node.sbu_id] = node
+            clusters[node] = []
+        for aux in self.auxiliaries:
+            for node_id in aux.adjacent_cluster_ids:
+                node = node_by_id[node_id]
+                clusters[node].append(aux)
+        return clusters.items()
 
     def __add__(self, other):
         return SBUCollection(self.clusters + other.clusters, self.connectors
@@ -69,6 +87,7 @@ class changeableSBU(Molecule.Molecule):
         self.adjacent_auxiliary_ids = set(())
         self.type = unit_type
         self.frequency = frequency
+        self.hash = sum(hash(atom) for atom in atoms)
         if self.frequency == float('inf'):
             self.should_use_weak_comparison = True
 
@@ -96,7 +115,7 @@ class changeableSBU(Molecule.Molecule):
             atom = queue.popleft()
             for neighbor in (n for n in atom.bondedAtoms if n in atoms and n not in visited):
                 d = Distances.distance(atom, neighbor)
-                if not Distances.distance_is_less_than_bond_distance(d, atom, neighbor):
+                if not Distances.is_bond_distance(d, atom, neighbor):
                     da = db = dc = 0
                     if neighbor.a - atom.a > 0.5:
                         da -= 1.0
@@ -117,6 +136,12 @@ class changeableSBU(Molecule.Molecule):
                 visited.add(neighbor_in_right_place)
                 queue.append(neighbor_in_right_place)
         self.atoms = visited
+        self.elementsPresent = dict()
+        for atom in atoms:
+            if atom.type_symbol in self.elementsPresent:
+                self.elementsPresent[atom.type_symbol] += 1
+            else:
+                self.elementsPresent[atom.type_symbol] = 1
 
     def __str__(self):
         unit = str(self.type)
@@ -126,6 +151,9 @@ class changeableSBU(Molecule.Molecule):
                                                                unittype=unit, cluster=len(self.adjacent_cluster_ids),
                                                                connector=len(self.adjacent_connector_ids),
                                                                aux=len(self.adjacent_auxiliary_ids))
+
+    def __hash__(self):
+        return self.hash
 
     def __eq__(self, other):
         is_isomorphic = SubGraphMatcher.match(self, other)

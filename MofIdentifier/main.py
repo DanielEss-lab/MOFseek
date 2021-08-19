@@ -1,4 +1,4 @@
-from MofIdentifier.SubGraphMatching import SubGraphMatcher, GraphMaker
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import LigandReader
 
 if __name__ == '__main__':

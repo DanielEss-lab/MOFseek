@@ -1,8 +1,8 @@
 import tkinter as tk
 from pathlib import Path
 
-from GUI.Views import MoleculeView
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess, StyledButton
+from GUI.Views import MoleculeView
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader
 

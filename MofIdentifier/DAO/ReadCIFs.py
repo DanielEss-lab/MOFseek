@@ -1,5 +1,6 @@
-from MofIdentifier.fileIO import CifReader
 from pymongo import MongoClient
+
+from MofIdentifier.fileIO import CifReader
 
 cluster = MongoClient(
     "mongodb+srv://db_admin:EHfbvgmVEJ9g0Mgk@cluster0.r0otj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")

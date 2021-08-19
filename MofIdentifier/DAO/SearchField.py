@@ -1,6 +1,3 @@
-from MofIdentifier.DAO import ReadCIFs
-from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import CifReader, LigandReader
 from pymongo import MongoClient
 
 cluster = MongoClient(

@@ -1,6 +1,6 @@
 import os
-from tkinter import messagebox
 import tkinter.filedialog as fd
+from tkinter import messagebox
 
 download_filepath = ""
 keep_solvent = True

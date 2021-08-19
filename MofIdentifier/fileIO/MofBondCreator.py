@@ -70,6 +70,7 @@ class MofBondCreator:
                     spaces_to_compare = self.get_spaces_adj_in_one_direction(x, y, z)
                     self.connect_within_space(this_space)
                     self.connect_within_spaces(this_space, spaces_to_compare)
+        self.enforce_single_hydrogen_bonds()
 
     def get_spaces_adj_in_one_direction(self, x, y, z):
         # in 2D space, you only need to compare each square with 4 other squares in order for each square
@@ -105,7 +106,7 @@ class MofBondCreator:
     def compare_for_bond(self, atom_a, atom_b):
         self.num_compared = self.num_compared + 1
         dist = Distances.distance(atom_a, atom_b)
-        if Distances.distance_is_less_than_bond_distance(dist, atom_a, atom_b):
+        if Distances.is_bond_distance(dist, atom_a, atom_b):
             self.num_bonds += 1
             if not atom_a.is_in_unit_cell() or not atom_b.is_in_unit_cell():
                 if not atom_a.is_in_unit_cell() and not atom_b.is_in_unit_cell():
@@ -116,3 +117,25 @@ class MofBondCreator:
 
     def get_extra_information(self):
         return self.num_bonds, self.num_compared, self.num_bonds_across_cell_border
+
+    def enforce_single_hydrogen_bonds(self):
+        for z in range(self.num_z_buckets):
+            for y in range(self.num_y_buckets):
+                for x in range(self.num_x_buckets):
+                    this_space = self.cellSpace[z][y][x]
+                    for atom in this_space:
+                        if atom.type_symbol == 'H' and len(atom.bondedAtoms) > 1:
+                            self.remove_distant_bonds(atom)
+
+    def remove_distant_bonds(self, atom):
+        lowest_distance = float('inf')
+        closest_atom = None
+        for neighbor in atom.bondedAtoms:
+            distance = Distances.distance_across_unit_cells(atom, neighbor, self.angles, self.lengths)
+            if distance < lowest_distance:
+                lowest_distance = distance
+                closest_atom = neighbor
+        for neighbor in atom.bondedAtoms.copy():
+            if neighbor != closest_atom:
+                neighbor.bondedAtoms.remove(atom)
+                atom.bondedAtoms.remove(neighbor)

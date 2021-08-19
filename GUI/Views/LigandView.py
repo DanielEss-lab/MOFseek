@@ -1,8 +1,8 @@
 import tkinter as tk
+import tkinter.font as tkFont
 
 from GUI import os_specific_settings
 from MofIdentifier.fileIO import FileOpen
-import tkinter.font as tkFont
 
 
 def select_for_edit(parent, ligand):

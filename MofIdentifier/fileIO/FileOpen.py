@@ -3,8 +3,8 @@ import platform
 import subprocess
 
 from GUI import Settings
-from MofIdentifier.fileIO import MoleculeWriter, CifWriter
 from MofIdentifier.Molecules import MOF
+from MofIdentifier.fileIO import MoleculeWriter, CifWriter
 
 
 def make_and_open(molecule):
