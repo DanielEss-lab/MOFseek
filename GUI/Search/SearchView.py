@@ -1,13 +1,13 @@
 import platform
+import re
 import tkinter as tk
 import tkinter.font as tkFont
-import re
 from pathlib import Path
 from tkinter import ttk
 
 from GUI import Attributes
-from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
 from GUI.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
+from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
 from MofIdentifier import SearchMOF
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUCollectionManager

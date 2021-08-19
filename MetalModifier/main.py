@@ -1,12 +1,13 @@
+import re
+import sys
+
+import numpy as np
+
 from MetalModifier import TetrahedronTools
 from MofIdentifier.Molecules.atom import Atom
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import CifReader
 from MofIdentifier.subbuilding import SBUIdentifier
-
-import numpy as np
-import re
-import sys
 
 
 def replace_metal(input_cif_file_path, output_cif_file_path, new_metal_symbol):

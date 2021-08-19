@@ -1,8 +1,8 @@
 import tkinter as tk
 from pathlib import Path
 
-from GUI.Views import MoleculeView, SBUView
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess
+from GUI.Views import SBUView
 from MofIdentifier.fileIO import LigandReader
 from MofIdentifier.subbuilding import SBUCollectionManager
 

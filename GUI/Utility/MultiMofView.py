@@ -1,4 +1,3 @@
-from _tkinter import TclError
 import tkinter as tk
 
 from GUI.Views import MOFView

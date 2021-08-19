@@ -4,7 +4,6 @@ import tkinter.font as tkFont
 from GUI import os_specific_settings, Attributes, Settings
 from GUI.Utility import Tooltips
 from MofIdentifier.fileIO import FileOpen
-from MofIdentifier.subbuilding import SBUCollectionManager
 
 
 def select_for_edit(parent, mof):

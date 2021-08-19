@@ -1,8 +1,8 @@
 import os
-
-from MofIdentifier.fileIO import CifReader, LigandReader
-from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from pathlib import Path
+
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
+from MofIdentifier.fileIO import CifReader, LigandReader
 
 
 def get_ligand_list_from_console_input():

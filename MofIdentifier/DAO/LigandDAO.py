@@ -1,9 +1,10 @@
-from MofIdentifier.DAO import ReadCIFs
+from MofIdentifier.DAO.LigandDatabase import LigandDatabase
+from pymongo import MongoClient
+
 from MofIdentifier.DAO.LigandDatabase import LigandDatabase
 from MofIdentifier.DAO.MOFDatabase import MOFDatabase
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import CifReader, LigandReader
-from pymongo import MongoClient
+from MofIdentifier.fileIO import LigandReader
 
 cluster = MongoClient(
     "mongodb+srv://db_admin:EHfbvgmVEJ9g0Mgk@cluster0.r0otj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
