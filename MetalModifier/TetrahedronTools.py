@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: CC0-1.0
 # This file is in Public Domain.
 
-from vector import Vector, sqrt
+from MetalModifier.custom_vector import Vector, sqrt
 
 
 def find_fourth_vertex(vertex1, vertex2, vertex3, distance1, distance2, distance3):
