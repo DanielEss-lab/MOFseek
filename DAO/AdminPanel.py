@@ -122,7 +122,8 @@ def speed_measure():
 
 if __name__ == '__main__':
     # refresh_active_collections_to_test()
-    fill_db()
+    # fill_db()
     # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
     # speed_measure()
     # refresh_active_collections_to_full()
+    LigandDAO.add_ligand_to_db_from_filepath(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands\NH.xyz')

@@ -80,7 +80,7 @@ attributes = {
     # "CSD_of_WoS": Attribute("CSD of WoS in CoRE", lambda mof: mof.CSD_of_WoS_inCoRE, False, bool),
     # "date_CSD": Attribute("unknown meaning", lambda mof: mof.date_CSD, False, str),  # str
     # "DOI_public": Attribute("unknown meaning", lambda mof: mof.DOI_public, False, str),  # str
-    # "Note": Attribute("unknown meaning", lambda mof: mof.Note, False, str),  # str TODO: change this to has_note, display note in MOFView
+    # "Note": Attribute("unknown meaning", lambda mof: mof.Note, False, str),  # str T-ODO: change this to has_note, display note in MOFView
     # "Matched_CSD_of_CoRE": Attribute("unknown meaning", lambda mof: mof.Matched_CSD_of_CoRE, False, str),  # str
     # "Possible_List_CSD_of_CoRE": Attribute("unknown meaning", lambda mof: mof.Possible_List_CSD_of_CoRE, False, str),  # str
 }

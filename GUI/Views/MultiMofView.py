@@ -49,9 +49,13 @@ class View(tk.Frame):
             widget.destroy()
         self.mofs_frame.focus_set()
         self.canvas.yview_moveto(0)
+        num_shown = 0
         for mof in results:
             mof_v = MOFView.View(self.mofs_frame, mof)
             mof_v.grid(sticky=tk.EW)
+            num_shown += 1
+            if num_shown >= 100:
+                break
 
     def refresh_all_attributes(self):
         for widget in self.mofs_frame.winfo_children():

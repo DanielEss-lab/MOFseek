@@ -23,7 +23,8 @@ class SBUDatabase:
     def get_sbu(self):
         if self._sbu is None:
             if self.file_content is not None:
-                self._sbu = XyzReader.get_molecule_from_string(self.file_content, self.name)
+                name = self.name + '.xyz'
+                self._sbu = XyzReader.get_molecule_from_string(self.file_content, name)
             else:
                 return None
         return self._sbu

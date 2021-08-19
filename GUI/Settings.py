@@ -7,6 +7,7 @@ keep_solvent = True
 allow_disorder = False
 # Attribute related settings are stored in Attributes
 
+
 def change_download_filepath():
     global download_filepath
     download_filepath = fd.askdirectory()

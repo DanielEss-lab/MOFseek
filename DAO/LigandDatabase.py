@@ -20,7 +20,11 @@ class LigandDatabase:
     def get_ligand(self):
         if self._ligand is None:
             if self.file_content is not None:
-                self._sbu = LigandReader.get_mol_from_string(self.file_content, self.name)
+                if len(self.file_content.split('\n')) > 2:
+                    name = self.name + '.xyz'
+                else:
+                    name = self.name + '.smiles'
+                self._sbu = LigandReader.get_mol_from_string(self.file_content, name)
             else:
                 return None
         return self._sbu

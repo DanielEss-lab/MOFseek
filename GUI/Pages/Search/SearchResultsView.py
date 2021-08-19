@@ -60,7 +60,10 @@ class View(FrameWithProcess.Frame):
             results.sort(reverse=descending, key=lambda mof: Attributes.attributes[attribute].calculate(mof))
         self.results = results
         if len(self.results) > 0:
-            self.lbl_num_results['text'] = f"{len(results)} Results"
+            if len(self.results) > 100:
+                self.lbl_num_results['text'] = f"Showing 100 of {len(results)} Results"
+            else:
+                self.lbl_num_results['text'] = f"{len(results)} Results"
             self.btn_export_txt['state'] = "normal"
             self.btn_export_cifs['state'] = "normal"
         else:

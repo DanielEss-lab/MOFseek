@@ -29,12 +29,12 @@ class View(tk.Frame):
         row_icon_btns = tk.Frame(master=self)
         open = tk.Label(row_icon_btns, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR,
                         padx=2, font=("Arial", 16), height=0)
-        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(mof))
+        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(mof.get_mof()))
         open.pack(side='right')
         tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
         see = tk.Label(row_icon_btns, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR,
                        padx=2, font=("Arial", 16), height=0)
-        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(mof))
+        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(mof.get_mof()))
         see.pack(side='right')
         tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
         edit = tk.Label(row_icon_btns, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR,

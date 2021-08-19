@@ -82,6 +82,11 @@ def delete_all_ligands():
     ligand_collection.delete_many({})
 
 
+def delete_unmatched_ligands():
+    ligand_collection.delete_many({{"MOFs": {"$exists": True, "$size": 0}}})
+    # TODO: test this
+
+
 if __name__ == '__main__':
     # --worked--
     # ligand, matched_mofs, ligand_for_db = read_ligand(
