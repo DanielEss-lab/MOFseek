@@ -9,8 +9,8 @@ def get_ligand_list_from_console_input():
     # An empty list for ligands that user wants to search
     ligands = []
 
-    # User specifies xyz file name - CO2_1.xyz
-    user_input = input("Enter a xyz file name: (Example: CO2_1.xyz). If you want to quit, type \"quit\"\n")
+    # User specifies xyz file name - CO2_bonded.xyz
+    user_input = input("Enter a xyz file name: (Example: CO2_bonded.xyz). If you want to quit, type \"quit\"\n")
 
     if user_input == "quit":
         raise SystemExit()  # Exit the code execution immediately
@@ -18,7 +18,7 @@ def get_ligand_list_from_console_input():
     # Use while loop
     while user_input != "done":
         ligands.append(user_input)
-        print("Enter a xyz file name: (Example: CO2_1.xyz). When you're done, type \"done\"")
+        print("Enter a xyz file name: (Example: CO2_bonded.xyz). When you're done, type \"done\"")
         user_input = input()
 
     return ligands

@@ -22,19 +22,15 @@ def add_ligand_to_db_from_filepath(ligand_file_path):
 
 def _read_ligand(ligand_file):
     matched_mof_names = []
-    # i = 0
+    i = 0
     for document in cif_collection.find():
         mof = MOFDatabase(document)
-        # i += 1
-        # if i % 100 == 0:
-        #     print(f"{ligand_file.label} compared with {i} mofs, and counting...")
-        # print(f"\n{ligand_file.label} comparing with {mof.filename}")
         if mof.file_content is not None:
             if SubGraphMatcher.find_ligand_in_mof(ligand_file, mof.get_mof()):
-                print('match')
+                i += 1
                 matched_mof_names.append(mof.filename)
                 cif_collection.update_one({"filename": mof.filename}, {"$addToSet": {"ligand_names": ligand_file.label}})
-
+    print(f"{ligand_file.label} found in {i} mofs")
     ligand_for_database = LigandDatabase(ligand_file.label, ligand_file.file_content, matched_mof_names)
 
     return ligand_for_database

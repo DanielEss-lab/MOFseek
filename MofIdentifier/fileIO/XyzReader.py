@@ -50,7 +50,7 @@ def get_atoms(file_like):
 
 
 if __name__ == '__main__':
-    file = '../ligands/M6_node_alternate.xyz'
+    file = '../ligands/M6_node.xyz'
     string = Path(file).read_text()
     print(read_string(string, 'name'))
     print(read_xyz(file))

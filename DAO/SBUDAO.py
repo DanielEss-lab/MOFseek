@@ -45,8 +45,11 @@ def process_sbu(input_sbu, mof_name):
         if SubGraphMatcher.match(input_sbu, existing_sbu):
             update_sbu(existing_sbu, mof_name)
             return existing_sbu.label
+        # Same type sbus, but different structures:
         if existing_sbu.label.startswith(generic_name_prefix):
-            highest_existing_index = max(highest_existing_index, int(existing_sbu.label[len(generic_name_prefix) + 1]))
+            existing_sbu_index = existing_sbu.label[len(generic_name_prefix) + 1:]
+            highest_existing_index = max(highest_existing_index, int(existing_sbu_index))
+    # The code reaches here unless it found a match
     name = generic_name_prefix + '_' + str(highest_existing_index + 1)
     add_new_sbu(input_sbu, mof_name, name)
     return name

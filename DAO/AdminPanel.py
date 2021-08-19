@@ -25,7 +25,7 @@ def add_test_mofs(directory):
 def add_test_ligands(directory):
     ligands = LigandReader.get_all_mols_from_directory(directory)
     # C:\Users\mdavid4\Desktop\Esslab - P66\MofIdentifier\ligands
-    done_ligands = ['BTC.smiles']
+    done_ligands = ['BTC.smiles, Benzene.smiles, PO4.xyz']
     for ligand in ligands:
         if ligand.label in done_ligands:
             continue
@@ -36,9 +36,9 @@ def add_test_ligands(directory):
 
 
 def create_indices():
-    DBConnection.cif_collection.create_index("filename", unique="True")
-    DBConnection.ligand_collection.create_index("ligand_name", unique="True")
-    DBConnection.sbu_collection.create_index("sbu_name", unique="True")
+    DBConnection.cif_collection.create_index("filename", unique=True)
+    DBConnection.ligand_collection.create_index("ligand_name", unique=True)
+    DBConnection.sbu_collection.create_index("sbu_name", unique=True)
 
 
 def add_all_mofs(mofs_path):
@@ -95,7 +95,7 @@ def refresh_active_collections_to_full():
 def fill_db():
     if platform.system() == 'Windows':  # Windows
         # add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')))
-        # add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
+        add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
         MOFDAO.add_csv_info(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020.csv')
     elif platform.system() == 'Darwin':  # macOS
         add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
@@ -123,6 +123,7 @@ def speed_measure():
 
 if __name__ == '__main__':
     # refresh_active_collections_to_test()
-    # fill_db()
+    fill_db()
     # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
-    speed_measure()
+    # speed_measure()
+    # refresh_active_collections_to_full()

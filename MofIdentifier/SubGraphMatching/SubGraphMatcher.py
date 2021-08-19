@@ -2,24 +2,24 @@ from MofIdentifier.Molecules import atom
 import time
 
 
-def vertices_are_equal(g1, g2, i1, i2):
-    elem_1 = g1.vs[i1]['element']
-    elem_1 = elem_1[0] if len(elem_1) > 1 and elem_1[1].isnumeric() else elem_1
-    elem_2 = g2.vs[i2]['element']
-    elem_2 = elem_2[0] if len(elem_2) > 1 and elem_2[1].isnumeric() else elem_2
-    result = elem_1 == elem_2 \
-             or elem_1 == '*' or elem_2 == '*' \
-             or (elem_1 == '%' and atom.is_metal(elem_2)) or (elem_2 == '%' and atom.is_metal(elem_1)) \
-             or (elem_1 == '#' and (elem_2 == 'H' or elem_2 == 'C')) or (
-                     elem_2 == '#' and (elem_1 == 'H' or elem_1 == 'C'))
-    return result
+# def vertices_are_equal(g1, g2, i1, i2):
+#     elem_1 = g1.vs[i1]['element']
+#     elem_1 = elem_1[0] if len(elem_1) > 1 and elem_1[1].isnumeric() else elem_1
+#     elem_2 = g2.vs[i2]['element']
+#     elem_2 = elem_2[0] if len(elem_2) > 1 and elem_2[1].isnumeric() else elem_2
+#     result = elem_1 == elem_2 \
+#              or elem_1 == '*' or elem_2 == '*' \
+#              or (elem_1 == '%' and atom.is_metal(elem_2)) or (elem_2 == '%' and atom.is_metal(elem_1)) \
+#              or (elem_1 == '#' and (elem_2 == 'H' or elem_2 == 'C')) or (
+#                      elem_2 == '#' and (elem_1 == 'H' or elem_1 == 'C'))
+#     return result
 
 
 def timed_vertices_are_equal(start):
     def vertices_are_equal(g1, g2, i1, i2):
         if start != 0 and time.time() - start > 20:
             print('VF2 Algorithm got stuck (somehow); exiting early')
-            return False
+            # return False
         elem_1 = g1.vs[i1]['element']
         elem_1 = elem_1[0] if len(elem_1) > 1 and elem_1[1].isnumeric() else elem_1
         elem_2 = g2.vs[i2]['element']
@@ -46,11 +46,22 @@ def find_ligand_in_mof(ligand, mof):
         raise Exception('Every atom in the ligand must be connected to a single molecule; try tweaking the input file '
                         'and try again.')
     mGraph = mof.get_graph()
-    if any(element not in mof.elementsPresent for element in ligand.elementsPresent):
+    if not all(element_in_mof(element, mof) for element in ligand.elementsPresent):
         return False
     start = time.time()
     mof_contains_ligand = mGraph.subisomorphic_vf2(lGraph, node_compat_fn=timed_vertices_are_equal(start))
     return mof_contains_ligand
+
+
+def element_in_mof(element, mof):
+    if element[0] == '*':
+        return True
+    elif element[0] == '#':
+        return any(elem == 'H' or elem == 'C' for elem in mof.elementsPresent)
+    elif element[0] == '%':
+        return any(atom.is_metal(elem) for elem in mof.elementsPresent)
+    else:
+        return element in mof.elementsPresent
 
 
 def mof_has_all_ligands(mof, ligands):
