@@ -284,17 +284,17 @@ def get_relevant_group_5_atoms(cluster, mof):
 
 def get_atoms_to_delete(cluster, mof, num_to_delete):
     group_by_atom = index_atoms(cluster)
-    group_5 = get_relevant_group_5_atoms(cluster, mof).delete_atoms
-    remove_from_cluster(group_by_atom, group_5, mof)
     group_4 = get_relevant_group_4_atoms(cluster).delete_atoms
     remove_from_cluster(group_by_atom, group_4, mof)
-    groups_3_and_2 = get_relevant_groups_2_and_3_atoms(cluster).delete_atoms
-    remove_from_cluster(group_by_atom, groups_3_and_2, mof)
+    group_5 = get_relevant_group_5_atoms(cluster, mof).delete_atoms
+    remove_from_cluster(group_by_atom, group_5, mof)
     group_1 = get_relevant_group_1_atoms(cluster, mof).delete_atoms
     remove_from_cluster(group_by_atom, group_1, mof)
+    groups_3_and_2 = get_relevant_groups_2_and_3_atoms(cluster).delete_atoms
+    remove_from_cluster(group_by_atom, groups_3_and_2, mof)
     group_0 = get_relevant_group_0_atoms(cluster).delete_atoms
     remove_from_cluster(group_by_atom, group_0, mof)
-    atoms_in_delete_order = group_5 + group_4 + groups_3_and_2 + group_1 + group_0
+    atoms_in_delete_order = group_4 + group_5 + group_1 + groups_3_and_2 + group_0
     assert(len(atoms_in_delete_order) >= num_to_delete)
     atoms_to_delete = atoms_in_delete_order[0:num_to_delete]
     return atoms_to_delete
@@ -304,15 +304,15 @@ def get_atoms_to_add(cluster, mof, num_to_add):
     group_by_atom = index_atoms(cluster)
     group_0 = get_relevant_group_0_atoms(cluster).add_atoms
     add_0 = add_to_cluster(group_by_atom, group_0, mof)
-    group_1 = get_relevant_group_1_atoms(cluster, mof).add_atoms
-    add_1 = add_to_cluster(group_by_atom, group_1, mof)
     groups_2_and_3 = get_relevant_groups_2_and_3_atoms(cluster).add_atoms
     add_2_3 = add_to_cluster(group_by_atom, groups_2_and_3, mof)
-    group_4 = get_relevant_group_4_atoms(cluster).add_atoms
-    add_4 = add_to_cluster(group_by_atom, group_4, mof)
+    group_1 = get_relevant_group_1_atoms(cluster, mof).add_atoms
+    add_1 = add_to_cluster(group_by_atom, group_1, mof)
     group_5 = get_relevant_group_5_atoms(cluster, mof).add_atoms
     add_5 = add_to_cluster(group_by_atom, group_5, mof)
-    atoms_in_add_order = add_0 + add_1 + add_2_3 + add_4 + add_5
+    group_4 = get_relevant_group_4_atoms(cluster).add_atoms
+    add_4 = add_to_cluster(group_by_atom, group_4, mof)
+    atoms_in_add_order = add_0 + add_2_3 + add_1 + add_5 + add_4
     assert (len(atoms_in_add_order) >= num_to_add)
     atoms_to_add = atoms_in_add_order[0:num_to_add]
     return atoms_to_add
