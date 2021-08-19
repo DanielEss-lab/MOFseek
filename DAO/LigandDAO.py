@@ -57,7 +57,7 @@ def get_ligand(ligand_name):
         print("error: ", e.args)
 
 
-def rename_ligand(old_name, new_name):
+def _rename_ligand(old_name, new_name):
     try:
         ligand_collection.find_one_and_update({"ligand_name": old_name}, {"$set": {"ligand_name": new_name}})
     except Exception as e:

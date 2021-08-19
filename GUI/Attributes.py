@@ -60,27 +60,27 @@ attributes = {
     "LCD": Attribute("Largest Cavity Diameter", lambda mof: round(mof.LCD, 3) if mof.LCD is not None else None, True, float),
     "PLD": Attribute("Pore Limiting Diameter", lambda mof: round(mof.PLD, 3) if mof.PLD is not None else None, True, float),
     "LFPD": Attribute("Largest Sphere along the Free Path", lambda mof: round(mof.LFPD, 3) if mof.LFPD is not None else None, True, float),
-    "cm3_g": Attribute("density", lambda mof: round(mof.cm3_g, 3) if mof.cm3_g is not None else None, True, float),
+    # "cm3_g": Attribute("density", lambda mof: round(mof.cm3_g, 3) if mof.cm3_g is not None else None, True, float),
     "ASA_m2_cm3": Attribute("Accessible Surface Area", lambda mof: round(mof.ASA_m2_cm3, 3) if mof.ASA_m2_cm3 is not None else None, False, float),
     "ASA_m2_g": Attribute("Accessible Surface Area", lambda mof: round(mof.ASA_m2_g, 3) if mof.ASA_m2_g is not None else None, False, float),
     "NASA_m2_cm3": Attribute("Non-Accessible Surface Area", lambda mof: round(mof.NASA_m2_cm3, 3) if mof.NASA_m2_cm3 is not None else None, False, float),
     "NASA_m2_g": Attribute("Non-Accessible Surface Area", lambda mof: round(mof.NASA_m2_g, 3) if mof.NASA_m2_g is not None else None, False, float),
     "AV_VF": Attribute("Void Fraction, 0-1", lambda mof: round(mof.AV_VF, 3) if mof.AV_VF is not None else None, False, float),
-    "AV_cm3_g": Attribute("Void Fraction, 0-1", lambda mof: round(mof.AV_cm3_g, 3) if mof.AV_cm3_g is not None else None, False, float),
+    # "AV_cm3_g": Attribute("Void Fraction, 0-1", lambda mof: round(mof.AV_cm3_g, 3) if mof.AV_cm3_g is not None else None, False, float),
     "NAV_cm3_g": Attribute("Non-Accessible Volume", lambda mof: round(mof.NAV_cm3_g, 7) if mof.NAV_cm3_g is not None else None, False, float),
     "Has_OMS": Attribute("Has Open Metal Sites", lambda mof: mof.Has_OMS, False, bool),  # Boolean
     "OMS": Attribute("Open Metal Sites", lambda mof: str(mof.Open_Metal_Sites)[1:-1] if mof.Open_Metal_Sites is not None else None, False, str),  # could be list of str
-    "Extension": Attribute("Last bit of filename", lambda mof: mof.Extension, False, str),  # str
-    "FSR_overlap": Attribute("Unknown acronym", lambda mof: mof.FSR_overlap, False, bool),  # Boolean
-    "from_CSD": Attribute("Unknown acronym", lambda mof: mof.from_CSD, False, bool),  # Boolean
-    "public": Attribute("Unknown meaning", lambda mof: mof.public, False, bool),
+    # "Extension": Attribute("Last bit of filename", lambda mof: mof.Extension, False, str),  # str
+    # "FSR_overlap": Attribute("Unknown acronym", lambda mof: mof.FSR_overlap, False, bool),  # Boolean
+    # "from_CSD": Attribute("Unknown acronym", lambda mof: mof.from_CSD, False, bool),  # Boolean
+    # "public": Attribute("Unknown meaning", lambda mof: mof.public, False, bool),
     # "DISORDER": Attribute("If this value is True, then the mof comes from unreliable data, and its structural "
     #                       "calculations may be inaccurate.", lambda mof: mof.public, False, bool),  # Boolean. Should, by default, not allow them AND not show this attribute.
-    "CSD_overlap": Attribute("CSD overlap in CoRE database", lambda mof: mof.CSD_overlap_inCoRE, False, bool),  # Boolean
-    "CSD_of_WoS": Attribute("CSD of WoS in CoRE", lambda mof: mof.CSD_of_WoS_inCoRE, False, bool),
-    "date_CSD": Attribute("unknown meaning", lambda mof: mof.date_CSD, False, str),  # str
-    "DOI_public": Attribute("unknown meaning", lambda mof: mof.DOI_public, False, str),  # str
-    "Note": Attribute("unknown meaning", lambda mof: mof.Note, False, str),  # str TODO: change this to has_note, display note in MOFView
-    "Matched_CSD_of_CoRE": Attribute("unknown meaning", lambda mof: mof.Matched_CSD_of_CoRE, False, str),  # str
-    "Possible_List_CSD_of_CoRE": Attribute("unknown meaning", lambda mof: mof.Possible_List_CSD_of_CoRE, False, str),  # str
+    # "CSD_overlap": Attribute("CSD overlap in CoRE database", lambda mof: mof.CSD_overlap_inCoRE, False, bool),  # Boolean
+    # "CSD_of_WoS": Attribute("CSD of WoS in CoRE", lambda mof: mof.CSD_of_WoS_inCoRE, False, bool),
+    # "date_CSD": Attribute("unknown meaning", lambda mof: mof.date_CSD, False, str),  # str
+    # "DOI_public": Attribute("unknown meaning", lambda mof: mof.DOI_public, False, str),  # str
+    # "Note": Attribute("unknown meaning", lambda mof: mof.Note, False, str),  # str TODO: change this to has_note, display note in MOFView
+    # "Matched_CSD_of_CoRE": Attribute("unknown meaning", lambda mof: mof.Matched_CSD_of_CoRE, False, str),  # str
+    # "Possible_List_CSD_of_CoRE": Attribute("unknown meaning", lambda mof: mof.Possible_List_CSD_of_CoRE, False, str),  # str
 }

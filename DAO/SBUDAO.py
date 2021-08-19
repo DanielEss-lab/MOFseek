@@ -26,7 +26,7 @@ def get_sbu(name):
         print("error: ", e.args)
 
 
-def rename_sbu(old_name, new_name):
+def _rename_sbu(old_name, new_name):
     try:
         sbu_collection.find_one_and_update({"sbu_name": old_name}, {"$set": {"sbu_name": new_name}})
     except Exception as e:

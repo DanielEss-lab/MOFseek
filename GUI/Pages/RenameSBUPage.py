@@ -1,10 +1,8 @@
 import tkinter as tk
-from pathlib import Path
 
 from GUI.Views import SBUView
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess
-from DAO import SBUDAO
-from MofIdentifier.fileIO import LigandReader
+from DAO import SBUDAO, RenameService
 
 instruction_text = """Renaming a Secondary Building Unit in the database takes several minutes, so please be patient."""
 
@@ -12,7 +10,6 @@ instruction_text = """Renaming a Secondary Building Unit in the database takes s
 class Page(FrameWithProcess.Frame):
     def __init__(self, parent):
         self.parent = parent
-        self.custom_sbus = dict()
         super().__init__(self.parent, lambda new_name: self.rename(new_name))
         instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
         instructions.pack()
@@ -33,13 +30,12 @@ class Page(FrameWithProcess.Frame):
         self.mol = None
 
     def rename(self, new_name):
-        if self.mol is not None and self.mol.label == self.combobox.get():
+        if self.mol is not None and self.mol.sbu_name == self.combobox.get():
             if new_name != '':
                 if new_name.find(' ') < 0 and new_name.find('.') < 0:
                     self.combobox.set('')
                     self.new_name_ent.delete(0, tk.END)
-                    new_name = new_name + self.extension_text['text']
-                    SBUDAO.rename_sbu(self.mol.label, new_name)
+                    RenameService.rename_sbu(self.mol.sbu_name, new_name, self.mol.type)
                     pass
                 else:
                     self._show_error('Name cannot contain a period or a space')
@@ -51,35 +47,17 @@ class Page(FrameWithProcess.Frame):
     def focus_sbu(self, sbu_name):
         if sbu_name != '':
             try:
-                mol = self.get_sbus([sbu_name])[0]
+                mol = SBUDAO.get_sbu(sbu_name)
                 self.set_mol_in_view(mol)
-            except FileNotFoundError as ex:
+            except Exception as ex:
                 self._show_error(ex)
 
-    def all_sbu_names(self):  # TODO: Will change with adding DB
-        path_1 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/cluster")
-        path_2 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/connector")
-        path_3 = str(Path(__file__).parent / "../../MofIdentifier/subbuilding/auxiliary")
-        sbus = LigandReader.get_all_mols_from_directory(path_1) + \
-               LigandReader.get_all_mols_from_directory(path_2) + \
-               LigandReader.get_all_mols_from_directory(path_3)
-        return [sbu.label for sbu in sbus]
-
-    def get_sbus(self, sbu_names):
-        sbus = list()
-        other_sbus = list()
-        for sbu_name in sbu_names:
-            if sbu_name in self.custom_sbus:
-                sbus.append(self.custom_sbus[sbu_name])
-            else:
-                other_sbus.append(sbu_name)
-        for name in other_sbus:
-            sbus.append(SBUDAO.get_sbu(name))
-        return sbus
+    def all_sbu_names(self):
+        return SBUDAO.get_all_names()
 
     def select_sbu(self, sbu):
         self.set_mol_in_view(sbu)
-        self.combobox.set(sbu.label)
+        self.combobox.set(sbu.sbu_name)
 
     def set_mol_in_view(self, mol):
         self.mol = mol

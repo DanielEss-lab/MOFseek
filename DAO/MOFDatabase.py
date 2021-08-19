@@ -99,7 +99,7 @@ class MOFDatabase:
                                                            lambda mof: mof.atoms_string_without_solvents(), dictionary)
 
         self.ligand_names = self.get_or_calculate('ligand_names', lambda mof: LigandDAO.scan_all_for_mof(mof), dictionary)
-        if self.get_mof() is not None:
+        if self.file_content is not None:
             sbu_node_info = dictionary['sbu_node_info']
             self.sbu_nodes = [ContainedSBU(info) for info in sbu_node_info]
             sbu_conn_info = dictionary['sbu_conn_info']

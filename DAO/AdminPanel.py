@@ -25,12 +25,11 @@ def add_test_mofs(directory):
 def add_test_ligands(directory):
     ligands = LigandReader.get_all_mols_from_directory(directory)
     # C:\Users\mdavid4\Desktop\Esslab - P66\MofIdentifier\ligands
-    done_ligands = ['BTC.smiles, Benzene.smiles, PO4.xyz']
+    done_ligands = ['BTC.smiles', 'Benzene.smiles', 'PO4.xyz']
     for ligand in ligands:
         if ligand.label in done_ligands:
             continue
         LigandDAO.add_ligand_to_db(ligand)
-        print(f'{ligand.label} is done being added')
         done_ligands.append(ligand.label)
     print(done_ligands)
 
@@ -96,7 +95,7 @@ def fill_db():
     if platform.system() == 'Windows':  # Windows
         # add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')))
         add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
-        MOFDAO.add_csv_info(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020.csv')
+        # MOFDAO.add_csv_info(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020.csv')
     elif platform.system() == 'Darwin':  # macOS
         add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
         add_test_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))

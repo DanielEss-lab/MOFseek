@@ -68,6 +68,34 @@ def _add_mof_to_collection(mof):
     return mof_name
 
 
+def _rename_ligand(old_name, new_name):
+    cif_collection.update_many({"ligand_names": old_name}, {"$set": {"ligand_names.$": new_name}})
+    # TODO: test that this actually works
+
+
+def _rename_sbu(old_name, new_name, sbu_type):
+    cif_collection.update_many({"ligand_names": old_name}, {"$set": {"ligand_names.$": new_name}})
+    # TODO: test that this actually works
+    array_name = array_name_of_type(sbu_type)
+    for document in cif_collection.find():
+        sbu_infos = document[array_name]
+        for sbu_info in sbu_infos:
+            name = sbu_info[sbu_info.rindex(' '):]
+            if name == old_name:
+                correct_sbu_info = sbu_info[0:1 + sbu_info.rindex(' ')] + new_name
+                cif_collection.update_one({"_id": document["_id"], array_name: sbu_info},
+                                          {"$set": {array_name + '.$': correct_sbu_info}})
+
+
+def array_name_of_type(sbu_type):
+    if sbu_type == 'cluster':
+        return 'sbu_node_info'
+    elif sbu_type == 'connector':
+        return 'sbu_conn_info'
+    else:
+        return 'sbu_aux_info'
+
+
 def add_csv_info(csv_file_path):
     with open(csv_file_path, 'r') as file:
         csv_file = csv.DictReader(file)

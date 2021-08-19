@@ -61,10 +61,6 @@ class Root(tk.Tk):
         s.configure("TMenubutton", background="#ffffff")
         os_specific_settings.style_for_platform(s)
 
-    def add_custom_ligand(self, mol):  # TODO: To change when connecting to DB
-        self.search_page.search_v.add_custom_ligand(mol)
-        self.rename_ligand_page.add_custom_ligand(mol)
-
     def highlight_molecule(self, mol):
         self.search_page.highlight_molecule(mol)
         self.tabControl.select(0)
