@@ -2,6 +2,7 @@ import tkinter as tk
 from pathlib import Path
 from tkinter.filedialog import askopenfilenames
 
+from DAO.MOFDatabase import MOFDatabase
 from GUI.Utility import FrameWithProcess, StyledButton
 from GUI.Views import MultiMofView
 from DAO import MOFDAO
@@ -38,16 +39,17 @@ class Page(FrameWithProcess.Frame):
                 except:
                     self._show_error('Unable to extract MOF from ' + filename)
         self.mofs = mofs
-        self.mof_preview.display_results(self.mofs)
+        mofs_for_display = [MOFDatabase.from_mof(mof) for mof in mofs]
+        self.mof_preview.display_results(mofs_for_display)
         if len(mofs) > 0:
             self.add_btn['state'] = "normal"
 
     def add_mofs_to_db(self, mofs):
         self.add_btn['state'] = "disabled"
-        self.mofs = []
-        self.mof_preview.display_results(self.mofs)
+        self.mof_preview.display_results([])
         for mof in mofs:
             MOFDAO.add_mof(mof)
+        self.mofs = []
 
     def refresh_attributes_shown(self):
         self.mof_preview.display_results(self.mofs)

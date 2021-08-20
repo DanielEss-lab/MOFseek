@@ -183,3 +183,13 @@ class MOFDatabase:
                 return value
             else:
                 return None
+
+    @classmethod
+    def from_mof(cls, mof):
+        initializer = dict()
+        initializer['filename'] = mof.label
+        initializer['cif_content'] = mof.file_content
+        initializer['sbu_node_info'] = []
+        initializer['sbu_conn_info'] = []
+        initializer['sbu_aux_info'] = []
+        return cls(initializer)

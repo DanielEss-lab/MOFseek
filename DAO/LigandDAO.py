@@ -83,8 +83,7 @@ def delete_all_ligands():
 
 
 def delete_unmatched_ligands():
-    ligand_collection.delete_many({{"MOFs": {"$exists": True, "$size": 0}}})
-    # TODO: test this
+    ligand_collection.delete_many({"MOFs": {"$exists": True, "$size": 0}})
 
 
 if __name__ == '__main__':
