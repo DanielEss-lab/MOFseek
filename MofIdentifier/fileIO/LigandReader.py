@@ -13,6 +13,13 @@ def get_mol_from_file(filepath):
         return None
 
 
+def get_mol_from_string(string, name):
+    if len(string.split('\n')) > 1:
+        return XyzReader.get_molecule_from_string(string, name)
+    else:
+        return SmilesReader.mol_from_str(string, name)
+
+
 def get_all_mols_from_directory(filepath):
     mols = []
     # Change the directory

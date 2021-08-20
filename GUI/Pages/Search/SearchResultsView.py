@@ -60,7 +60,10 @@ class View(FrameWithProcess.Frame):
             results.sort(reverse=descending, key=lambda mof: Attributes.attributes[attribute].calculate(mof))
         self.results = results
         if len(self.results) > 0:
-            self.lbl_num_results['text'] = f"{len(results)} Results"
+            if len(self.results) > 100:
+                self.lbl_num_results['text'] = f"Showing 100 of {len(results)} Results"
+            else:
+                self.lbl_num_results['text'] = f"{len(results)} Results"
             self.btn_export_txt['state'] = "normal"
             self.btn_export_cifs['state'] = "normal"
         else:
@@ -77,7 +80,7 @@ class View(FrameWithProcess.Frame):
             for molecule in self.results:
                 CifWriter.write_without_solvent(molecule, path)
         else:
-            MoleculeWriter.write_many(self.results, path)
+            MoleculeWriter.write_many((mof.get_mof() for mof in self.results), path)
 
     def export_txt(self):
         if len(self.results) == 0:
@@ -86,7 +89,7 @@ class View(FrameWithProcess.Frame):
                              initialdir=os.getcwd(), initialfile='SearchOutput' + str(time.time()))
         if f is None:
             return
-        text_to_save = '\n'.join(mof.label for mof in self.results)
+        text_to_save = '\n'.join(mof.filename for mof in self.results)
         f.write(text_to_save)
         f.close()
 
@@ -104,8 +107,8 @@ class View(FrameWithProcess.Frame):
 
     def build_sort_options(self):
         sort_options = [self.default_sort_string]
-        for attr in Attributes.attributes:
-            if Attributes.attributes[attr].enabled:
-                sort_options.append(attr + ' | high first')
-                sort_options.append(attr + ' | low first')
+        for name, attr in Attributes.attributes.items():
+            if attr.enabled and (attr.var_type is int or attr.var_type is float):
+                sort_options.append(name + ' | high first')
+                sort_options.append(name + ' | low first')
         return sort_options

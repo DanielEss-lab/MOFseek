@@ -139,7 +139,7 @@ class SBUIdentifier:
                     self.groups[self.next_group_id] = sbu
                     self.next_group_id += 1
         if len(clusters) == 0:
-            raise Exception('Exiting algorithm early because no metal atoms found')
+            raise Exception(f'Exiting algorithm early because no metal atoms found for mof {self.mof.label}')
         for atom in self.atoms:
             if not self.been_visited(atom):
                 if self.successfully_adds_to_cluster(atom):
@@ -199,7 +199,7 @@ class SBUIdentifier:
     def identify_ligand(self, nonmetal_atom):
         atoms = set()
         adjacent_cluster_ids = set()
-        self.identify_ligand_recurse(nonmetal_atom, atoms, adjacent_cluster_ids)  # Todo: see why one of these was set to 9 in the test
+        self.identify_ligand_recurse(nonmetal_atom, atoms, adjacent_cluster_ids)
         self.correct_adjacent_cluster_ids(atoms, adjacent_cluster_ids)
         if len(adjacent_cluster_ids) > 1:
             ligand_type = UnitType.CONNECTOR

@@ -31,7 +31,7 @@ class Root(tk.Tk):
         self.tabControl.add(self.rename_ligand_page, text='Rename Ligand')
         self.tabControl.add(self.rename_sbu_page, text='Rename SBU')
         self.tabControl.add(self.add_MOFs_page, text='Add MOFs')
-        self.tabControl.add(self.edit_MOF_page, text='Edit MOF')
+        # self.tabControl.add(self.edit_MOF_page, text='Edit MOF')
         self.tabControl.add(self.settings_page, text='Settings')
         self.tabControl.pack(expand=1, fill="both")
 
@@ -44,9 +44,10 @@ class Root(tk.Tk):
         self.prev_tab_name = new_tab_name
 
     def select_mof_for_edit(self, mof):
-        if self.tabControl.index('current') != 5:
-            self.edit_MOF_page.select_mof(mof)
-            self.tabControl.select(5)
+        pass
+        # if self.tabControl.index('current') != 5:
+        #     self.edit_MOF_page.select_mof(mof)
+        #     self.tabControl.select(5)
 
     def select_ligand_for_edit(self, ligand):
         self.rename_ligand_page.select_ligand(ligand)
@@ -60,10 +61,6 @@ class Root(tk.Tk):
         s = ttk.Style()
         s.configure("TMenubutton", background="#ffffff")
         os_specific_settings.style_for_platform(s)
-
-    def add_custom_ligand(self, mol):  # To change when connecting to DB
-        self.search_page.search_v.add_custom_ligand(mol)
-        self.rename_ligand_page.add_custom_ligand(mol)
 
     def highlight_molecule(self, mol):
         self.search_page.highlight_molecule(mol)
@@ -88,3 +85,12 @@ class Root(tk.Tk):
 
     def toggle_solvent(self):
         self.search_page.refresh_elements_shown()
+
+    def toggle_disorder(self):
+        self.search_page.forget_history()
+
+    def reload_ligands(self):
+        self.search_page.reload_ligands()
+
+    def reload_sbus(self):
+        self.search_page.reload_sbus()

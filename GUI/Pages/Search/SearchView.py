@@ -1,17 +1,15 @@
 import platform
-import re
 import tkinter as tk
 import tkinter.font as tkFont
-from pathlib import Path
+
+import re
 from tkinter import ttk
 
 from GUI import Attributes
-from GUI.Pages.Search.SearchTerms import SearchTerms, search_in_mofsForGUI_temp
 from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
-from MofIdentifier import SearchMOF
-from MofIdentifier.DAO import LigandDAO
-from MofIdentifier.fileIO import LigandReader
-from MofIdentifier.subbuilding import SBUCollectionManager
+from GUI.Pages.Search.SearchTerms import SearchTerms
+from DAO import MOFDAO, SBUDAO, LigandDAO
+
 
 ROW_MAXIMUM = 6
 
@@ -21,7 +19,6 @@ class View(FrameWithProcess.Frame):
         self.parent = parent
         super().__init__(self.parent, lambda search: self.search_from_input(search), height=40, width=300, padx=12)
         self.attribute_entries = list()
-        self.custom_ligands = dict()
         self.search_to_results = dict()
         self.text_to_search = dict()
         for i in range(8 + 1):
@@ -118,35 +115,13 @@ class View(FrameWithProcess.Frame):
         else:
             self.start_process(search)
 
-    def get_ligands(self, ligand_names):
-        ligands = list()
-        other_ligands = list()
-        for ligand_name in ligand_names:
-            if ligand_name in self.custom_ligands:
-                ligands.append(self.custom_ligands[ligand_name])
-            else:
-                other_ligands.append(ligand_name)
-        ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
-        return ligands
-
-    def get_sbus(self, sbu_names):
-        sbus = list()
-        other_sbus = list()
-        for sbu_name in sbu_names:
-            if sbu_name in self.custom_ligands:
-                sbus.append(self.custom_ligands[sbu_name])
-            else:
-                other_sbus.append(sbu_name)
-        sbus.extend(SBUCollectionManager.read_sbus_from_files(other_sbus))
-        return sbus
-
     def search_from_input(self, search):
         # Generate SearchTerms object from entries if needed
         if search is None:
-            ligands = self.get_ligands(self.ent_ligand.get_values())
-            forbidden_ligands = self.get_ligands(self.ent_excl_ligand.get_values())
-            sbus = self.get_sbus(self.ent_sbus.get_values())
-            forbidden_sbus = self.get_sbus(self.ent_excl_sbus.get_values())
+            ligands = self.ent_ligand.get_values()
+            forbidden_ligands = self.ent_excl_ligand.get_values()
+            sbus = self.ent_sbus.get_values()
+            forbidden_sbus = self.ent_excl_sbus.get_values()
             element_symbols_text = self.ent_elements.get()
             element_symbols = re.findall(r"[\w']+", element_symbols_text)
             forbidden_element_symbols_text = self.ent_excl_elements.get()
@@ -164,51 +139,38 @@ class View(FrameWithProcess.Frame):
             self.dropdown_redo_search['menu'].add_command(label=str(search), command=lambda value=str(search):
             self.redo_search_selected.set(value))
             self.search_to_results[search] = 'ongoing'
-            results = search_in_mofsForGUI_temp(search)  # TODO: this will change with db integration
+            results = MOFDAO.get_passing_MOFs(search)
             self.search_to_results[search] = results
             self.parent.display_search_results(results)
-
-    def add_custom_ligand(self, mol):
-        self.ent_ligand.add_new_possible_value('* ' + mol.label)
-        self.custom_ligands['* ' + mol.label] = mol
-        self.ent_sbus.add_new_possible_value('* ' + mol.label)
-        self.ent_excl_ligand.add_new_possible_value('* ' + mol.label)
-        self.ent_excl_sbus.add_new_possible_value('* ' + mol.label)
 
     def add_attribute_search_entries(self):
         def attribute_heading(parent):
             view = tk.Frame(parent)
             top = tk.Label(view, text='')
             top.pack()
-            middle = tk.Label(view, text='Maximum')
+            middle = tk.Label(view, text='Maximum/Include')
             middle.pack()
-            bottom = tk.Label(view, text='Minimum')
+            bottom = tk.Label(view, text='Minimum/Exclude')
             bottom.pack()
             return view
 
         self.attribute_row = tk.Frame(self)
         attribute_heading(self.attribute_row).pack(side='left')
-        for attr in Attributes.attributes:
-            if Attributes.attributes[attr].enabled:
-                entry = AttributeEntry(self.attribute_row, attr, Attributes.attributes[attr].description)
+        for name, attr in Attributes.attributes.items():
+            if attr.enabled:
+                entry = make_attribute_entry(self.attribute_row, name, attr)
                 self.attribute_entries.append(entry)
                 entry.pack(side='left')
         self.attribute_row.grid(column=0, row=3, columnspan=12, pady=2)
 
     def get_attribute_parameters(self):
-        return {entry.name: entry.get() for entry in self.attribute_entries}  # FIXME: don't use deselected attributes
+        return {entry.name: entry.get() for entry in self.attribute_entries}
 
-    def all_ligands_names(self):  # Will change with adding DB
-        return LigandDAO.search_all_ligand_names()
+    def all_ligands_names(self):
+        return LigandDAO.get_all_names()
 
-    def all_sbu_names(self):  # Will change with adding DB
-        path_1 = str(Path(__file__).parent / "../../../MofIdentifier/subbuilding/cluster")
-        path_2 = str(Path(__file__).parent / "../../../MofIdentifier/subbuilding/connector")
-        path_3 = str(Path(__file__).parent / "../../../MofIdentifier/subbuilding/auxiliary")
-        sbus = LigandReader.get_all_mols_from_directory(path_1) + \
-               LigandReader.get_all_mols_from_directory(path_2) + \
-               LigandReader.get_all_mols_from_directory(path_3)
-        return [sbu.label for sbu in sbus]
+    def all_sbu_names(self):
+        return SBUDAO.get_all_names()
 
     def add_error_to_layout(self, error_row):
         error_row.grid(row=ROW_MAXIMUM + 1, column=0, pady=2, columnspan=12, sticky=tk.EW)
@@ -222,7 +184,7 @@ class View(FrameWithProcess.Frame):
     def focus_ligand(self, ligand_name):
         if ligand_name != '':
             try:
-                ligand = self.get_ligands([ligand_name])[0]
+                ligand = LigandDAO.get_ligand(ligand_name)
                 self.parent.highlight_molecule(ligand)
             except FileNotFoundError as ex:
                 self._show_error(ex)
@@ -230,7 +192,7 @@ class View(FrameWithProcess.Frame):
     def focus_sbu(self, sbu_name):
         if sbu_name != '':
             try:
-                sbu = self.get_sbus([sbu_name])[0]
+                sbu = SBUDAO.get_sbu(sbu_name)
                 self.parent.highlight_molecule(sbu)
             except FileNotFoundError as ex:
                 self._show_error(ex)
@@ -240,14 +202,40 @@ class View(FrameWithProcess.Frame):
         self.attribute_entries = list()
         self.add_attribute_search_entries()
 
+    def clear_previous_results(self):
+        self.search_to_results = dict()
+        self.redo_search_selected.set('History')
+        self.dropdown_redo_search['menu'].delete(0, 'end')
 
-class AttributeEntry(tk.Frame):
-    def __init__(self, parent, name, description):
+    def reload_ligands(self):
+        ligand_names = self.all_ligands_names()
+        self.ent_ligand.set_possible_values(ligand_names)
+        self.ent_excl_ligand.set_possible_values(ligand_names)
+
+    def reload_sbus(self):
+        sbu_names = self.all_sbu_names()
+        self.ent_sbus.set_possible_values(sbu_names)
+        self.ent_excl_sbus.set_possible_values(sbu_names)
+
+
+def make_attribute_entry(parent, name, attr):
+    if attr.var_type is int or attr.var_type is float:
+        return NumericAttributeEntry(parent, name, attr)
+    elif attr.var_type is bool:
+        return BooleanAttributeEntry(parent, name, attr)
+    elif attr.var_type is str:
+        return StringAttributeEntry(parent, name, attr)
+    else:
+        raise Exception(f'Error: {name} is instance of {attr.var_type}, which is not supported.')
+
+
+class NumericAttributeEntry(tk.Frame):
+    def __init__(self, parent, name, attr):
         self.parent = parent
         self.name = name
         tk.Frame.__init__(self, self.parent, bd=1, relief=tk.SOLID)
         self.top = tk.Label(self, text=name)
-        Tooltips.create_tool_tip(self.top, description)
+        Tooltips.create_tool_tip(self.top, attr.description)
         self.top.grid()
         vcmd = (self.register(self.is_numeric_input))
         self.max = tk.Entry(self, validate='key', validatecommand=(vcmd, '%P'), width=max(7, len(name)))
@@ -277,3 +265,51 @@ class AttributeEntry(tk.Frame):
         else:
             min = float(self.min.get())
         return min, max
+
+
+class StringAttributeEntry(tk.Frame):
+    def __init__(self, parent, name, attr):
+        self.parent = parent
+        self.name = name
+        tk.Frame.__init__(self, self.parent, bd=1, relief=tk.SOLID)
+        self.top = tk.Label(self, text=name)
+        Tooltips.create_tool_tip(self.top, attr.description)
+        self.top.grid()
+        self.include = tk.Entry(self, width=max(7, len(name)))
+        self.include.grid(padx=4)
+        self.exclude = tk.Entry(self, width=max(7, len(name)))
+        self.exclude.grid(padx=4)
+
+    def get(self):
+        if len(self.include.get()) == 0:
+            include = None
+        else:
+            include = self.include.get()
+        if len(self.exclude.get()) == 0:
+            exclude = None
+        else:
+            exclude = self.exclude.get()
+        return exclude, include
+
+
+class BooleanAttributeEntry(tk.Frame):
+    def __init__(self, parent, name, attr):
+        self.parent = parent
+        self.name = name
+        tk.Frame.__init__(self, self.parent, bd=1, relief=tk.SOLID)
+        self.top = tk.Label(self, text=name)
+        Tooltips.create_tool_tip(self.top, attr.description)
+        self.top.grid()
+        self.value = tk.StringVar(self, "-")
+        values = {'Either': '-', "Yes": 'Y', "No": 'N'}
+        for text, value in values.items():
+            ttk.Radiobutton(self, text=text, variable = self.value, value=value).grid()
+
+    def get(self):
+        v = self.value.get()
+        if v == '-':
+            return None
+        elif v == 'Y':
+            return True
+        else:
+            return False

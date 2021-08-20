@@ -24,7 +24,7 @@ class SBUCollection:
             self.avg_conn_connectivity = sum(len(sbu.adjacent_cluster_ids) * sbu.frequency for sbu in connectors) / \
                 sum(sbu.frequency for sbu in connectors)
         except ZeroDivisionError:
-            self.avg_node_connectivity = float('inf')
+            self.avg_conn_connectivity = float('inf')
 
     def __str__(self):
         string = ""
@@ -80,6 +80,8 @@ class changeableSBU(Molecule.Molecule):
         # Right now, SBUs are constructed with atoms as sets; a refactor to lists wouldn't break much though
         if adjacent_cluster_ids is None:
             adjacent_cluster_ids = set()
+        # file_content will get set to something other than '' as part of SBUIdentifier.run_algorithm(),
+        # which also creates the changeableSBU to start
         self.file_content = file_content
         self.sbu_id = sbu_id
         self.adjacent_cluster_ids = adjacent_cluster_ids

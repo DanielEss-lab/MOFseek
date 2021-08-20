@@ -11,6 +11,7 @@ class MofBondCreator:
     def __init__(self, atoms, angles, fractional_lengths, cartesian_lengths):
         self.angles = angles
         self.lengths = fractional_lengths
+        self.atoms = atoms
         # Floor the number of buckets to overestimate the size of buckets
         # to ensure we're comparing at all viable distances
         self.num_x_buckets = floor(cartesian_lengths[0] / max_bond_length) if cartesian_lengths[0] > max_bond_length else 1
@@ -23,7 +24,7 @@ class MofBondCreator:
         # However, to assign atoms to buckets, and to copy buckets over to simulate atoms outside the unit cell,
         # the math remains simpler to use fractional coordinates (usually a, b, and c). Unfortunately, we refer to the
         # index of buckets by x y and z instead of a b and c
-        for atom in atoms:
+        for atom in self.atoms:
             x_bucket = floor(atom.a * self.num_x_buckets)
             y_bucket = floor(atom.b * self.num_y_buckets)
             z_bucket = floor(atom.c * self.num_z_buckets)
@@ -31,6 +32,7 @@ class MofBondCreator:
         self.num_compared = 0
         self.num_bonds = 0
         self.num_bonds_across_cell_border = 0
+        self.error_margin = Distances.bond_length_multiplicative_error_margin
 
     def get_bucket(self, z, y, x):
         bucket_belongs_to_unit_cell = True
@@ -63,6 +65,8 @@ class MofBondCreator:
             return bucket_copy
 
     def connect_atoms(self):
+        if self.num_compared > 0:
+            self.reset()
         for z in range(self.num_z_buckets):
             for y in range(self.num_y_buckets):
                 for x in range(self.num_x_buckets):
@@ -106,7 +110,7 @@ class MofBondCreator:
     def compare_for_bond(self, atom_a, atom_b):
         self.num_compared = self.num_compared + 1
         dist = Distances.distance(atom_a, atom_b)
-        if Distances.is_bond_distance(dist, atom_a, atom_b):
+        if Distances.is_bond_distance(dist, atom_a, atom_b, self.error_margin):
             self.num_bonds += 1
             if not atom_a.is_in_unit_cell() or not atom_b.is_in_unit_cell():
                 if not atom_a.is_in_unit_cell() and not atom_b.is_in_unit_cell():
@@ -119,13 +123,9 @@ class MofBondCreator:
         return self.num_bonds, self.num_compared, self.num_bonds_across_cell_border
 
     def enforce_single_hydrogen_bonds(self):
-        for z in range(self.num_z_buckets):
-            for y in range(self.num_y_buckets):
-                for x in range(self.num_x_buckets):
-                    this_space = self.cellSpace[z][y][x]
-                    for atom in this_space:
-                        if atom.type_symbol == 'H' and len(atom.bondedAtoms) > 1:
-                            self.remove_distant_bonds(atom)
+        for atom in self.atoms:
+            if atom.type_symbol == 'H' and len(atom.bondedAtoms) > 1:
+                self.remove_distant_bonds(atom)
 
     def remove_distant_bonds(self, atom):
         lowest_distance = float('inf')
@@ -139,3 +139,10 @@ class MofBondCreator:
             if neighbor != closest_atom:
                 neighbor.bondedAtoms.remove(atom)
                 atom.bondedAtoms.remove(neighbor)
+
+    def reset(self):
+        self.num_compared = 0
+        self.num_bonds = 0
+        self.num_bonds_across_cell_border = 0
+        for atom in self.atoms:
+            atom.bondedAtoms = []

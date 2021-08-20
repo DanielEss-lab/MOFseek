@@ -1,12 +1,14 @@
 from pathlib import Path
 
-from GUI import Attributes
-from MofIdentifier.SubGraphMatching import SubGraphMatcher
+from GUI import Attributes, Settings
 from MofIdentifier.fileIO import CifReader
-from MofIdentifier.subbuilding import SBUIdentifier
 
 
 def condense_t(tup):
+    if tup is None:
+        return '-'
+    if isinstance(tup, bool):
+        return 'Y' if tup else 'N'
     l = tup[0]
     if l is None:
         l = ''
@@ -18,7 +20,7 @@ def condense_t(tup):
 
 class SearchTerms:
     def __init__(self, ligands=None, excl_ligands=None, elements=None, excl_elements=None, sbus=None,
-                 excl_sbus=None, numerical_attr=None, label=''):
+                 excl_sbus=None, attr=None, label=''):
         if excl_sbus is None:
             excl_sbus = []
         if sbus is None:
@@ -31,53 +33,68 @@ class SearchTerms:
             ligands = []
         if elements is None:
             elements = []
-        if numerical_attr is None:
-            numerical_attr = dict()
-        self.ligands = ligands
+        if attr is None:
+            attr = dict()
+        self.ligand_names = ligands
         self.element_symbols = elements
-        self.excl_ligands = excl_ligands
+        self.excl_ligand_names = excl_ligands
         self.excl_element_symbols = excl_elements
-        self.sbus = sbus
-        self.excl_sbus = excl_sbus
-        self.numerical_attr = numerical_attr
+        self.sbu_names = sbus
+        self.excl_sbu_names = excl_sbus
+        self.attr = attr
         self.label_substring = label
 
     def passes(self, MOF):
+        if MOF is None:
+            return False
+        if MOF.DISORDER and not Settings.allow_disorder:
+            return False
         for element in self.element_symbols:
-            if element not in MOF.elementsPresent:
+            if element not in MOF.elements_present:
                 return False
         for element in self.excl_element_symbols:
-            if element in MOF.elementsPresent:
+            if element in MOF.elements_present:
                 return False
-        for attr_name in self.numerical_attr:
-            if self.numerical_attr[attr_name][0] is not None:
-                if Attributes.attributes[attr_name].calculate(MOF) < self.numerical_attr[attr_name][0]:
-                    return False  # Less than the minimum
-            if self.numerical_attr[attr_name][1] is not None:
-                if Attributes.attributes[attr_name].calculate(MOF) > self.numerical_attr[attr_name][1]:
-                    return False  # More than the maximum
-        if MOF.label.find(self.label_substring) < 0:
+        for attr_name in self.attr:
+            attr = Attributes.attributes[attr_name]
+            if attr.var_type is bool:
+                if self.attr[attr_name] is not None:
+                    if self.attr[attr_name] != attr.calculate(MOF):
+                        # If SearchTerms requires false and it calculates to true, or vice versa
+                        return False
+            elif attr.var_type is str:
+                if self.attr[attr_name][0] is not None:  # exclusion string
+                    if self.attr[attr_name][0] in attr.calculate(MOF):
+                        return False
+                if self.attr[attr_name][1] is not None:  # inclusion string
+                    if not self.attr[attr_name][1] in attr.calculate(MOF):
+                        return False
+            else:  # A numeric attribute
+                if self.attr[attr_name][0] is not None:
+                    if attr.calculate(MOF) < self.attr[attr_name][0]:
+                        return False  # Less than the minimum
+                if self.attr[attr_name][1] is not None:
+                    if attr.calculate(MOF) > self.attr[attr_name][1]:
+                        return False  # More than the maximum
+        if MOF.filename.find(self.label_substring) < 0:
             return False
-        if SBUIdentifier.mof_has_all_sbus(MOF, self.sbus) and SBUIdentifier.mof_has_no_sbus(MOF, self.excl_sbus):
+        if all(name in MOF.sbu_names for name in self.sbu_names) and \
+                not any(name in MOF.sbu_names for name in self.excl_sbu_names):
             pass
         else:
             return False
-        if SubGraphMatcher.mof_has_all_ligands(MOF, self.ligands) \
-                and SubGraphMatcher.mof_has_no_ligands(MOF, self.excl_ligands):
+        if all(name in MOF.ligand_names for name in self.ligand_names) and \
+                not any(name in MOF.ligand_names for name in self.excl_ligand_names):
             pass
         else:
             return False
         return True
 
     def __str__(self):
-        ligands = [ligand.label for ligand in self.ligands]
-        excl_ligands = [ligand.label for ligand in self.excl_ligands]
-        sbus = [sbu.label for sbu in self.sbus]
-        excl_sbus = [sbu.label for sbu in self.excl_sbus]
-        return f"lig:{ligands}-{excl_ligands}, " + \
+        return f"lig:{self.ligand_names}-{self.excl_ligand_names}, " + \
                f"elem:{self.element_symbols}-{self.excl_element_symbols}" + \
-               f"sbus:{sbus}-{excl_sbus}" + \
-               f"attr:{[str(Attributes.attributes[item[0]].index) + condense_t(item[1]) for item in self.numerical_attr.items()]}" + \
+               f"sbus:{self.sbu_names}-{self.excl_sbu_names}" + \
+               f"attr:{[str(Attributes.attributes[item[0]].index) + condense_t(item[1]) for item in self.attr.items()]}" + \
                f"n:{self.label_substring}"
 
     def __eq__(self, other):

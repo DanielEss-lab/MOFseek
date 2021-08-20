@@ -7,3 +7,4 @@ if __name__ == '__main__':
     ligand = LigandReader.get_mol_from_file(input('Ligand?'))
     molecule = LigandReader.get_mol_from_file(input('Larger Molecule?'))
     print(SubGraphMatcher.find_ligand_in_mof(ligand, molecule))
+    my_num = input('Enter a number')

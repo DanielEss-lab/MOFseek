@@ -30,11 +30,12 @@ def distance_across_unit_cells(base_atom, neighbor, angles, lengths):
     return distance(base_atom, neighbor_in_right_place)
 
 
-def is_bond_distance(d, a, b):
+def is_bond_distance(d, a, b, error_margin=bond_length_multiplicative_error_margin):
     rad_a = lookup(a.type_symbol)
     rad_b = lookup(b.type_symbol)
-    return d < (rad_a + rad_b) * bond_length_multiplicative_error_margin + bond_length_flat_error_margin
+    return d < (rad_a + rad_b) * error_margin + bond_length_flat_error_margin
 
 
 def are_within_bond_range(a, b):
+    """Not recommended, except for specific situations, because it interacts strangely with unit cell boundaries."""
     return is_bond_distance(distance(a, b), a, b)

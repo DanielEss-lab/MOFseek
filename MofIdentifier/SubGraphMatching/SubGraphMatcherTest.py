@@ -63,7 +63,7 @@ class StrongFindLigandInMofTest(unittest.TestCase):
 
     def test_single_metal_WCA(self):
         # To match any metal
-        m = XyzReader.get_molecule('../ligands/SingleMetal.xyz')
+        m = XyzReader.get_molecule('../ligands/test_resources/SingleMetal.xyz')
         mof_with_small_nodes = CifReader.get_mof('../mofsForTests/ABAVIJ_clean.cif')
         mof_with_big_nodes = CifReader.get_mof('../mofsForTests/AKOHEO_clean.cif')
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(m, mof_with_small_nodes), "Should find match in structures")
@@ -71,21 +71,21 @@ class StrongFindLigandInMofTest(unittest.TestCase):
 
     def test_pound_sign_WCA(self):
         # To match Carbon and Hydrogen only
-        CO2_1 = XyzReader.get_molecule('../ligands/CO2_1.xyz')
+        CO2_1 = XyzReader.get_molecule('../ligands/CO2_bonded.xyz')
         CO2_1_good_ex = XyzReader.get_molecule('../ligands/test_resources/contains_CO2_1_good.xyz')
         CO2_1_bad_ex = XyzReader.get_molecule('../ligands/test_resources/contains_CO2_1_bad.xyz')
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(CO2_1, CO2_1_good_ex), "Should find match in structures")
         self.assertEqual(False, SubGraphMatcher.find_ligand_in_mof(CO2_1, CO2_1_bad_ex), "Should not find match in structures")
 
     def test_numbered_bond_WCA(self):
-        m6 = XyzReader.get_molecule('../ligands/M6_node_alternate.xyz')
+        m6 = XyzReader.get_molecule('../ligands/M6_node.xyz')
         m6_fe = XyzReader.get_molecule('../ligands/test_resources/M6_node_compact.xyz')
         m6_bad = XyzReader.get_molecule('../ligands/test_resources/contains_M6_node_bad.xyz')
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(m6, m6_fe), "Should find match in structures")
         self.assertEqual(False, SubGraphMatcher.find_ligand_in_mof(m6, m6_bad), "Should not find match in structures")
 
     def test_M6_node_in_various(self):
-        m6 = XyzReader.get_molecule('../ligands/M6_node_alternate.xyz')
+        m6 = XyzReader.get_molecule('../ligands/M6_node.xyz')
         ja500330a_si_006_auto = CifReader.get_mof('../mofsForTests/ja500330a_si_006_auto.cif')
         ja500330a_si_007_auto = CifReader.get_mof('../mofsForTests/ja500330a_si_007_auto.cif')
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(m6, ja500330a_si_006_auto), "Should find match in structures")

@@ -1,6 +1,7 @@
 import os
 import platform
 import subprocess
+from pathlib import Path
 
 from GUI import Settings
 from MofIdentifier.Molecules import MOF
@@ -14,7 +15,7 @@ def make_and_open(molecule):
 
 def make_and_see(molecule):
     path = make_file(molecule)
-    see_file(os.path.join(path, molecule.label))
+    see_file(str(Path(os.path.join(path, molecule.label))))
 
 
 def make_file(molecule):
@@ -42,3 +43,6 @@ def see_file(filepath):
         subprocess.call(["open", "-R", filepath])
     else:
         subprocess.Popen(["xdg-open", filepath])
+
+if __name__ == '__main__':
+    see_file(r'C:\Users\mdavid4\Downloads\ABAVIJ_clean.cif')

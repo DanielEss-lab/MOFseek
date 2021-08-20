@@ -10,7 +10,6 @@ database may take some time. Please be patient."""
 class Page(FrameWithProcess.Frame):
     def __init__(self, parent):
         self.parent = parent
-        self.custom_ligands = dict()
         super().__init__(self.parent, lambda new_mof: self.edit_mof_in_db(new_mof))
         instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
         instructions.pack()

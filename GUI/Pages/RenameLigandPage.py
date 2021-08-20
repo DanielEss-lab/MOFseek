@@ -1,10 +1,8 @@
 import tkinter as tk
-from pathlib import Path
 
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess, StyledButton
 from GUI.Views import MoleculeView
-from MofIdentifier import SearchMOF
-from MofIdentifier.fileIO import LigandReader
+from DAO import LigandDAO, RenameService
 
 instruction_text = """Renaming a ligand in the database takes several minutes, so please be patient."""
 
@@ -12,7 +10,6 @@ instruction_text = """Renaming a ligand in the database takes several minutes, s
 class Page(FrameWithProcess.Frame):
     def __init__(self, parent):
         self.parent = parent
-        self.custom_ligands = dict()
         super().__init__(self.parent, lambda new_name: self.rename(new_name))
         instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
         instructions.pack()
@@ -34,14 +31,14 @@ class Page(FrameWithProcess.Frame):
         self.mol = None
 
     def rename(self, new_name):
-        if self.mol is not None and self.mol.label == self.combobox.get():
+        if self.mol is not None and self.mol.name == self.combobox.get():
             if new_name != '':
                 if new_name.find(' ') < 0 and new_name.find('.') < 0:
                     self.combobox.set('')
-                    self.new_name_ent.delete(0,tk.END)
+                    self.new_name_ent.delete(0, tk.END)
                     new_name = new_name + self.extension_text['text']
-                    # TODO: link to DAO
-                    pass
+                    RenameService.rename_ligand(self.mol.name, new_name)
+                    self.reload_ligands()
                 else:
                     self._show_error('Name cannot contain a period or a space')
             else:
@@ -52,40 +49,32 @@ class Page(FrameWithProcess.Frame):
     def focus_ligand(self, ligand_name):
         if ligand_name != '':
             try:
-                mol = self.get_ligands([ligand_name])[0]
+                mol = LigandDAO.get_ligand(ligand_name)
                 self.set_mol_in_view(mol)
             except FileNotFoundError as ex:
                 self._show_error(ex)
 
-    def all_ligands_names(self):  # Will change with adding DB
-        path = str(Path(__file__).parent / "../../MofIdentifier/ligands")
-        ligands = LigandReader.get_all_mols_from_directory(path)
-        return [ligand.label for ligand in ligands]
-
-    def get_ligands(self, ligand_names):
-        ligands = list()
-        other_ligands = list()
-        for ligand_name in ligand_names:
-            if ligand_name in self.custom_ligands:
-                ligands.append(self.custom_ligands[ligand_name])
-            else:
-                other_ligands.append(ligand_name)
-        ligands.extend(SearchMOF.read_ligands_from_files(other_ligands))
-        return ligands
-
-    def add_custom_ligand(self, mol):
-        self.values.append('* ' + mol.label)
-        self.combobox.set_completion_list(self.values)
-        self.custom_ligands['* ' + mol.label] = mol
+    def all_ligands_names(self):
+        return LigandDAO.get_all_names()
 
     def select_ligand(self, ligand):
         self.set_mol_in_view(ligand)
-        self.combobox.set(ligand.label)
+        self.combobox.set(ligand.name)
 
     def set_mol_in_view(self, mol):
         self.mol = mol
         if self.molecule_v is not None:
             self.molecule_v.destroy()
         self.molecule_v = MoleculeView.make_view(self, self.mol)
-        self.extension_text.config(text='.' + self.mol.label[-3:])
+        extension_text = mol.name[mol.name.rindex('.'):]
+        self.extension_text.config(text=extension_text)
         self.molecule_v.pack(side=tk.BOTTOM)
+
+    def reload_ligands(self):
+        self.values = self.all_ligands_names()
+        self.combobox.set_completion_list(self.values)
+        self.combobox.focus_set()
+        if self.molecule_v is not None:
+            self.molecule_v.destroy()
+        self.winfo_toplevel().reload_ligands()
+

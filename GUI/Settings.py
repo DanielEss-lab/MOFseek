@@ -4,6 +4,8 @@ from tkinter import messagebox
 
 download_filepath = ""
 keep_solvent = True
+allow_disorder = False
+# Attribute related settings are stored in Attributes
 
 
 def change_download_filepath():
@@ -28,3 +30,8 @@ def get_download_filepath():
 def toggle_solvent(enabled):
     global keep_solvent
     keep_solvent = enabled
+
+
+def toggle_disorder(enabled):
+    global allow_disorder
+    allow_disorder = enabled
