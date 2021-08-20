@@ -17,7 +17,6 @@ class View(FrameWithProcess.Frame):
         self.parent = parent
         super().__init__(self.parent, lambda search: self.search_from_input(search), height=40, width=300, padx=12)
         self.attribute_entries = list()
-        self.custom_ligands = dict()
         self.search_to_results = dict()
         self.text_to_search = dict()
         for i in range(8 + 1):
@@ -142,13 +141,6 @@ class View(FrameWithProcess.Frame):
             self.search_to_results[search] = results
             self.parent.display_search_results(results)
 
-    def add_custom_ligand(self, mol):
-        self.ent_ligand.add_new_possible_value('* ' + mol.label)
-        self.custom_ligands['* ' + mol.label] = mol
-        self.ent_sbus.add_new_possible_value('* ' + mol.label)
-        self.ent_excl_ligand.add_new_possible_value('* ' + mol.label)
-        self.ent_excl_sbus.add_new_possible_value('* ' + mol.label)
-
     def add_attribute_search_entries(self):
         def attribute_heading(parent):
             view = tk.Frame(parent)
@@ -212,6 +204,16 @@ class View(FrameWithProcess.Frame):
         self.search_to_results = dict()
         self.redo_search_selected.set('History')
         self.dropdown_redo_search['menu'].delete(0, 'end')
+
+    def reload_ligands(self):
+        ligand_names = self.all_ligands_names()
+        self.ent_ligand.set_possible_values(ligand_names)
+        self.ent_excl_ligand.set_possible_values(ligand_names)
+
+    def reload_sbus(self):
+        sbu_names = self.all_sbu_names()
+        self.ent_sbus.set_possible_values(sbu_names)
+        self.ent_excl_sbus.set_possible_values(sbu_names)
 
 
 def make_attribute_entry(parent, name, attr):

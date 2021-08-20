@@ -52,3 +52,9 @@ class SearchPage(tk.Frame):
 
     def forget_history(self):
         self.search_v.clear_previous_results()
+
+    def reload_ligands(self):
+        self.search_v.reload_ligands()
+
+    def reload_sbus(self):
+        self.search_v.reload_sbus()

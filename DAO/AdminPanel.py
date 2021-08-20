@@ -115,7 +115,7 @@ def speed_measure():
         if i == 100:
             break
         i += 1
-        MOFDatabase(MOFDAO.get_MOF(name))
+        MOFDAO.get_MOF(name)
     start = time.time()
     print(f'100 objects created in {round(start - end, 2)} seconds')
 
@@ -124,6 +124,6 @@ if __name__ == '__main__':
     # refresh_active_collections_to_test()
     # fill_db()
     # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
-    # speed_measure()
+    speed_measure()
     # refresh_active_collections_to_full()
-    LigandDAO.add_ligand_to_db_from_filepath(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands\NH.xyz')
+    # LigandDAO.add_ligand_to_db_from_filepath(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands\NH.xyz')

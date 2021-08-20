@@ -40,7 +40,7 @@ class View(tk.Frame):
         edit = tk.Label(row_icon_btns, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR,
                         padx=2, font=("Arial", 16), height=0)
         edit.bind('<Button-1>', lambda e: select_for_edit(parent, mof))
-        edit.pack(side='right')
+        # edit.pack(side='right')
         row_icon_btns.grid(sticky=tk.E, row=0, column=2)
 
         self.attribute_row = self.generate_attribute_row()

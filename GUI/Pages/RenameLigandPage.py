@@ -31,14 +31,14 @@ class Page(FrameWithProcess.Frame):
         self.mol = None
 
     def rename(self, new_name):
-        if self.mol is not None and self.mol.ligand_name == self.combobox.get():
+        if self.mol is not None and self.mol.name == self.combobox.get():
             if new_name != '':
                 if new_name.find(' ') < 0 and new_name.find('.') < 0:
                     self.combobox.set('')
                     self.new_name_ent.delete(0, tk.END)
                     new_name = new_name + self.extension_text['text']
-                    RenameService.rename_ligand(self.mol.ligand_name, new_name)
-                    pass
+                    RenameService.rename_ligand(self.mol.name, new_name)
+                    self.reload_ligands()
                 else:
                     self._show_error('Name cannot contain a period or a space')
             else:
@@ -59,13 +59,22 @@ class Page(FrameWithProcess.Frame):
 
     def select_ligand(self, ligand):
         self.set_mol_in_view(ligand)
-        self.combobox.set(ligand.ligand_name)
+        self.combobox.set(ligand.name)
 
     def set_mol_in_view(self, mol):
         self.mol = mol
         if self.molecule_v is not None:
             self.molecule_v.destroy()
         self.molecule_v = MoleculeView.make_view(self, self.mol)
-        extension_text = mol.ligand_name[mol.ligand_name.rindex('.'):]
+        extension_text = mol.name[mol.name.rindex('.'):]
         self.extension_text.config(text=extension_text)
         self.molecule_v.pack(side=tk.BOTTOM)
+
+    def reload_ligands(self):
+        self.values = self.all_ligands_names()
+        self.combobox.set_completion_list(self.values)
+        self.combobox.focus_set()
+        if self.molecule_v is not None:
+            self.molecule_v.destroy()
+        self.winfo_toplevel().reload_ligands()
+

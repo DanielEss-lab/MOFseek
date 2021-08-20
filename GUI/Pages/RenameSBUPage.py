@@ -36,7 +36,7 @@ class Page(FrameWithProcess.Frame):
                     self.combobox.set('')
                     self.new_name_ent.delete(0, tk.END)
                     RenameService.rename_sbu(self.mol.sbu_name, new_name, self.mol.type)
-                    pass
+                    self.reload_sbus()
                 else:
                     self._show_error('Name cannot contain a period or a space')
             else:
@@ -65,3 +65,11 @@ class Page(FrameWithProcess.Frame):
             self.molecule_v.destroy()
         self.molecule_v = SBUView.View(self, self.mol)
         self.molecule_v.pack(side=tk.BOTTOM)
+
+    def reload_sbus(self):
+        self.values = self.all_sbu_names()
+        self.combobox.set_completion_list(self.values)
+        self.combobox.focus_set()
+        if self.molecule_v is not None:
+            self.molecule_v.destroy()
+        self.winfo_toplevel().reload_sbus()
