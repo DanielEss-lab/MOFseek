@@ -1,8 +1,9 @@
 from MofIdentifier.Molecules import Molecule
-from MofIdentifier.Molecules.atom import conversion_to_Cartesian
+from MofIdentifier.Molecules.atom import conversion_to_Cartesian, is_metal
 from MofIdentifier.bondTools import SolventTools
 from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
 from MofIdentifier.subbuilding import SBUIdentifier
+from MofIdentifier.subbuilding.SBUTools import SBUCollection
 
 
 class NoMetalException(Exception):
@@ -12,6 +13,9 @@ class NoMetalException(Exception):
 class MOF(Molecule.Molecule):
     def __init__(self, filepath, atoms, symmetry, a, b, c, al, be, ga, file_string):
         super().__init__(filepath, atoms)
+        self.has_metal = any(is_metal(type_symbol) for type_symbol in self.elementsPresent)
+        self.is_organic = any(type_symbol == 'C' for type_symbol in self.elementsPresent) and any(
+                              type_symbol == 'H' for type_symbol in self.elementsPresent)
         self.symmetry = symmetry
         self.fractional_lengths = (a, b, c)
         self.angles = (al, be, ga)  # alpha, beta, gamma
@@ -25,25 +29,31 @@ class MOF(Molecule.Molecule):
         bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths)
         self._sbus = None
 
-        for x in range(1, 4):  # try 3 times
+        for x in range(1, 5):  # try 4 times
             bond_creator.connect_atoms()
             try:
                 components = SolventTools.get_connected_components(self.atoms)
-                self.atoms = []
+                atoms = []
                 self.solvents = dict()
                 self.solvent_components = []
-                self.assign_components(components, self.atoms)
+                self.assign_components(components, atoms)
                 assert (len(atoms) > 0)
                 good_connections = True
             except NoMetalException:
                 good_connections = False
             if good_connections:
+                self.atoms = atoms
                 break
             else:
                 bond_creator.error_margin += 0.01 * x  # If 1.10 to 1.16 doesn't fix it, I'm afraid to try higher.
         else:  # no break
-            raise NoMetalException  # If it never broke out from good_connection being True, then it's a problem MOF
+            assert not self.has_metal
+            components = SolventTools.get_connected_components(self.atoms)
+            self.assign_components(components, atoms, True)
+            # If it never broke out from good_connection being True, then it never found a metal
 
+        if not self.has_metal:
+            self._sbus = SBUCollection.empty()
         # self.sbu_names
         # self.identified_ligand_names
 
@@ -79,17 +89,18 @@ class MOF(Molecule.Molecule):
     def __str__(self):
         return "{} with fractional dimensions {}".format(self.label, self.fractional_lengths)
 
-    def assign_components(self, components, atoms):
+    def assign_components(self, components, atoms, allow_no_metal=False):
         atoms.extend(components[0])
-        has_metal = False
-        for atom in atoms:
-            if atom.is_metal():
-                has_metal = True
-                break
-        if not has_metal:
-            raise NoMetalException
+        if not allow_no_metal:
+            has_metal = False
+            for atom in atoms:
+                if atom.is_metal():
+                    has_metal = True
+                    break
+            if not has_metal:
+                raise NoMetalException
         for comp_index in range(1, len(components)):
-            if len(components[comp_index]) < 13 and len(components[comp_index]) * 2 < len(components[0]):
+            if len(components[comp_index]) < len(atoms) and not any(atom.is_metal() for atom in components[comp_index]):
                 self.solvent_components = components[comp_index:]
                 self.solvents = SolventTools.count_solvents(self.solvent_components)
                 return

@@ -34,6 +34,9 @@ class MOFDatabase:
         self.atoms_string_with_solvents = dictionary['atoms_string_with_solvents']
         self.atoms_string_without_solvents = dictionary['atoms_string_without_solvents']
         self.ligand_names = dictionary['ligand_names']
+        self.has_metal = dictionary['has_metal']
+        self.is_organic = dictionary['is_organic']
+        self.ligand_names = dictionary['ligand_names']
         sbu_node_info = dictionary['sbu_node_info']
         self.sbu_nodes = [ContainedSBU(info) for info in sbu_node_info]
         sbu_conn_info = dictionary['sbu_conn_info']
@@ -93,12 +96,17 @@ class MOFDatabase:
         self.set_from_dictionary_or_mof('unit_volume', dictionary)
         self.set_from_dictionary_or_mof('cartesian_lengths', dictionary)
         self.set_from_dictionary_or_mof('elementsPresent', dictionary)
+        self.set_from_dictionary_or_mof('is_organic', dictionary)
+        self.set_from_dictionary_or_mof('has_metal', dictionary)
         self.atoms_string_with_solvents = self.get_or_calculate('atoms_string_with_solvents',
-                                                           lambda mof: mof.atoms_string_with_solvents(), dictionary)
+                                                                lambda mof: mof.atoms_string_with_solvents(),
+                                                                dictionary)
         self.atoms_string_without_solvents = self.get_or_calculate('atoms_string_without_solvents',
-                                                           lambda mof: mof.atoms_string_without_solvents(), dictionary)
+                                                                   lambda mof: mof.atoms_string_without_solvents(),
+                                                                   dictionary)
 
-        self.ligand_names = self.get_or_calculate('ligand_names', lambda mof: LigandDAO.scan_all_for_mof(mof), dictionary)
+        self.ligand_names = self.get_or_calculate('ligand_names', lambda mof: LigandDAO.scan_all_for_mof(mof),
+                                                  dictionary)
         if self.file_content is not None:
             sbu_node_info = dictionary['sbu_node_info']
             self.sbu_nodes = [ContainedSBU(info) for info in sbu_node_info]
@@ -145,10 +153,14 @@ class MOFDatabase:
 
         self.num_atoms = self.get_or_calculate('num_atoms', lambda mof: len(mof.atoms), dictionary)
         self.conn_node_atom_ratio = self.get_or_calculate('conn_node_atom_ratio', lambda mof:
-                mof.sbus().num_connector_atoms / mof.sbus().num_cluster_atoms, dictionary)
-        self.aux_density = self.get_or_calculate('aux_density', lambda mof: len(mof.sbus().auxiliaries) / mof.unit_volume, dictionary)
-        self.conn_connectivity = self.get_or_calculate('conn_connectivity', lambda mof: mof.sbus().avg_conn_connectivity, dictionary)
-        self.node_connectivity = self.get_or_calculate('node_connectivity', lambda mof: mof.sbus().avg_node_connectivity, dictionary)
+                                    float('inf') if mof.sbus().num_cluster_atoms == 0
+                                    else mof.sbus().num_connector_atoms / mof.sbus().num_cluster_atoms, dictionary)
+        self.aux_density = self.get_or_calculate('aux_density',
+                                                 lambda mof: len(mof.sbus().auxiliaries) / mof.unit_volume, dictionary)
+        self.conn_connectivity = self.get_or_calculate('conn_connectivity',
+                                                       lambda mof: mof.sbus().avg_conn_connectivity, dictionary)
+        self.node_connectivity = self.get_or_calculate('node_connectivity',
+                                                       lambda mof: mof.sbus().avg_node_connectivity, dictionary)
         self.elements_present = self.get_or_calculate('elements_present', lambda mof: mof.elementsPresent, dictionary)
 
     def get_mof(self):

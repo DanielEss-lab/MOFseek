@@ -5,6 +5,7 @@ from pathlib import Path
 
 from DAO import MOFDAO, SBUDAO, DBConnection, LigandDAO
 from DAO.MOFDatabase import MOFDatabase
+from MofIdentifier.Molecules.MOF import NoMetalException
 from MofIdentifier.fileIO import CifReader, LigandReader
 from MofIdentifier.fileIO.CifReader import get_mof
 
@@ -63,6 +64,9 @@ def add_all_mofs(mofs_path):
                 i += 1
                 if i % 100 == 0:
                     print(f"{i} mofs uploaded")
+            except NoMetalException:
+                print(f"No metal found in {file_name}. This may happen "
+                      f"if the metal is too far away from its neighbors.")
             except Exception as ex:
                 print("Error reading file: ", file_name)
                 print(ex)

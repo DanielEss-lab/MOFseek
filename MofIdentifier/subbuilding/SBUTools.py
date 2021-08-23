@@ -64,6 +64,10 @@ class SBUCollection:
         return SBUCollection(self.clusters + other.clusters, self.connectors
                              + other.connectors, self.auxiliaries + other.auxiliaries)
 
+    @classmethod
+    def empty(cls):
+        return cls([], [], [])
+
 
 class UnitType(Enum):
     CLUSTER = 1
