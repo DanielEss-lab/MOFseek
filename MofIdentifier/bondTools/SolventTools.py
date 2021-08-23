@@ -1,5 +1,6 @@
 from MofIdentifier.Molecules import Molecule
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
+from collections import deque
 
 
 def get_connected_components(atoms):
@@ -7,19 +8,26 @@ def get_connected_components(atoms):
     visited_labels = set()
     for atom in atoms:
         if atom.label not in visited_labels:
-            group = list()
-            add_reachables_to_group(atom, group, visited_labels)
+            group = gather_all_connected_atoms(atom, visited_labels)
             connected_components.append(group)
     connected_components.sort(key=lambda g: len(g), reverse=True)
     return connected_components
 
 
-def add_reachables_to_group(atom, group, visited_labels):
-    group.append(atom)
-    visited_labels.add(atom.label)
-    for neighbor in atom.bondedAtoms:
-        if neighbor.label not in visited_labels:
-            add_reachables_to_group(neighbor, group, visited_labels)
+def gather_all_connected_atoms(atom, visited_labels):
+    group = list()
+    atoms_to_visit = deque()
+    atoms_to_visit.append(atom)
+    while len(atoms_to_visit) > 0:
+        atom = atoms_to_visit.popleft()
+        if atom.label in visited_labels:
+            continue
+        group.append(atom)
+        visited_labels.add(atom.label)
+        for neighbor in atom.bondedAtoms:
+            if neighbor.label not in visited_labels:
+                atoms_to_visit.append(neighbor)
+    return group
 
 
 def count_solvents(atom_groups):

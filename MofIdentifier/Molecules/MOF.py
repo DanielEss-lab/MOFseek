@@ -89,7 +89,7 @@ class MOF(Molecule.Molecule):
         if not has_metal:
             raise NoMetalException
         for comp_index in range(1, len(components)):
-            if len(components[comp_index]) < 8 and len(components[comp_index]) * 2 < len(components[0]):
+            if len(components[comp_index]) < 13 and len(components[comp_index]) * 2 < len(components[0]):
                 self.solvent_components = components[comp_index:]
                 self.solvents = SolventTools.count_solvents(self.solvent_components)
                 return
