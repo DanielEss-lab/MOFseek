@@ -2,6 +2,7 @@ import os
 from io import FileIO, StringIO
 from pathlib import Path
 
+import CifFile.StarFile
 from CifFile import ReadCif
 
 from MofIdentifier.Molecules.MOF import MOF
@@ -38,16 +39,29 @@ def get_all_mofs_in_directory(mofs_path):
 
 def read_cif(filename):
     with FileIO(filename, 'rb') as io:
-        cf = ReadCif(io)
-        file = open(filename)
-        file_str = file.read()
-        file.close()
+        try:
+            cf = ReadCif(io)
+        except CifFile.StarFile.StarError:
+            with open(filename) as file:
+                file_str = file.read()
+                file_str = file_str.replace("_symmetry_space_group_name_H-M    P 1",
+                                            "_symmetry_space_group_name_H-M    'P1'")
+                print('Please ignore the message saying "Trying to find one of LBLOCK..." Sorry about that')
+                return read_string(file_str, filename)
+        with open(filename) as file:
+            file_str = file.read()
     return mof_from_cf(cf, filename, file_str)
 
 
 def read_string(cif_content, filename):
     with StringIO(cif_content) as io:
-        cf = ReadCif(io)
+        try:
+            cf = ReadCif(io)
+        except CifFile.StarFile.StarError:
+            cif_content = cif_content.replace("_symmetry_space_group_name_H-M    P 1",
+                                        "_symmetry_space_group_name_H-M    'P1'")
+            print('Please ignore the message saying "Trying to find one of LBLOCK..." Sorry about that')
+            return read_string(cif_content, filename)
     return mof_from_cf(cf, filename, cif_content)
 
 
@@ -84,7 +98,7 @@ def mof_from_cf(cf, filename, file_str):
 
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-    MOF = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\BODPAN_clean.cif')
+    MOF = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\cm901983a_si_001_clean.cif')
 
     print(MOF.unit_volume)
     print(MOF.cartesian_lengths[0] * MOF.cartesian_lengths[1] * MOF.cartesian_lengths[2])
