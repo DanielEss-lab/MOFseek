@@ -49,6 +49,10 @@ class SearchTerms:
             return False
         if MOF.DISORDER and not Settings.allow_disorder:
             return False
+        if not MOF.has_metal and not Settings.allow_no_metal:
+            return False
+        if not MOF.is_organic and not Settings.allow_not_organic:
+            return False
         for element in self.element_symbols:
             if element not in MOF.elements_present:
                 return False

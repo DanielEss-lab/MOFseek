@@ -86,7 +86,7 @@ class Root(tk.Tk):
     def toggle_solvent(self):
         self.search_page.refresh_elements_shown()
 
-    def toggle_disorder(self):
+    def forget_history(self):
         self.search_page.forget_history()
 
     def reload_ligands(self):

@@ -5,6 +5,8 @@ from tkinter import messagebox
 download_filepath = ""
 keep_solvent = True
 allow_disorder = False
+allow_not_organic = False
+allow_no_metal = False
 # Attribute related settings are stored in Attributes
 
 
@@ -35,3 +37,13 @@ def toggle_solvent(enabled):
 def toggle_disorder(enabled):
     global allow_disorder
     allow_disorder = enabled
+
+
+def toggle_allow_not_organic(enabled):
+    global allow_not_organic
+    allow_not_organic = enabled
+
+
+def toggle_allow_no_metal(enabled):
+    global allow_no_metal
+    allow_no_metal = enabled

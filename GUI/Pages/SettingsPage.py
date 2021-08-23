@@ -44,10 +44,24 @@ class Page(tk.Frame):
 
         def disorder_button_action(enabled):
             Settings.toggle_disorder(enabled)
-            self.winfo_toplevel().toggle_disorder()
+            self.winfo_toplevel().forget_history()
         Page.Setting(self.frame, 'Allow Disorder', 'Include in results MOFs that have been marked DISORDER for '
-                                                   'containing illogical structures. Only affects future searches.',
-                     Settings.allow_disorder, disorder_button_action).grid(sticky=tk.W, pady=(20, 20))
+                                                   'containing illogical structures (Only affects future searches)',
+                     Settings.allow_disorder, disorder_button_action).grid(sticky=tk.W, pady=(20, 0))
+
+        def allow_not_organic_action(enabled):
+            Settings.toggle_allow_not_organic(enabled)
+            self.winfo_toplevel().forget_history()
+        Page.Setting(self.frame, 'Allow Inorganic', 'Include in search results "MOFs" that do not contain carbon '
+                                                    'and/or hydrogen (Only affects future searches)',
+                     Settings.allow_not_organic, allow_not_organic_action).grid(sticky=tk.W, pady=(20, 0))
+
+        def allow_no_metal_action(enabled):
+            Settings.toggle_allow_no_metal(enabled)
+            self.winfo_toplevel().forget_history()
+        Page.Setting(self.frame, 'Allow Nonmetallic', 'Include in search results MOFs that do not contain metal nodes '
+                                                      '(ie COFs) (Only affects future searches)',
+                     Settings.allow_no_metal, allow_no_metal_action).grid(sticky=tk.W, pady=(20, 20))
 
     def onFrameConfigure(self, event):
         '''Reset the scroll region to encompass the inner frame'''
