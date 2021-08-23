@@ -21,6 +21,12 @@ def get_all_names():
     return names
 
 
+def get_mof_iterator():
+    cursor = cif_collection.find({})
+    generator = (MOFDatabase(mof_dict) for mof_dict in cursor)
+    return generator
+
+
 def get_passing_MOFs(search):
     results = []
     for document in cif_collection.find():
