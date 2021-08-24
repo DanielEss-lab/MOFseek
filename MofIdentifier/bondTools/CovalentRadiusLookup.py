@@ -133,5 +133,5 @@ def lookup(symbol):
 
 if __name__ == '__main__':
     radius_1 = lookup('O')
-    radius_2 = lookup('Zn')
+    radius_2 = lookup('C')
     print((radius_1 + radius_2) * 1.11 + 0.05)

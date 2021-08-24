@@ -14,7 +14,7 @@ class SBUDatabase:
         self.name = name
 
     def set_file_contents(self, file):
-        self.file_contents = file
+        self.file_content = file
 
     def set_mofs(self, mofs):
         self.mofs = mofs
