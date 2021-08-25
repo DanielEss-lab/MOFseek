@@ -19,13 +19,20 @@ def create_bar_plot(x_values, y_values):
 
 
 def chart_presence():
-    freq = {symbol: 0 for symbol in CovalentRadiusLookup.data}
+    presence = {symbol: 0 for symbol in CovalentRadiusLookup.data}
+    total_freq = {symbol: 0 for symbol in CovalentRadiusLookup.data}
     for mof in MOFDAO.get_mof_iterator():
-        for element in mof.elements_present:
-            freq[element] += 1
-    create_bar_plot(freq.keys(), freq.values())
+        for element, count in mof.elements_present.items():
+            presence[element] += 1
+            total_freq[element] += count
+    create_bar_plot(presence.keys(), presence.values())
+    with open("output/element_frequency.csv", "w") as f:
+        f.write('element, number of MOFs that contain element, total number of element atoms within db')
+        f.write('\n'.join(f"{symbol}, {presence[symbol]}, {total_freq[symbol]}"
+                          for symbol in CovalentRadiusLookup.data))
+    print(total_freq)
 
 
 if __name__ == '__main__':
     chart_presence()
-    plt.show()
+    # plt.show()

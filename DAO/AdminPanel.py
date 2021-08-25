@@ -131,5 +131,5 @@ if __name__ == '__main__':
     # speed_measure()
     # refresh_active_collections_to_full()
     # LigandDAO.delete_unmatched_ligands()
-    add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')))
-    MOFDAO.add_csv_info(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020.csv')
+    add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
+    MOFDAO.add_csv_info(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020.csv')

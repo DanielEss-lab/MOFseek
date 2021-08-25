@@ -7,6 +7,7 @@ keep_solvent = True
 allow_disorder = False
 allow_not_organic = False
 allow_no_metal = False
+# TODO: use borg instead of global variables
 # Attribute related settings are stored in Attributes
 
 

@@ -117,18 +117,14 @@ data = {
     'Uuh': 175,
     'Uus': 165,
     'Uuo': 157,
+    '#': 110,
+    '*': 170,
+    '%:': 170,
 }
 
 
 def lookup(symbol):
-    if symbol == '#':
-        return 1.1
-    elif symbol == '*':
-        return 1.7
-    elif symbol == '%':
-        return 1.7
-    else:
-        return data[symbol] / 100
+    return data[symbol] / 100
 
 
 if __name__ == '__main__':
