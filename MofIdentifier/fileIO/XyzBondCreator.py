@@ -18,6 +18,7 @@ class XyzBondCreator:
                 continue
             for j in range(i+1, len(atoms)):
                 self.compare_for_bond(atoms[i], atoms[j])
+        self.enforce_single_hydrogen_bonds(atoms)
         return molecule
 
     def compare_for_bond(self, atom_a, atom_b):
@@ -29,6 +30,25 @@ class XyzBondCreator:
             self.num_bonds = self.num_bonds + 1
             atom_a.bondedAtoms.append(atom_b)
             atom_b.bondedAtoms.append(atom_a)
+
+    def enforce_single_hydrogen_bonds(self, atoms):
+        for atom in atoms:
+            if atom.type_symbol == 'H' and len(atom.bondedAtoms) > 1:
+                self.remove_distant_bonds(atom)
+
+    def remove_distant_bonds(self, atom):
+        lowest_distance = float('inf')
+        closest_atom = None
+        for neighbor in atom.bondedAtoms:
+            distance = Distances.distance(atom, neighbor)
+            if distance < lowest_distance:
+                lowest_distance = distance
+                closest_atom = neighbor
+        for neighbor in atom.bondedAtoms.copy():
+            if neighbor != closest_atom:
+                neighbor.bondedAtoms.remove(atom)
+                atom.bondedAtoms.remove(neighbor)
+                self.num_bonds -= 1
 
     def get_extra_information(self):
         return self.num_bonds, self.num_compared

@@ -13,6 +13,19 @@ is a SMILES string. It will be loaded onto the database and added to the ligand 
 contain it. The calculations, which happen as you add it, will take some time (expect 40-60 minutes), so 
 please be patient."""
 
+instructions_text_2 = """Of note are certain wildcard symbols that can be used in place of element symbols when "
+                            "creating ligand input files."""
+
+instructions_text_3 = """For example, you can search for mofs that have water bonded to atoms other than metal by "
+                            "requiring a ligand that is a water molecule bonded to a * atom (see the provided "
+                            "H2O_bonded.xyz) and excluding a ligand that is a water molecule bonded to a % atom."""
+
+instructions_text_4 = """You can (optionally) put an integer after the wildcard symbol in order to specify the number of
+                         other molecules within the ligand to which it should be bonded. For example, the %4 in 
+                         M6_node.xyz means that each metal must be bonded to the 4 closest other atoms in the xyz file 
+                         (all Oxygen in this case), and may also be bonded to additional atoms outside the xyz file- 
+                         connectors, auxililary groups, water, etc."""
+
 """Of note are certain wildcard symbols that can be used when creating ligand input files."""
 
 
@@ -24,32 +37,29 @@ class AddLigandPage(FrameWithProcess.Frame):
         self.molecule_v = None
         instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
         instructions.pack()
-        tk.Label(self, text="Of note are certain wildcard symbols that can be used in place of element symbols when "
-                            "creating ligand input files.", justify=tk.LEFT).pack()
+        tk.Label(self, text=instructions_text_2, justify=tk.LEFT).pack()
         wildcard_instructions_grid = tk.Frame(self)
-        tk.Label(wildcard_instructions_grid, text='symbol').grid(sticky=tk.W, row=1, column=0)
-        tk.Label(wildcard_instructions_grid, text='use as wildcard').grid(sticky=tk.W, row=1, column=1)
-        tk.Label(wildcard_instructions_grid, text='assumed maximum covalent radius').grid(sticky=tk.W, row=1, column=2)
+        tk.Label(wildcard_instructions_grid, text='symbol').grid(sticky=tk.W, row=0, column=0)
+        tk.Label(wildcard_instructions_grid, text='use as wildcard').grid(sticky=tk.W, row=0, column=1)
+        tk.Label(wildcard_instructions_grid, text='assumed maximum covalent radius').grid(sticky=tk.W, row=0, column=2)
         tk.Label(wildcard_instructions_grid, text='*').grid(sticky=tk.W, row=1, column=0)
         tk.Label(wildcard_instructions_grid, text='matches all atoms').grid(sticky=tk.W, row=1, column=1)
         tk.Label(wildcard_instructions_grid, text='1.7').grid(sticky=tk.W, row=1, column=2)
         tk.Label(wildcard_instructions_grid, text='%').grid(sticky=tk.W, row=2, column=0)
         tk.Label(wildcard_instructions_grid, text='matches metal atoms').grid(sticky=tk.W, row=2, column=1)
-        tk.Label(wildcard_instructions_grid, text='1.7').grid(sticky=tk.W, row=1, column=2)
+        tk.Label(wildcard_instructions_grid, text='1.7').grid(sticky=tk.W, row=2, column=2)
         tk.Label(wildcard_instructions_grid, text='#').grid(sticky=tk.W, row=3, column=0)
         tk.Label(wildcard_instructions_grid, text='matches carbon and hydrogen atoms').grid(sticky=tk.W, row=3, column=1)
-        tk.Label(wildcard_instructions_grid, text='1.1').grid(sticky=tk.W, row=1, column=2)
-        tk.Label(self, text="For example, you can search for mofs that have water bonded to atoms other than metal by "
-                            "requiring a ligand that is a water molecule bonded to a * atom (see the provided "
-                            "H2O_bonded.xyz) and excluding a ligand that is a water molecule bonded to a % atom.",
-                 justify=tk.LEFT).pack()
-
+        tk.Label(wildcard_instructions_grid, text='1.1').grid(sticky=tk.W, row=3, column=2)
+        wildcard_instructions_grid.pack()
+        tk.Label(self, text=instructions_text_3, justify=tk.LEFT).pack()
+        tk.Label(self, text=instructions_text_4, justify=tk.LEFT).pack()
         btn = StyledButton.make(self, 'Open Ligand', lambda: self.open_file())
         btn.pack()
         self.frm_ligand_preview = tk.Frame(self)
         # LigandView.make_view()
         self.frm_ligand_preview.pack()
-        self.add_btn = StyledButton.make(self, 'Upload to DB', lambda: self.start_process(self.mol))
+        self.add_btn = StyledButton.make(self, 'Add to DB', lambda: self.start_process(self.mol))
         self.add_btn['state'] = "disabled"
         self.add_btn.pack()
 
