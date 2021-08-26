@@ -10,7 +10,10 @@ from MofIdentifier.fileIO import LigandReader
 
 instruction_text = """Choose from your computer a .xyz file or a .smiles plaintext file whose first line 
 is a SMILES string. It will be loaded onto the database and added to the ligand list of all MOFs that 
-contain it. The calculations will take some time (expect 40-60 minutes), so please be patient."""
+contain it. The calculations, which happen as you add it, will take some time (expect 40-60 minutes), so 
+please be patient."""
+
+"""Of note are certain wildcard symbols that can be used when creating ligand input files."""
 
 
 class AddLigandPage(FrameWithProcess.Frame):
@@ -21,6 +24,26 @@ class AddLigandPage(FrameWithProcess.Frame):
         self.molecule_v = None
         instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
         instructions.pack()
+        tk.Label(self, text="Of note are certain wildcard symbols that can be used in place of element symbols when "
+                            "creating ligand input files.", justify=tk.LEFT).pack()
+        wildcard_instructions_grid = tk.Frame(self)
+        tk.Label(wildcard_instructions_grid, text='symbol').grid(sticky=tk.W, row=1, column=0)
+        tk.Label(wildcard_instructions_grid, text='use as wildcard').grid(sticky=tk.W, row=1, column=1)
+        tk.Label(wildcard_instructions_grid, text='assumed maximum covalent radius').grid(sticky=tk.W, row=1, column=2)
+        tk.Label(wildcard_instructions_grid, text='*').grid(sticky=tk.W, row=1, column=0)
+        tk.Label(wildcard_instructions_grid, text='matches all atoms').grid(sticky=tk.W, row=1, column=1)
+        tk.Label(wildcard_instructions_grid, text='1.7').grid(sticky=tk.W, row=1, column=2)
+        tk.Label(wildcard_instructions_grid, text='%').grid(sticky=tk.W, row=2, column=0)
+        tk.Label(wildcard_instructions_grid, text='matches metal atoms').grid(sticky=tk.W, row=2, column=1)
+        tk.Label(wildcard_instructions_grid, text='1.7').grid(sticky=tk.W, row=1, column=2)
+        tk.Label(wildcard_instructions_grid, text='#').grid(sticky=tk.W, row=3, column=0)
+        tk.Label(wildcard_instructions_grid, text='matches carbon and hydrogen atoms').grid(sticky=tk.W, row=3, column=1)
+        tk.Label(wildcard_instructions_grid, text='1.1').grid(sticky=tk.W, row=1, column=2)
+        tk.Label(self, text="For example, you can search for mofs that have water bonded to atoms other than metal by "
+                            "requiring a ligand that is a water molecule bonded to a * atom (see the provided "
+                            "H2O_bonded.xyz) and excluding a ligand that is a water molecule bonded to a % atom.",
+                 justify=tk.LEFT).pack()
+
         btn = StyledButton.make(self, 'Open Ligand', lambda: self.open_file())
         btn.pack()
         self.frm_ligand_preview = tk.Frame(self)

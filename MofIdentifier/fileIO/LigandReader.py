@@ -39,3 +39,7 @@ def get_all_mols_from_directory(filepath):
     # Return to original directory
     os.chdir(original_path)
     return mols
+
+if __name__ == '__main__':
+    mol = get_mol_from_file(r'/Users/davidl/Desktop/Work/Esslab-P66/Analysis/input/MOM.xyz')
+    print(mol.elementsPresent)
