@@ -29,9 +29,6 @@ class MofBondCreator:
             y_bucket = floor(atom.b * self.num_y_buckets)
             z_bucket = floor(atom.c * self.num_z_buckets)
             self.cellSpace[z_bucket][y_bucket][x_bucket].append(atom)
-        self.num_compared = 0
-        self.num_bonds = 0
-        self.num_bonds_across_cell_border = 0
         self.error_margin = Distances.bond_length_multiplicative_error_margin
 
     def get_bucket(self, z, y, x):
@@ -65,7 +62,7 @@ class MofBondCreator:
             return bucket_copy
 
     def connect_atoms(self):
-        if self.num_compared > 0:
+        if self.error_margin != Distances.bond_length_multiplicative_error_margin:
             self.reset()
         for z in range(self.num_z_buckets):
             for y in range(self.num_y_buckets):
@@ -108,19 +105,13 @@ class MofBondCreator:
                 self.compare_for_bond(atom_a, atom_b)
 
     def compare_for_bond(self, atom_a, atom_b):
-        self.num_compared = self.num_compared + 1
         dist = Distances.distance(atom_a, atom_b)
         if Distances.is_bond_distance(dist, atom_a, atom_b, self.error_margin):
-            self.num_bonds += 1
             if not atom_a.is_in_unit_cell() or not atom_b.is_in_unit_cell():
                 if not atom_a.is_in_unit_cell() and not atom_b.is_in_unit_cell():
                     raise Exception
-                self.num_bonds_across_cell_border += 1
             atom_a.bondedAtoms.append(atom_b)
             atom_b.bondedAtoms.append(atom_a)
-
-    def get_extra_information(self):
-        return self.num_bonds, self.num_compared, self.num_bonds_across_cell_border
 
     def enforce_single_hydrogen_bonds(self):
         for atom in self.atoms:
@@ -141,8 +132,5 @@ class MofBondCreator:
                 atom.bondedAtoms.remove(neighbor)
 
     def reset(self):
-        self.num_compared = 0
-        self.num_bonds = 0
-        self.num_bonds_across_cell_border = 0
         for atom in self.atoms:
             atom.bondedAtoms = []

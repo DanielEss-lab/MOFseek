@@ -6,20 +6,18 @@ import pandas as pd
 
 from MofIdentifier.Molecules.Ligand import Ligand
 from MofIdentifier.Molecules.atom import Atom
-from MofIdentifier.fileIO.XyzBondCreator import XyzBondCreator
-
-bond_creator = XyzBondCreator()
+from MofIdentifier.fileIO import XyzBondCreator
 
 
 def get_molecule(filename):
     mol = read_xyz(filename)
-    bond_creator.connect_atoms(mol)
+    XyzBondCreator.connect_atoms(mol)
     return mol
 
 
 def get_molecule_from_string(string, name):
     mol = read_string(string, name)
-    bond_creator.connect_atoms(mol)
+    XyzBondCreator.connect_atoms(mol)
     return mol
 
 
