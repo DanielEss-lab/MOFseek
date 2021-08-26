@@ -10,7 +10,12 @@ from MofIdentifier.fileIO import MoleculeWriter, CifWriter
 
 def make_and_open(molecule):
     path = make_file(molecule)
-    open_file(os.path.join(path, molecule.label))
+    full_path = os.path.join(path, molecule.label)
+    extension = full_path[full_path.rfind('.'):]
+    if Settings.open_app_filepath[extension] == "":
+        open_file(full_path)
+    else:
+        open_file_with_app(full_path, Settings.open_app_filepath[extension])
 
 
 def make_and_see(molecule):
@@ -36,6 +41,10 @@ def open_file(filepath):
         subprocess.call(('xdg-open', filepath))
 
 
+def open_file_with_app(file_path, app_path):
+    subprocess.call([app_path, file_path])
+
+
 def see_file(filepath):
     if platform.system() == "Windows":  # Windows
         subprocess.Popen(["explorer", "/select,", filepath])
@@ -44,5 +53,8 @@ def see_file(filepath):
     else:
         subprocess.Popen(["xdg-open", filepath])
 
+
 if __name__ == '__main__':
-    see_file(r'C:\Users\mdavid4\Downloads\ABAVIJ_clean.cif')
+    file_path = r'C:\Users\mdavid4\Downloads\ABAVIJ_clean.cif'
+    app_path = r'C:\Program Files\CCDC\Mercury\mercury.exe'  # C:\Windows\system32
+    open_file_with_app(file_path, app_path)

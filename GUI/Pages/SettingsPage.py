@@ -32,9 +32,6 @@ class Page(tk.Frame):
         Page.Setting(self.frame, 'SBU search', 'Enable the powerful (but situational) SBU search', 0,
                      lambda enabled: self.winfo_toplevel().toggle_sbu_search(enabled)).grid(sticky=tk.W, pady=(20, 0))
 
-        self.download_filepath_option_row = self.make_download_filepath_option_row()
-        self.download_filepath_option_row.grid(sticky=tk.W)
-
         def solvent_button_action(enabled):
             Settings.toggle_solvent(enabled)
             self.winfo_toplevel().toggle_solvent()
@@ -62,6 +59,14 @@ class Page(tk.Frame):
         Page.Setting(self.frame, 'Allow Nonmetallic', 'Include in search results MOFs that do not contain metal nodes '
                                                       '(ie COFs) (Only affects future searches)',
                      Settings.allow_no_metal, allow_no_metal_action).grid(sticky=tk.W, pady=(20, 20))
+
+        self.download_filepath_option_row = self.make_download_filepath_option_row()
+        self.download_filepath_option_row.grid(sticky=tk.W)
+
+        self.app_select_labels = {".cif": None, ".xyz": None, ".smiles": None}
+        for extension in self.app_select_labels:
+            app_select_row, self.app_select_labels[extension] = self.make_app_select_option_row(extension)
+            app_select_row.grid(sticky=tk.W)
 
     def onFrameConfigure(self, event):
         '''Reset the scroll region to encompass the inner frame'''
@@ -99,11 +104,35 @@ class Page(tk.Frame):
             Settings.change_download_filepath()
             self.refresh_download_filepath_row()
 
-        btn = StyledButton.make(row, 'Change filepath for opening molecules', command=callback)
+        btn = StyledButton.make(row, 'Change filepath to save molecules onto computer in order to open',
+                                command=callback)
         lbl = tk.Label(row, text=Settings.download_filepath)
         btn.pack(side=tk.LEFT)
         lbl.pack(side=tk.LEFT)
         return row
+
+    def make_app_select_option_row(self, file_extension):
+        row = tk.Frame(self.frame)
+        if self.app_select_labels[file_extension] is None:
+            text = Settings.open_app_filepath[file_extension]
+            if text == "":
+                text = "<computer default for this filetype>"
+            lbl = tk.Label(row, text=text)
+        else:
+            lbl = self.app_select_labels[file_extension]
+
+        def callback():
+            try:
+                Settings.change_app_filepath(file_extension)
+                lbl['text'] = Settings.open_app_filepath[file_extension]
+            except ValueError:
+                lbl['text'] = "Error; reverting to computer default. Make sure you use the true full path to the app " \
+                              "file"
+        btn = StyledButton.make(row, f'Specify application (full filepath) to use when opening {file_extension} files',
+                                command=callback)
+        btn.pack(side=tk.LEFT)
+        lbl.pack(side=tk.LEFT)
+        return row, lbl
 
     def refresh_download_filepath_row(self):
         self.download_filepath_option_row.grid_forget()

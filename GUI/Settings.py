@@ -3,6 +3,7 @@ import tkinter.filedialog as fd
 from tkinter import messagebox
 
 download_filepath = ""
+open_app_filepath = {".xyz": "", ".smiles": "", ".cif": ""}
 keep_solvent = True
 allow_disorder = False
 allow_not_organic = False
@@ -16,6 +17,14 @@ def change_download_filepath():
     download_filepath = fd.askdirectory()
     if download_filepath is None or not os.path.isdir(download_filepath):
         change_download_filepath()
+
+
+def change_app_filepath(file_extension):
+    global open_app_filepath
+    open_app_filepath[file_extension] = fd.askopenfilename()
+    if open_app_filepath[file_extension] is None or os.path.isdir(download_filepath):
+        open_app_filepath[file_extension] = ""
+        raise ValueError('Invalid path to an app. Make sure you use the full path to the .exe file')
 
 
 def get_download_filepath():
