@@ -4,31 +4,18 @@ import tkinter.ttk as ttk
 
 from GUI import Attributes, Settings
 from GUI.Utility import StyledButton
+from GUI.Utility.ScrollFrame import ScrollFrame
 
 instruction_text = """Select which properties you would like to search by and see for each MOF. """
 
 
-class Page(tk.Frame):
+class Page(ScrollFrame):
     def __init__(self, parent):
         self.parent = parent
         super().__init__(self.parent)
-        self.canvas = tk.Canvas(self, borderwidth=0, background="#ffffff")
-        self.frame = tk.Frame(self.canvas, background="#ffffff")
-        self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.vsb.set)
-        self.canvas.bind('<Enter>', self._bound_to_mousewheel)
-        self.canvas.bind('<Leave>', self._unbound_to_mousewheel)
-
-        self.vsb.pack(side="right", fill="y")
-        self.canvas.pack(side="left", fill="both", expand=True)
-        self.canvas.create_window((4, 4), window=self.frame, anchor="nw",
-                                  tags="self.frame")
-
-        self.frame.bind("<Configure>", self.onFrameConfigure)
-
+        self.frame = self.get_frame()
         instructions = tk.Label(self.frame, text=instruction_text, justify=tk.LEFT)
         instructions.grid()
-
         for attr in Attributes.attributes:
             Page.AttributeSetting(self.frame, attr).grid(sticky=tk.W)
 
@@ -70,10 +57,6 @@ class Page(tk.Frame):
         for extension in self.app_select_labels:
             app_select_row, self.app_select_labels[extension] = self.make_app_select_option_row(extension)
             app_select_row.grid(sticky=tk.W, pady=(0, 2))
-
-    def onFrameConfigure(self, event):
-        '''Reset the scroll region to encompass the inner frame'''
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
     class Setting(tk.Frame):
         def __init__(self, parent, name, description, starts_enabled, function):
@@ -147,12 +130,3 @@ class Page(tk.Frame):
         self.download_filepath_option_row.grid_forget()
         self.download_filepath_option_row = self.make_download_filepath_option_row()
         self.download_filepath_option_row.grid(sticky=tk.W)
-
-    def _bound_to_mousewheel(self, event):
-        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-
-    def _unbound_to_mousewheel(self, event):
-        self.canvas.unbind_all("<MouseWheel>")
-
-    def _on_mousewheel(self, event):
-        self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")

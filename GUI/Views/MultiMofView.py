@@ -1,46 +1,17 @@
 import tkinter as tk
 
+from GUI.Utility.ScrollFrame import ScrollFrame
 from GUI.Views import MOFView
 
 
-class View(tk.Frame):
+class View(ScrollFrame):
     def __init__(self, parent):
         self.parent = parent
         super().__init__(self.parent, height=450)
         self.results = []
 
-        self.canvas = tk.Canvas(self, borderwidth=0, background="#ffffff", height=400)
-        self.mofs_frame = tk.Frame(self.canvas, background="#ffffff")
+        self.mofs_frame = super().get_frame()
         self.mofs_frame.grid_columnconfigure(0, weight=1)
-        self.canvas.master = parent
-        self.vsb = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.vsb.set)
-
-        self.vsb.pack(side="right", fill="y")
-        self.canvas.pack(side="left", fill="both", expand=True)
-        self.canvas.create_window((4, 4), window=self.mofs_frame, anchor="nw", tags="frame")
-
-        self.canvas.bind('<Configure>', self.frame_width)
-        self.mofs_frame.bind("<Configure>", self.on_frame_configure)
-        # self.frame.bind('<Configure>', self._configure_window)
-        self.canvas.bind('<Enter>', self._bound_to_mousewheel)
-        self.canvas.bind('<Leave>', self._unbound_to_mousewheel)
-
-    def frame_width(self, event):
-        self.canvas.itemconfig("frame", width=self.canvas.winfo_width())
-
-    def on_frame_configure(self, event):
-        # Reset the scroll region to encompass the inner frame
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-
-    def _bound_to_mousewheel(self, event):
-        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
-
-    def _unbound_to_mousewheel(self, event):
-        self.canvas.unbind_all("<MouseWheel>")
-
-    def _on_mousewheel(self, event):
-        self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
     def display_results(self, results):
         self.results = results
