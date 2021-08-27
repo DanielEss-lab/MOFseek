@@ -44,29 +44,29 @@ class Page(tk.Frame):
             self.winfo_toplevel().forget_history()
         Page.Setting(self.frame, 'Allow Disorder', 'Include in results MOFs that have been marked DISORDER for '
                                                    'containing illogical structures (Only affects future searches)',
-                     Settings.allow_disorder, disorder_button_action).grid(sticky=tk.W, pady=(20, 0))
+                     Settings.allow_disorder, disorder_button_action).grid(sticky=tk.W, pady=(20, 2))
 
         def allow_not_organic_action(enabled):
             Settings.toggle_allow_not_organic(enabled)
             self.winfo_toplevel().forget_history()
         Page.Setting(self.frame, 'Allow Inorganic', 'Include in search results "MOFs" that do not contain carbon '
                                                     'and/or hydrogen (Only affects future searches)',
-                     Settings.allow_not_organic, allow_not_organic_action).grid(sticky=tk.W, pady=(20, 0))
+                     Settings.allow_not_organic, allow_not_organic_action).grid(sticky=tk.W, pady=(2, 0))
 
         def allow_no_metal_action(enabled):
             Settings.toggle_allow_no_metal(enabled)
             self.winfo_toplevel().forget_history()
         Page.Setting(self.frame, 'Allow Nonmetallic', 'Include in search results MOFs that do not contain metal nodes '
                                                       '(ie COFs) (Only affects future searches)',
-                     Settings.allow_no_metal, allow_no_metal_action).grid(sticky=tk.W, pady=(20, 20))
+                     Settings.allow_no_metal, allow_no_metal_action).grid(sticky=tk.W, pady=(2, 20))
 
         self.download_filepath_option_row = self.make_download_filepath_option_row()
-        self.download_filepath_option_row.grid(sticky=tk.W)
+        self.download_filepath_option_row.grid(sticky=tk.W, pady=(0, 2))
 
         self.app_select_labels = {".cif": None, ".xyz": None, ".smiles": None}
         for extension in self.app_select_labels:
             app_select_row, self.app_select_labels[extension] = self.make_app_select_option_row(extension)
-            app_select_row.grid(sticky=tk.W)
+            app_select_row.grid(sticky=tk.W, pady=(0, 2))
 
     def onFrameConfigure(self, event):
         '''Reset the scroll region to encompass the inner frame'''
