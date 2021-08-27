@@ -1,3 +1,4 @@
+import platform
 import tkinter as tk
 import tkinter.ttk as ttk
 
@@ -126,8 +127,14 @@ class Page(tk.Frame):
                 Settings.change_app_filepath(file_extension)
                 lbl['text'] = Settings.open_app_filepath[file_extension]
             except ValueError:
-                lbl['text'] = "Error; reverting to computer default. Make sure you use the true full path to the app " \
-                              "file"
+                if platform.system() == 'Darwin':
+                    lbl['text'] = "Error; reverting to computer default. On Macs, you can specify the filepath to " \
+                                  "the executable within a .app package by using command-shift-G within the app " \
+                                  "select menu"
+                else:
+                    lbl['text'] = "Error; reverting to computer default. Make sure you use the true full path to the " \
+                                  "executable file"
+
         btn = StyledButton.make(row, f'Specify application (full filepath) to use when opening {file_extension} files',
                                 command=callback)
         btn.pack(side=tk.LEFT)

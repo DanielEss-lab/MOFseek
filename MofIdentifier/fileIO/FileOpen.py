@@ -55,6 +55,6 @@ def see_file(filepath):
 
 
 if __name__ == '__main__':
-    file_path = r'C:\Users\mdavid4\Downloads\ABAVIJ_clean.cif'
-    app_path = r'C:\Program Files\CCDC\Mercury\mercury.exe'  # C:\Windows\system32
+    file_path = r'/Users/davidl/Downloads/ABAVIJ_clean.cif'
+    app_path = r'/Applications/CCDC/Mercury/mercury.app/Contents/MacOS/mercury'  # C:\Windows\system32
     open_file_with_app(file_path, app_path)
