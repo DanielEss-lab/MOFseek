@@ -1,4 +1,4 @@
-import igraph
+import igraph  # currently python-igraph in repositories
 
 
 def graph_from_mol(molecule):

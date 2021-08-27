@@ -2,7 +2,7 @@ import os
 from io import FileIO, StringIO
 from pathlib import Path
 
-import CifFile.StarFile
+import CifFile.StarFile  # PyCifRW (4.4.3 works, but other versions should work also
 from CifFile import ReadCif
 
 from MofIdentifier.Molecules.MOF import MOF
