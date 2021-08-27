@@ -1,5 +1,7 @@
 import tkinter as tk
 
+from GUI import os_specific_settings
+
 
 class ScrollFrame(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -19,7 +21,7 @@ class ScrollFrame(tk.Frame):
         self.canvas.bind('<Configure>', lambda e: self.canvas.itemconfig("frame", width=self.canvas.winfo_width()))
         self.content_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
         self.canvas.bind('<Enter>', lambda e: self.canvas.bind_all("<MouseWheel>",
-                         lambda event: self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")))
+                         lambda event: self.canvas.yview_scroll(int(-1 * (event.delta / os_specific_settings.SCROLL_DIVISOR)), "units")))
         self.canvas.bind('<Leave>', lambda e: self.canvas.unbind_all("<MouseWheel>"))
 
     def get_frame(self):
