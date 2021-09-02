@@ -13,3 +13,5 @@ def write_one(mol, path):
         if not os.path.exists(complete_path):
             with open(complete_path, "w") as f:
                 f.write(mol.file_content)
+    else:
+        raise ValueError(f'Target filepath {path} is not an existing directory')

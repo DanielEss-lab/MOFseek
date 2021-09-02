@@ -3,7 +3,11 @@ from pysmiles import read_smiles
 from MofIdentifier.Molecules.Ligand import Ligand
 from MofIdentifier.Molecules.atom import Atom
 
-REPLACEMENT = 'Rpl'
+H_REPLACEMENT = 'Rpl'
+WILD_REPLACEMENTS = {'*': 'Ast',
+                     '%': 'Per',
+                     '#': 'Pou'}
+WILD_RESTORES = {v: k for k, v in WILD_REPLACEMENTS.items()}
 
 
 def mol_from_file(filepath):
@@ -13,21 +17,39 @@ def mol_from_file(filepath):
 
 
 def convert_smiles_to_no_h(string):
-    return string.replace('H', REPLACEMENT)
+    return string.replace('H', H_REPLACEMENT)
 
 
 def convert_mol_to_h(mol):
     for atom in mol.atoms:
-        if atom.type_symbol == REPLACEMENT:
+        if atom.type_symbol == H_REPLACEMENT:
             atom.type_symbol = 'H'
-            atom.label = atom.label.replace(REPLACEMENT, 'H')
-    mol.elementsPresent['H'] = mol.elementsPresent[REPLACEMENT]
-    mol.elementsPresent.pop(REPLACEMENT)
+            atom.label = atom.label.replace(H_REPLACEMENT, 'H')
+    mol.elementsPresent['H'] = mol.elementsPresent[H_REPLACEMENT]
+    mol.elementsPresent.pop(H_REPLACEMENT)
+
+
+def remove_wildcards(string):
+    for symbol, replacement in WILD_REPLACEMENTS.items():
+        string = string.replace(symbol, replacement)
+    return string
+
+
+def restore_wildcards(mol):
+    for atom in mol.atoms:
+        if atom.type_symbol in WILD_RESTORES:
+            atom.label = atom.label.replace(atom.type_symbol, WILD_RESTORES[atom.type_symbol])
+            atom.type_symbol = WILD_RESTORES[atom.type_symbol]
+    for replacement, symbol in WILD_RESTORES.items():
+        if replacement in mol.elementsPresent:
+            mol.elementsPresent[symbol] = mol.elementsPresent[replacement]
+            mol.elementsPresent.pop(replacement)
 
 
 def mol_from_str(string, mol_name=None):
     if mol_name is None:
         mol_name = string
+    string = remove_wildcards(string)
     manually_specified_h = 'H' in string
     if manually_specified_h:
         string = convert_smiles_to_no_h(string)
@@ -35,6 +57,7 @@ def mol_from_str(string, mol_name=None):
     molecule = mol_from_networkx_graph(networkx_mol, mol_name, string)
     if manually_specified_h:
         convert_mol_to_h(molecule)
+    restore_wildcards(molecule)
     molecule.should_use_weak_comparison = not manually_specified_h
     return molecule
 
@@ -61,6 +84,6 @@ def mol_from_networkx_graph(graph, mol_name, file_string):
 
 
 if __name__ == '__main__':
-    mol = mol_from_str('[H]C1=C([H])C([H])=C([H])C([H])=C1[H]')
+    mol = mol_from_file(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands\new_ligands\phosphonate.smiles')
     print(mol)
     print(*mol.atoms, sep='\n')

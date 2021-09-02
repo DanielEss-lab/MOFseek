@@ -5,8 +5,9 @@ from pathlib import Path
 
 from DAO import MOFDAO, SBUDAO, DBConnection, LigandDAO
 from DAO.MOFDatabase import MOFDatabase
+from collections import namedtuple
 from MofIdentifier.Molecules.MOF import NoMetalException
-from MofIdentifier.fileIO import CifReader, LigandReader
+from MofIdentifier.fileIO import CifReader, LigandReader, MoleculeWriter
 from MofIdentifier.fileIO.CifReader import get_mof
 
 
@@ -130,6 +131,7 @@ if __name__ == '__main__':
     # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
     # speed_measure()
     # refresh_active_collections_to_full()
-    # LigandDAO.delete_unmatched_ligands()
-    add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
-    MOFDAO.add_csv_info(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020.csv')
+    LigandDAO.delete_unmatched_ligands()
+    # add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
+    # MOFDAO.add_csv_info(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020.csv')
+    add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands\new_ligands')))
