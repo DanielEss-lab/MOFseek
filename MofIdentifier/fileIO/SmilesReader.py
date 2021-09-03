@@ -84,6 +84,6 @@ def mol_from_networkx_graph(graph, mol_name, file_string):
 
 
 if __name__ == '__main__':
-    mol = mol_from_file(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands\new_ligands\phosphonate.smiles')
+    mol = mol_from_file(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands\phosphonate.smiles')
     print(mol)
     print(*mol.atoms, sep='\n')

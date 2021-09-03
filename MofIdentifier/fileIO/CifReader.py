@@ -72,22 +72,22 @@ def mof_from_cf(cf, filename, file_str):
         symmetry = cb['_symmetry_cell_setting']
     except KeyError:
         symmetry = None
-    length_a = float(cb['_cell_length_a'])
-    length_b = float(cb['_cell_length_b'])
-    length_c = float(cb['_cell_length_c'])
-    angle_alpha = float(cb['_cell_angle_alpha'])
-    angle_beta = float(cb['_cell_angle_beta'])
-    angle_gamma = float(cb['_cell_angle_gamma'])
+    length_a = extract_float(cb['_cell_length_a'])
+    length_b = extract_float(cb['_cell_length_b'])
+    length_c = extract_float(cb['_cell_length_c'])
+    angle_alpha = extract_float(cb['_cell_angle_alpha'])
+    angle_beta = extract_float(cb['_cell_angle_beta'])
+    angle_gamma = extract_float(cb['_cell_angle_gamma'])
 
     atom_data_loop = cb.GetLoop('_atom_site_label')
     atoms = list(())
     for atomData in atom_data_loop:
         # Modulus 1 to account for edge-case cif files with fractional values v where v < 0 or v > 1
-        a = float(atomData._atom_site_fract_x) % 1
+        a = extract_float(atomData._atom_site_fract_x) % 1
         a += 1 if a < 0 else 0
-        b = float(atomData._atom_site_fract_y) % 1
+        b = extract_float(atomData._atom_site_fract_y) % 1
         b += 1 if b < 0 else 0
-        c = float(atomData._atom_site_fract_z) % 1
+        c = extract_float(atomData._atom_site_fract_z) % 1
         c += 1 if c < 0 else 0
         atom = Atom.from_fractional(atomData._atom_site_label,
                                     atomData._atom_site_type_symbol,
@@ -96,9 +96,18 @@ def mof_from_cf(cf, filename, file_str):
     return MOF(file_path, atoms, symmetry, length_a, length_b, length_c, angle_alpha, angle_beta, angle_gamma, file_str)
 
 
+def extract_float(text):
+    paren_index = text.find('(')
+    if paren_index < 0:
+        return float(text)
+    else:
+        return float(text[0:paren_index])
+
+
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-    MOF = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\BAMKIM_clean.cif')
+    MOF = get_mof(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\mofsForTests\other_format'
+                  r'\c8ce00072g2.cif')
 
     print(MOF.has_metal)
     print(MOF.is_organic)
