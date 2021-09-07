@@ -6,3 +6,7 @@ if __name__ == '__main__':
         '--windowed',
         '-y'
     ])
+
+"""
+To make the dump folder, run mongodump.exe 
+"""

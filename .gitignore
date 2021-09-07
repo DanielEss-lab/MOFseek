@@ -5,3 +5,8 @@ venv/
 MofIdentifier/subbuilding/connector/
 MofIdentifier/subbuilding/auxiliary/
 MofIdentifier/subbuilding/cluster/
+build/
+dist/
+main.spec
+Start.spec
+MOFseek.spec

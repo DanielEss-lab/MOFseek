@@ -41,6 +41,7 @@ def restore_wildcards(mol):
             atom.label = atom.label.replace(atom.type_symbol, WILD_RESTORES[atom.type_symbol])
             atom.type_symbol = WILD_RESTORES[atom.type_symbol]
     for replacement, symbol in WILD_RESTORES.items():
+        mol.file_content = mol.file_content.replace(symbol, replacement)
         if replacement in mol.elementsPresent:
             mol.elementsPresent[symbol] = mol.elementsPresent[replacement]
             mol.elementsPresent.pop(replacement)
