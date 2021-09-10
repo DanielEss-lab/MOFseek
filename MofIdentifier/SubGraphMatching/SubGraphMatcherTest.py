@@ -7,12 +7,15 @@ from MofIdentifier.fileIO import XyzReader, CifReader, LigandReader
 class StrongFindLigandInMofTest(unittest.TestCase):
 
     def test_single_atom(self):
+        closed_carbon = XyzReader.get_molecule('../ligands/test_resources/SingleClosedCarbon.xyz')
         carbon = XyzReader.get_molecule('../ligands/test_resources/SingleCarbon.xyz')
         iron = XyzReader.get_molecule('../ligands/test_resources/SingleIron.xyz')
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(carbon, carbon), "Carbon should be subgraph of Carbon")
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(iron, iron), "Iron should be subgraph of Iron")
         self.assertEqual(False, SubGraphMatcher.find_ligand_in_mof(carbon, iron), "Carbon should not be subgraph of Iron")
         self.assertEqual(False, SubGraphMatcher.find_ligand_in_mof(iron, carbon), "Iron should not be subgraph of Carbon")
+        self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(closed_carbon, carbon))
+        self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(closed_carbon, closed_carbon))
 
     def test_atom_in_ligand(self):
         carbon = XyzReader.get_molecule('../ligands/test_resources/SingleCarbon.xyz')
@@ -52,14 +55,6 @@ class StrongFindLigandInMofTest(unittest.TestCase):
         self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(H2O_2, H20_good_ex), "Should find match in structures")
         self.assertEqual(False, SubGraphMatcher.find_ligand_in_mof(H2O_1, H20_bad_ex), "Should not find match in structures")
         self.assertEqual(False, SubGraphMatcher.find_ligand_in_mof(H2O_2, H20_bad_ex), "Should not find match in structures")
-
-    def test_percent_sign_WCA(self):
-        # To match metals only
-        m6 = XyzReader.get_molecule('../ligands/M6_node.xyz')
-        m6_fe = XyzReader.get_molecule('../ligands/test_resources/M6_node_compact.xyz')
-        m6_bad = XyzReader.get_molecule('../ligands/test_resources/contains_M6_node_bad.xyz')
-        self.assertEqual(True, SubGraphMatcher.find_ligand_in_mof(m6, m6_fe), "Should find match in structures")
-        self.assertEqual(False, SubGraphMatcher.find_ligand_in_mof(m6, m6_bad), "Should not find match in structures")
 
     def test_single_metal_WCA(self):
         # To match any metal
@@ -111,7 +106,7 @@ class WeakSubGraphMatcherTest(unittest.TestCase):
 class SubGraphMatcherTest(unittest.TestCase):
 
     def test_dynamic_matching(self):
-        smile_benzene = LigandReader.get_mol_from_file('../ligands/Benzene.smiles')
+        smile_benzene = LigandReader.get_mol_from_file('../ligands/test_resources/Benzene.smiles')
         smile_full_benzene = LigandReader.get_mol_from_file('../ligands/test_resources/FullBenzene.smiles')
         xyz_benzene = LigandReader.get_mol_from_file('../ligands/test_resources/BenzeneBase.xyz')
         mof_808 = CifReader.get_mof('../mofsForTests/smod7-pos-1.cif')
@@ -119,6 +114,7 @@ class SubGraphMatcherTest(unittest.TestCase):
         self.assertTrue(SubGraphMatcher.find_ligand_in_mof(smile_benzene, mof_808), 'Should find match')
         self.assertTrue(SubGraphMatcher.find_ligand_in_mof(xyz_benzene, mof_808), 'Should find match')
         self.assertFalse(SubGraphMatcher.find_ligand_in_mof(smile_full_benzene, mof_808), 'Should not find match')
+
 
 class SetAssignmentTest(unittest.TestCase):
 
@@ -135,6 +131,37 @@ class SetAssignmentTest(unittest.TestCase):
         result = SubGraphMatcher.name_molecules_from_set([conn_59], [conn_61])
         self.assertEqual(0, len(result[0]))  # unrecognized molecules
         self.assertEqual(1, len(result[1]))  # recognized molecules
+
+
+class ConstrainedAndOpenAtomsTest(unittest.TestCase):
+
+    def test_constrained_phosphate_in_mof(self):
+        mof = CifReader.get_mof('../mofsForTests/ABETAE_clean.cif')
+        smiles_ligand = LigandReader.get_mol_from_string('[O][P]([O])([O])[O]', 'PO4_all_closed')
+        xyz_ligand = LigandReader.get_mol_from_file('../ligands/test_resources/PO4_all_closed.xyz')
+        self.assertFalse(SubGraphMatcher.find_ligand_in_mof(smiles_ligand, mof))
+        self.assertFalse(SubGraphMatcher.find_ligand_in_mof(xyz_ligand, mof))
+
+    def test_partially_constrained_phosphate_in_mof(self):
+        mof = CifReader.get_mof('../mofsForTests/ABETAE_clean.cif')
+        smiles_ligand = LigandReader.get_mol_from_string('[O`][P]([O`])([O`])[O`]', 'PO4')
+        xyz_ligand = LigandReader.get_mol_from_file('../ligands/test_resources/PO4.xyz')
+        self.assertTrue(SubGraphMatcher.find_ligand_in_mof(smiles_ligand, mof))
+        self.assertTrue(SubGraphMatcher.find_ligand_in_mof(xyz_ligand, mof))
+
+    def test_wrongly_constrained_phosphate_in_mof(self):
+        mof = CifReader.get_mof('../mofsForTests/ABETAE_clean.cif')
+        smiles_ligand = LigandReader.get_mol_from_string('[O][P`]([O])([O])[O]', 'PO4_all_closed')
+        xyz_ligand = LigandReader.get_mol_from_file('../ligands/test_resources/PO4_P_open.xyz')
+        self.assertFalse(SubGraphMatcher.find_ligand_in_mof(smiles_ligand, mof))
+        self.assertFalse(SubGraphMatcher.find_ligand_in_mof(xyz_ligand, mof))
+
+    def test_open_phosphate_in_mof(self):
+        mof = CifReader.get_mof('../mofsForTests/ABETAE_clean.cif')
+        smiles_ligand = LigandReader.get_mol_from_string('[O`][P`]([O`])([O`])[O`]', 'PO4')
+        xyz_ligand = LigandReader.get_mol_from_file('../ligands/test_resources/PO4_all_open.xyz')
+        self.assertTrue(SubGraphMatcher.find_ligand_in_mof(smiles_ligand, mof))
+        self.assertTrue(SubGraphMatcher.find_ligand_in_mof(xyz_ligand, mof))
 
 
 if __name__ == '__main__':

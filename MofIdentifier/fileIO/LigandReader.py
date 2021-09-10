@@ -13,7 +13,7 @@ def get_mol_from_file(filepath):
         return None
 
 
-def get_mol_from_string(string, name):
+def get_mol_from_string(string: str, name: str):
     if len(string.split('\n')) > 1:
         return XyzReader.get_molecule_from_string(string, name)
     else:

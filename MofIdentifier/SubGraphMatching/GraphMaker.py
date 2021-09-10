@@ -4,7 +4,7 @@ import igraph  # currently python-igraph in repositories
 def graph_from_mol(molecule):
     graph = igraph.Graph()
     for atom in molecule.atoms:
-        graph.add_vertex(atom.label, element=atom.type_symbol)
+        graph.add_vertex(atom.label, element=atom.type_symbol, is_bond_limited=atom.is_bond_limited)
     for atom in molecule.atoms:
         for bonded_atom in atom.bondedAtoms:
             while not bonded_atom.is_in_unit_cell():
@@ -18,7 +18,7 @@ def hydrogenless_graph_from_mol(molecule):
     graph = igraph.Graph()
     for atom in molecule.atoms:
         if atom.type_symbol != 'H':
-            graph.add_vertex(atom.label, element=atom.type_symbol)
+            graph.add_vertex(atom.label, element=atom.type_symbol, is_bond_limited=atom.is_bond_limited)
     for atom in molecule.atoms:
         if atom.type_symbol != 'H':
             for bonded_atom in atom.bondedAtoms:

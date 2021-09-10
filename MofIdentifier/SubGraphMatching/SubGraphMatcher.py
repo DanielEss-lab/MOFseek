@@ -20,16 +20,20 @@ def timed_vertices_are_equal(start):
         if start != 0 and time.time() - start > 20:
             print('VF2 Algorithm got stuck (somehow); exiting early')
             # return False
+        if g2.vs[i2]['is_bond_limited']:  # or g1.vs[i1]['is_bond_limited']:
+            if len(g1.neighbors(i1)) != len(g2.neighbors(i2)):
+                return False
         elem_1 = g1.vs[i1]['element']
-        elem_1 = elem_1[0] if len(elem_1) > 1 and elem_1[1].isnumeric() else elem_1
+        elem_1 = elem_1[0] if len(elem_1) > 1 and elem_1[-1].isnumeric() else elem_1
         elem_2 = g2.vs[i2]['element']
-        elem_2 = elem_2[0] if len(elem_2) > 1 and elem_2[1].isnumeric() else elem_2
+        elem_2 = elem_2[0] if len(elem_2) > 1 and elem_2[-1].isnumeric() else elem_2
         result = elem_1 == elem_2 \
                  or elem_1 == '*' or elem_2 == '*' \
                  or (elem_1 == '%' and atom.is_metal(elem_2)) or (elem_2 == '%' and atom.is_metal(elem_1)) \
                  or (elem_1 == '#' and (elem_2 == 'H' or elem_2 == 'C')) or (
                          elem_2 == '#' and (elem_1 == 'H' or elem_1 == 'C'))
         return result
+
     return vertices_are_equal
 
 
@@ -108,11 +112,24 @@ def mol_are_isomorphic(mol_1, mol_2):
     return match
 
 
+def vertices_near_equal(g1, g2, i1, i2):
+    elem_1 = g1.vs[i1]['element']
+    elem_1 = elem_1[0] if len(elem_1) > 1 and elem_1[-1].isnumeric() else elem_1
+    elem_2 = g2.vs[i2]['element']
+    elem_2 = elem_2[0] if len(elem_2) > 1 and elem_2[-1].isnumeric() else elem_2
+    result = elem_1 == elem_2 \
+             or elem_1 == '*' or elem_2 == '*' \
+             or (elem_1 == '%' and atom.is_metal(elem_2)) or (elem_2 == '%' and atom.is_metal(elem_1)) \
+             or (elem_1 == '#' and (elem_2 == 'H' or elem_2 == 'C')) or (
+                     elem_2 == '#' and (elem_1 == 'H' or elem_1 == 'C'))
+    return result
+
+
 def mol_near_isomorphic(mol_1, mol_2):
     graph_a = mol_1.get_hydrogenless_graph()
     graph_b = mol_2.get_hydrogenless_graph()
     if graph_a.vcount() != graph_b.vcount():
         return False
-    match = (graph_a.subisomorphic_vf2(graph_b, node_compat_fn=timed_vertices_are_equal(time.time()))
-             or graph_b.subisomorphic_vf2(graph_a, node_compat_fn=timed_vertices_are_equal(time.time())))
+    match = (graph_a.subisomorphic_vf2(graph_b, node_compat_fn=vertices_near_equal)
+             or graph_b.subisomorphic_vf2(graph_a, node_compat_fn=vertices_near_equal))
     return match

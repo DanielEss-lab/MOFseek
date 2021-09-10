@@ -63,6 +63,7 @@ class Atom:
         self.z = z
         self.bondedAtoms = list(())
         self.original = None  # Used when an atom is copied outside of unit cell
+        self.is_bond_limited = False
 
     @classmethod
     def from_cartesian(cls, label, type_symbol, x, y, z, mof=None):

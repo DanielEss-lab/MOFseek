@@ -38,11 +38,19 @@ def get_atoms(file_like):
     atoms = list(())
     index = 0
     for atomData in molecule.values:
-        atom = Atom.from_cartesian(atomData[0] + str(index),
-                                   atomData[0],
+        symbol: str = atomData[0]
+        if symbol.endswith('`'):
+            symbol = symbol[0:-1]
+            explicitly_open_to_more_bonds = True
+        else:
+            explicitly_open_to_more_bonds = False
+        atom = Atom.from_cartesian(symbol + str(index),
+                                   symbol,
                                    float(atomData[1]),
                                    float(atomData[2]),
                                    float(atomData[3]))
+        if not explicitly_open_to_more_bonds:
+            atom.is_bond_limited = True
         atoms.append(atom)
         index += 1
     return atoms

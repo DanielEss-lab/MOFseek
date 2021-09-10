@@ -90,7 +90,7 @@ data = {
     'Ac': 215,
     'Th': 206,
     'Pa': 200,
-    'U': 176,
+    'U': 166,
     'Np': 190,
     'Pu': 187,
     'Am': 180,
@@ -112,11 +112,17 @@ data = {
     'Rg': 121,
     'Cn': 122,
     'Uut': 136,
+    'Nh': 136,
     'Uuq': 143,
+    'Fl': 143,
     'Uup': 162,
+    'Mc': 162,
     'Uuh': 175,
+    'Lv': 175,
     'Uus': 165,
+    'Ts': 165,
     'Uuo': 157,
+    'Og': 157,
     '#': 110,
     '*': 170,
     '%': 170,
@@ -128,6 +134,6 @@ def lookup(symbol):
 
 
 if __name__ == '__main__':
-    radius_1 = lookup('O')
-    radius_2 = lookup('C')
+    radius_1 = lookup('U')
+    radius_2 = lookup('P')
     print((radius_1 + radius_2) * 1.11 + 0.05)
