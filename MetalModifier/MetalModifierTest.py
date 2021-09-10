@@ -179,6 +179,13 @@ class ChangeMetalTest(unittest.TestCase):
         self.assertEqual(0, count_node_protons(new_mof))
         os.remove(r'TestResources/smod7-one-node-temp-0-d.cif')
 
+    def test_Zr_to_Nb_in_mof_with_whitespace(self):
+        replace_metal(r'TestResources/mof808_cellopt_pbesol-pos-final.cif',
+                      r'TestResources/mof808_cellopt_pbesol_Nb.cif', 'Nb')
+        new_mof = CifReader.get_mof(r'TestResources/mof808_cellopt_pbesol_Nb.cif')
+        self.assertTrue('Nb' in new_mof.atoms_string())
+        self.assertEqual(protons_needed('Nb'), count_node_protons(new_mof))
+
 
 
 if __name__ == '__main__':

@@ -413,7 +413,7 @@ def get_file_content_without_atoms(file_content, atoms_to_delete):
     line_index = 0
     while line_index < len(file_lines):
         line = file_lines[line_index]
-        if any(line.startswith(atom.label + ' ') for atom in atoms_to_delete):
+        if any((atom.label + ' ') in line for atom in atoms_to_delete):
             file_lines.pop(line_index)
         else:
             line_index += 1
