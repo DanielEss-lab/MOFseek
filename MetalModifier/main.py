@@ -16,7 +16,7 @@ def replace_metal(input_cif_file_path, output_cif_file_path, new_metal_symbol):
     clusters = SBUIdentifier.split(mof, True).nodes_with_auxiliaries()
     clusters = [cluster for cluster in clusters if len(cluster[0].atoms) > 1]
     assert (len(clusters) > 0)
-    assert (all(cluster[0] == clusters[0][0] for cluster in clusters))
+    # assert (all(cluster[0] == clusters[0][0] for cluster in clusters))
     num_protons = count_added_protons(clusters[0])
     previous_metal_symbol = get_metal_of_node(clusters[0][0])
     if num_protons > num_needed:
@@ -42,6 +42,17 @@ def replace_metal(input_cif_file_path, output_cif_file_path, new_metal_symbol):
 
     with open(output_cif_file_path, "w") as f:
         f.write(file_content)
+
+    mof = CifReader.get_mof(output_cif_file_path)
+    clusters = SBUIdentifier.split(mof, True).nodes_with_auxiliaries()
+    clusters = [cluster for cluster in clusters if len(cluster[0].atoms) > 1]
+    for index, cluster in enumerate(clusters):
+        print(f"\ncluster {index}")
+        for atom in cluster[0].atoms:
+            print(atom.label)
+        for aux in cluster[1]:
+            for atom in aux.atoms:
+                print(atom.label)
 
 
 def protons_needed(new_metal_symbol):
@@ -284,7 +295,7 @@ def get_relevant_group_5_atoms(cluster, mof):
 
 
 def get_atoms_to_delete(cluster, mof, num_to_delete):
-    group_by_atom = index_atoms(cluster)
+    group_by_atom = index_atoms(cluster)  # each atom points to the node or to the atom's containing aux group
     group_4 = get_relevant_group_4_atoms(cluster).delete_atoms
     remove_from_cluster(group_by_atom, group_4, mof)
     group_5 = get_relevant_group_5_atoms(cluster, mof).delete_atoms

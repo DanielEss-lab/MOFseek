@@ -2,6 +2,7 @@ from pysmiles import read_smiles
 
 from MofIdentifier.Molecules.Ligand import Ligand
 from MofIdentifier.Molecules.atom import Atom
+from MofIdentifier.SubGraphMatching import CustomWildcard
 
 OPEN_MARK_REPLACEMENT = 'z'
 H_REPLACEMENT = 'Hh'
@@ -113,7 +114,10 @@ def mol_from_networkx_graph(graph, mol_name, file_string):
             adj_elem = str(adj[1])[:-1] if str(adj[1]).endswith(OPEN_MARK_REPLACEMENT) else str(adj[1])
             adj_name = adj_elem + str(adj[0])
             atom.bondedAtoms.append(atoms[adj_name])
-    molecule = Ligand(mol_name, list(atoms.values()), file_string)
+
+    wildcards_line = file_string.split('\n')[1]
+    wildcards = CustomWildcard.WC.parse_line(wildcards_line)
+    molecule = Ligand(mol_name, list(atoms.values()), file_string, wildcards)
     return molecule
 
 

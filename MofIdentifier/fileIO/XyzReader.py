@@ -6,6 +6,7 @@ import pandas as pd
 
 from MofIdentifier.Molecules.Ligand import Ligand
 from MofIdentifier.Molecules.atom import Atom
+from MofIdentifier.SubGraphMatching import CustomWildcard
 from MofIdentifier.fileIO import XyzBondCreator
 
 
@@ -24,12 +25,16 @@ def get_molecule_from_string(string, name):
 def read_xyz(file):
     atoms = get_atoms(file)
     file_str = Path(file).read_text()
-    return Ligand(file, atoms, file_str)
+    wildcards_line = file_str.split('\n')[1]
+    wildcards = CustomWildcard.WC.parse_line(wildcards_line)
+    return Ligand(file, atoms, file_str, wildcards)
 
 
 def read_string(file_content, name):
+    wildcards_line = file_content.split('\n')[1]
+    wildcards = CustomWildcard.WC.parse_line(wildcards_line)
     atoms = get_atoms(StringIO(file_content))
-    return Ligand(name, atoms, file_content)
+    return Ligand(name, atoms, file_content, wildcards)
 
 
 def get_atoms(file_like):
