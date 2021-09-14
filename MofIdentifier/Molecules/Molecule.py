@@ -3,6 +3,7 @@ from MofIdentifier.SubGraphMatching import GraphMaker
 
 class Molecule:
     def __init__(self, filepath, atoms, igraph=None, weak_comparison_enabled=False):
+        self.unique_wildcards = None
         self.filepath = filepath
         slice_index = max(filepath.rfind('\\'), filepath.rfind('/'))
         if slice_index > -1:

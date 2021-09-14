@@ -56,7 +56,7 @@ def find_ligand_in_mof(ligand, mof):
         raise Exception('Every atom in the ligand must be connected to a single molecule; try tweaking the input file '
                         'and try again.')
     mGraph = mof.get_graph()
-    if not all(element_in_mof(element, mof) for element in ligand.elementsPresent):
+    if not all(element_in_mof(element, mof) for element in ligand.concrete_elements_present()):
         return False
     start = time.time()
     mof_contains_ligand = \

@@ -9,3 +9,10 @@ class Ligand(Molecule.Molecule):
 
     def __str__(self):
         return "{} ligand".format(self.label)
+
+    def concrete_elements_present(self):
+        elements = set(self.elementsPresent.keys())
+        for element in self.elementsPresent:
+            if (element == wc.symbol for wc in self.unique_wildcards) or element in '#%*':
+                elements.remove(element)
+        return elements

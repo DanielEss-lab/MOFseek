@@ -8,7 +8,8 @@ OPEN_MARK_REPLACEMENT = 'z'
 H_REPLACEMENT = 'Hh'
 WILD_REPLACEMENTS = {'*': 'Aa',
                      '%': 'Pq',
-                     '#': 'Py'}
+                     '#': 'Py',
+                     'Wc': 'J'}
 WILD_RESTORES = {v: k for k, v in WILD_REPLACEMENTS.items()}
 
 pysmiles_organic_subset = 'B C N O P S F Cl Br I * b c n o s p'.split()
@@ -16,8 +17,8 @@ pysmiles_organic_subset = 'B C N O P S F Cl Br I * b c n o s p'.split()
 
 def mol_from_file(filepath):
     with open(filepath, 'r') as file:
-        line = file.readline()
-    return mol_from_str(line, filepath)
+        string = file.read()
+    return mol_from_str(string, filepath)
 
 
 def convert_mol_to_h(mol):
@@ -43,17 +44,27 @@ def restore_wildcards(mol):
         elif atom.type_symbol == H_REPLACEMENT:
             atom.label = atom.label.replace(H_REPLACEMENT, 'H')
             atom.type_symbol = 'H'
-    for replacement, symbol in WILD_RESTORES.items():
-        if replacement in mol.elementsPresent:
-            mol.elementsPresent[symbol] = mol.elementsPresent[replacement]
-            mol.elementsPresent.pop(replacement)
-    if H_REPLACEMENT in mol.elementsPresent:
-        mol.elementsPresent['H'] = mol.elementsPresent[H_REPLACEMENT]
-        mol.elementsPresent.pop(H_REPLACEMENT)
+        elif 'J' in atom.type_symbol:
+            atom.label = atom.label.replace('J', 'Wc')
+            first_digit_index = 2 if atom.label[2].isdigit() else 3
+            atom.type_symbol = atom.label[0:first_digit_index]
+    elements_to_check = set(mol.elementsPresent.keys())
+    for elem in elements_to_check:
+        symbol = WILD_RESTORES.get(elem, None)
+        if symbol is not None:
+            mol.elementsPresent[symbol] = mol.elementsPresent[elem]
+            mol.elementsPresent.pop(elem)
+        elif elem == H_REPLACEMENT:
+            mol.elementsPresent['H'] = mol.elementsPresent[H_REPLACEMENT]
+            mol.elementsPresent.pop(H_REPLACEMENT)
+        elif 'J' in elem:
+            symbol = elem.replace('J', 'Wc')
+            mol.elementsPresent[symbol] = mol.elementsPresent[elem]
+            mol.elementsPresent.pop(elem)
 
 
 def mol_from_str(string, mol_name=None):
-    for special in WILD_REPLACEMENTS:
+    for special in WILD_REPLACEMENTS.values():
         if special in string:
             raise Exception(f'{special} not allowed in smiles text')
     if H_REPLACEMENT in string:
@@ -74,6 +85,7 @@ def mol_from_str(string, mol_name=None):
 
 
 def processable_smiles(string):
+    string = string.split('\n')[0]
     string = remove_wildcards(string)
     string = string.replace('H', H_REPLACEMENT)
     string = string.replace('`', OPEN_MARK_REPLACEMENT)  # The Smiles interpreter doesn't handle ` but does handle z
@@ -114,9 +126,11 @@ def mol_from_networkx_graph(graph, mol_name, file_string):
             adj_elem = str(adj[1])[:-1] if str(adj[1]).endswith(OPEN_MARK_REPLACEMENT) else str(adj[1])
             adj_name = adj_elem + str(adj[0])
             atom.bondedAtoms.append(atoms[adj_name])
-
-    wildcards_line = file_string.split('\n')[1]
-    wildcards = CustomWildcard.WC.parse_line(wildcards_line)
+    if '\n' in file_string:
+        wildcards_line = file_string.split('\n')[1]
+        wildcards = CustomWildcard.WC.parse_line(wildcards_line)
+    else:
+        wildcards = None
     molecule = Ligand(mol_name, list(atoms.values()), file_string, wildcards)
     return molecule
 

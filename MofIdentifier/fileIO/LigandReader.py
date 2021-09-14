@@ -14,7 +14,7 @@ def get_mol_from_file(filepath):
 
 
 def get_mol_from_string(string: str, name: str):
-    if len(string.split('\n')) > 1:
+    if len(string.split('\n')) > 2:
         return XyzReader.get_molecule_from_string(string, name)
     else:
         return SmilesReader.mol_from_str(string, name)

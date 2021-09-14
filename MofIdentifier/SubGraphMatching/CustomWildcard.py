@@ -12,12 +12,12 @@ class WC:
     def matches(self, element):
         if self.should_match:
             return element in self.elements
-        else:
+        else:  # a not was specified in creating the wildcard
             return element not in self.elements
 
     @classmethod
     def parse_line(cls, line):
-        wildcards = []
+        wildcards = dict()
         sections = line.split(';')
         for section in sections:
             section = "".join(section.split())  # remove all whitespace
@@ -29,5 +29,5 @@ class WC:
                 is_inverted = False
             elements = section.split(',')
             wildcard = WC(symbol, not is_inverted, elements)
-            wildcards.append(wildcard)
+            wildcards[symbol] = wildcard
         return wildcards
