@@ -37,7 +37,7 @@ def add_test_ligands(directory):
 
 
 def create_indices():
-    DBConnection.cif_collection.create_index("filename", unique=True)
+    DBConnection.mof_collection.create_index("filename", unique=True)
     DBConnection.ligand_collection.create_index("ligand_name", unique=True)
     DBConnection.sbu_collection.create_index("sbu_name", unique=True)
 

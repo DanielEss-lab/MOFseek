@@ -133,7 +133,7 @@ def lookup(symbol):
     try:
         return data[symbol] / 100
     except KeyError:
-        return 1.70
+        return 1.60
 
 
 if __name__ == '__main__':

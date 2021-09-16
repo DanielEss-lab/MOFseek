@@ -15,10 +15,10 @@ class TestWC(TestCase):
         self.assertFalse(Wc2.matches('H'))
 
     def test_parse_line(self):
-        expected = [CustomWildcard.WC('Wca', True, ['Cd', 'Ca', 'Fe']),
-                    CustomWildcard.WC('Wcb', False, ['H'])]
+        expected = {'Wca': CustomWildcard.WC('Wca', True, ['Cd', 'Ca', 'Fe']),
+                    'Wcb': CustomWildcard.WC('Wcb', False, ['H'])}
         wildcards = CustomWildcard.WC.parse_line("Wca=Cd,Ca,Fe;Wcb=notH")
-        self.assertEqual(expected, wildcards)
+        self.assertCountEqual(expected, wildcards)
 
     def test_ligand_within_mof(self):
         mof = CifReader.get_mof('../mofsForTests/smod7-pos-1.cif')

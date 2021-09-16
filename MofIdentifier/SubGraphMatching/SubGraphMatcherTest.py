@@ -163,6 +163,22 @@ class ConstrainedAndOpenAtomsTest(unittest.TestCase):
         self.assertTrue(SubGraphMatcher.find_ligand_in_mof(smiles_ligand, mof))
         self.assertTrue(SubGraphMatcher.find_ligand_in_mof(xyz_ligand, mof))
 
+    def test_open_O_sites_in_mofs(self):
+        containing_mof = CifReader.get_mof('../mofsForTests/smod7-pos-1.cif')
+        # other_mof = CifReader.get_mof('../mofsForTests/smod7-pos-1.cif')
+        one_wild_smiles = LigandReader.get_mol_from_file('../ligands/test_resources/O_by_one_non_H.smiles')
+        one_wild_xyz = LigandReader.get_mol_from_file('../ligands/test_resources/O_by_one_non_H.xyz')
+        two_wild_smiles = LigandReader.get_mol_from_file('../ligands/test_resources/O_by_two_non_H.smiles')
+        two_wild_xyz = LigandReader.get_mol_from_file('../ligands/test_resources/O_by_two_non_H.xyz')
+        self.assertTrue(SubGraphMatcher.find_ligand_in_mof(one_wild_smiles, containing_mof))
+        self.assertTrue(SubGraphMatcher.find_ligand_in_mof(one_wild_xyz, containing_mof))
+        self.assertTrue(SubGraphMatcher.find_ligand_in_mof(two_wild_smiles, containing_mof))
+        self.assertTrue(SubGraphMatcher.find_ligand_in_mof(two_wild_xyz, containing_mof))
+        # self.assertFalse(SubGraphMatcher.find_ligand_in_mof(one_wild_smiles, other_mof))
+        # self.assertFalse(SubGraphMatcher.find_ligand_in_mof(one_wild_xyz, other_mof))
+        # self.assertFalse(SubGraphMatcher.find_ligand_in_mof(two_wild_smiles, other_mof))
+        # self.assertFalse(SubGraphMatcher.find_ligand_in_mof(two_wild_xyz, other_mof))
+
 
 if __name__ == '__main__':
     unittest.main()

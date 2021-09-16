@@ -1,11 +1,12 @@
 import unittest
 
-from DAO import MOFDAO
+from DAO import MOFDAO, DBConnection
 from MofIdentifier.fileIO import CifReader
 
 
 class MOFDAOTest(unittest.TestCase):
     def test_put_and_get(self):
+        DBConnection.use_test_connections()
         mof = CifReader.get_mof("../MofIdentifier/mofsForTests/smod7-pos-1.cif")
         MOFDAO.add_mof(mof)
         retrieved_mof = MOFDAO.get_MOF(mof.label)
@@ -13,6 +14,9 @@ class MOFDAOTest(unittest.TestCase):
         self.assertEqual(1, len(retrieved_mof.sbu_nodes))
 
     def test_get_and_store_value(self):
+        DBConnection.use_test_connections()
+        mof = CifReader.get_mof("../MofIdentifier/mofsForTests/smod7-pos-1.cif")
+        MOFDAO.add_mof(mof)
         retrieved_mof = MOFDAO.get_MOF('smod7-pos-1.cif')
         self.assertIsNotNone(retrieved_mof)
         unit_volume = retrieved_mof.unit_volume

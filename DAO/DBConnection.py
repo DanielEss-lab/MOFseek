@@ -13,6 +13,14 @@ if USE_ONLINE_SERVER:
 else:
     cluster = MongoClient('mongodb://localhost:27017/')
 database = cluster["Database"]
-cif_collection = database["test_"]
-ligand_collection = database["test_ligands_"]
-sbu_collection = database["test_sbus_"]
+mof_collection = database["mof"]
+ligand_collection = database["ligand"]
+sbu_collection = database["sbu"]
+
+
+def use_test_connections():
+    global mof_collection, ligand_collection, sbu_collection
+    database = cluster["TestDatabase"]
+    mof_collection = database["mof"]
+    ligand_collection = database["ligand"]
+    sbu_collection = database["sbu"]

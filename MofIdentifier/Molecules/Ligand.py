@@ -5,7 +5,7 @@ class Ligand(Molecule.Molecule):
     def __init__(self, filepath, atoms, file_string, wildcards=None):
         self.file_content = file_string
         super().__init__(filepath, atoms)
-        self.unique_wildcards = wildcards
+        self.unique_wildcards = wildcards if wildcards is not None else dict()
 
     def __str__(self):
         return "{} ligand".format(self.label)

@@ -1,6 +1,6 @@
 from DAO.LigandDatabase import LigandDatabase
 from DAO.MOFDatabase import MOFDatabase
-from DAO.DBConnection import cif_collection, ligand_collection
+from DAO.DBConnection import mof_collection, ligand_collection
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import LigandReader
 
@@ -23,13 +23,13 @@ def add_ligand_to_db_from_filepath(ligand_file_path):
 def _read_ligand(ligand_file):
     matched_mof_names = []
     i = 0
-    for document in cif_collection.find():
+    for document in mof_collection.find():
         mof = MOFDatabase(document)
         if mof.file_content is not None:
             if SubGraphMatcher.find_ligand_in_mof(ligand_file, mof.get_mof()):
                 i += 1
                 matched_mof_names.append(mof.filename)
-                cif_collection.update_one({"filename": mof.filename}, {"$addToSet": {"ligand_names": ligand_file.label}})
+                mof_collection.update_one({"filename": mof.filename}, {"$addToSet": {"ligand_names": ligand_file.label}})
     print(f"{ligand_file.label} found in {i} mofs")
     ligand_for_database = LigandDatabase(ligand_file.label, ligand_file.file_content, matched_mof_names)
 
@@ -73,7 +73,7 @@ def scan_all_for_mof(mof):
             if mof_name.endswith('.cif'):
                 mof_name = mof_name[:-4]
             ligand_collection.update_one({"ligand_name": ligand.name}, {"$addToSet": {"MOFs": mof_name}})
-            cif_collection.update_one({"filename": ligand.name}, {"$addToSet": {"ligand_names": mof_name}})
+            mof_collection.update_one({"filename": ligand.name}, {"$addToSet": {"ligand_names": mof_name}})
             ligands.append(ligand.name)
     return ligands
 
