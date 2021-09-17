@@ -42,6 +42,10 @@ def _read_ligand(ligand_file):
     return ligand_for_database
 
 
+def _delete_ligand(old_name):
+    ligand_collection.delete_one({"ligand_name": old_name})
+
+
 def get_all_names():
     names = list()
     try:

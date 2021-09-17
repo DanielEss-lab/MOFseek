@@ -2,9 +2,10 @@ import tkinter as tk
 
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess, StyledButton
 from GUI.Views import MoleculeView
-from DAO import LigandDAO, RenameService
+from DAO import LigandDAO, RenameService, DeleteService
 
-instruction_text = """Renaming a ligand in the database takes several minutes, so please be patient."""
+instruction_text = """Renaming a ligand in the database takes a minute, so please be patient.\n
+To delete a ligand, rename it to 'trash' (all lowercase, no punctuation)."""
 
 
 class Page(FrameWithProcess.Frame):
@@ -34,10 +35,13 @@ class Page(FrameWithProcess.Frame):
         if self.mol is not None and self.mol.name == self.combobox.get():
             if new_name != '':
                 if new_name.find(' ') < 0 and new_name.find('.') < 0:
-                    self.combobox.set('')
-                    self.new_name_ent.delete(0, tk.END)
-                    new_name = new_name + self.extension_text['text']
-                    RenameService.rename_ligand(self.mol.name, new_name)
+                    if new_name == 'trash':
+                        DeleteService.delete_ligand(self.mol.name)
+                    else:
+                        self.combobox.set('')
+                        self.new_name_ent.delete(0, tk.END)
+                        new_name = new_name + self.extension_text['text']
+                        RenameService.rename_ligand(self.mol.name, new_name)
                     self.reload_ligands()
                 else:
                     self._show_error('Name cannot contain a period or a space')

@@ -79,6 +79,11 @@ def _rename_ligand(old_name, new_name):
     # TODO: test that this actually works
 
 
+def _delete_ligand(old_name):
+    mof_collection.update({}, {"$pull": {"ligand_names": old_name}})
+    # TODO: test that this actually works
+
+
 def _rename_sbu(old_name, new_name, sbu_type):
     mof_collection.update_many({"ligand_names": old_name}, {"$set": {"ligand_names.$": new_name}})
     # TODO: test that this actually works

@@ -8,10 +8,15 @@ from GUI.Views import LigandView
 from DAO import LigandDAO
 from MofIdentifier.fileIO import LigandReader
 
-instruction_text = """Choose from your computer a .xyz file or a .smiles plaintext file whose first line 
-is a SMILES string. It will be loaded onto the database and added to the ligand list of all MOFs that 
-contain it. The calculations, which happen as you add it, will take some time (expect 40-60 minutes), so 
-please be patient."""
+instruction_text = """Choose from your computer a .xyz file or a .smiles file (a plaintext file whose first line is a 
+SMILES string) containing information to represent a ligand. The program will calculate which mofs contain the 
+ligand, using only atom types and connections (not exact distances nor angles). In order to do so, it must know which 
+atoms in the ligand are meant to connect into the larger structure of the MOF and which atoms shouldn't have any 
+connections but the ones within the ligand itself. Put a ` symbol (the one above the tab button on most keyboards) 
+right after the atomic symbol of any atom that should be open to connecting into the larger structure; the program 
+will then allow that to have more bonds and it will require that any atoms not marked as such do not have more bonds; 
+see other ligand files for examples. The calculations, which happen as you upload the ligand, will take some time ( 
+expect 40-60 minutes), so please be patient. """
 
 instructions_text_2 = """Of note are certain wildcard symbols that can be used in place of element symbols when "
                             "creating ligand input files."""
