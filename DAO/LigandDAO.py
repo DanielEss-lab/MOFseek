@@ -15,6 +15,12 @@ def add_ligand_to_db(ligand):
         print("error: ", e.args)
 
 
+def get_ligand_iterator():
+    cursor = ligand_collection.find({})
+    generator = (LigandDatabase.from_dict(ligand_dict) for ligand_dict in cursor)
+    return generator
+
+
 def add_ligand_to_db_from_filepath(ligand_file_path):
     ligand_file = LigandReader.get_mol_from_file(ligand_file_path)
     add_ligand_to_db(ligand_file)
@@ -22,15 +28,15 @@ def add_ligand_to_db_from_filepath(ligand_file_path):
 
 def _read_ligand(ligand_file):
     matched_mof_names = []
-    i = 0
+    # i = 0
     for document in mof_collection.find():
         mof = MOFDatabase(document)
         if mof.file_content is not None:
             if SubGraphMatcher.find_ligand_in_mof(ligand_file, mof.get_mof()):
-                i += 1
+                # i += 1
                 matched_mof_names.append(mof.filename)
                 mof_collection.update_one({"filename": mof.filename}, {"$addToSet": {"ligand_names": ligand_file.label}})
-    print(f"{ligand_file.label} found in {i} mofs")
+    # print(f"{ligand_file.label} found in {i} mofs")
     ligand_for_database = LigandDatabase(ligand_file.label, ligand_file.file_content, matched_mof_names)
 
     return ligand_for_database

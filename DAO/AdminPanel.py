@@ -33,7 +33,12 @@ def add_test_ligands(directory):
             continue
         LigandDAO.add_ligand_to_db(ligand)
         done_ligands.append(ligand.label)
-    print(done_ligands)
+
+
+def add_ligands(directory):
+    ligands = LigandReader.get_all_mols_from_directory(directory)
+    for ligand in ligands:
+        LigandDAO.add_ligand_to_db(ligand)
 
 
 def create_indices():
@@ -80,30 +85,37 @@ def refresh_active_collections_to_test():
     delete_all()
     create_indices()
     if platform.system() == 'Windows':  # Windows
-        add_all_mofs(str(Path(r'/GUI/mofsForGui_temp')))
         add_test_ligands(str(Path(r'/MofIdentifier/ligands')))
+        add_all_mofs(str(Path(r'/GUI/mofsForGui_temp')))
         MOFDAO.add_csv_info('')
     elif platform.system() == 'Darwin':  # macOS
-        add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/test_mol')))
         add_test_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
+        add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/test_mol')))
         MOFDAO.add_csv_info('/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020_short.csv')
+    print_summary()
 
 
 def refresh_active_collections_to_full():
     delete_all()
     create_indices()
     fill_db()
+    print_summary()
+
+
+def print_summary():
     print(MOFDAO.get_num_mofs(), "mofs in DB now")
+    for ligand in LigandDAO.get_ligand_iterator():
+        print(f"{ligand.ligand_name} in {len(ligand.Mofs)} mofs")
 
 
 def fill_db():
     if platform.system() == 'Windows':  # Windows
-        # add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')))
-        add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
-        # MOFDAO.add_csv_info(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020.csv')
+        add_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
+        add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')))
+        MOFDAO.add_csv_info(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020.csv')
     elif platform.system() == 'Darwin':  # macOS
+        add_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
         add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
-        add_test_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
         MOFDAO.add_csv_info('/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020.csv')
 
 
@@ -130,8 +142,8 @@ if __name__ == '__main__':
     # fill_db()
     # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
     # speed_measure()
-    # refresh_active_collections_to_full()
+    refresh_active_collections_to_full()
     # LigandDAO.delete_unmatched_ligands()
     # add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
     # MOFDAO.add_csv_info(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020.csv')
-    add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands\new_ligands')))
+    # add_test_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands\new_ligands')))

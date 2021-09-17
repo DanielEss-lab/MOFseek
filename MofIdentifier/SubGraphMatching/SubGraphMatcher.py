@@ -28,9 +28,9 @@ def timed_vertices_are_equal(start, additional_wildcards):
         additional_wildcards = []
 
     def vertices_are_equal(g1, g2, i1, i2):
-        if start != 0 and time.time() - start > 20:
+        if start != 0 and time.time() - start > 40:
             print('VF2 Algorithm got stuck (somehow); exiting early')
-            # return False
+            return False
         if g2.vs[i2]['is_bond_limited']:
             if len(g1.neighbors(i1)) != len(g2.neighbors(i2)):
                 return False
