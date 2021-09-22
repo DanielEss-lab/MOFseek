@@ -8,30 +8,32 @@ from GUI.Views import LigandView
 from DAO import LigandDAO
 from MofIdentifier.fileIO import LigandReader
 
-instruction_text = """Choose from your computer a .xyz file or a .smiles file (a plaintext file whose first line is a 
+instruction_text = """Choose from your computer a .xyz file or a .smiles file (a plaintext file whose first line is a
 SMILES string) containing information to represent a ligand. The program will calculate which mofs contain the 
 ligand, using only atom types and connections (not exact distances nor angles). In order to do so, it must know which 
 atoms in the ligand are meant to connect into the larger structure of the MOF and which atoms shouldn't have any 
-connections but the ones within the ligand itself. Put a ` symbol (the one above the tab button on most keyboards) 
-right after the atomic symbol of any atom that should be open to connecting into the larger structure; the program 
-will then allow that to have more bonds and it will require that any atoms not marked as such do not have more bonds; 
-see other ligand files for examples. The calculations, which happen as you upload the ligand, will take some time ( 
-expect 40-60 minutes), so please be patient. """
+connections other than the ones within the ligand itself. Put a ` symbol (the one above the tab button on most 
+keyboards) right after the atomic symbol of any atom that should be open to connecting into the larger structure; the 
+program will then allow that marked symbols may have more bonds, and it will require that any atoms not marked as 
+such do not have more bonds; see other ligand files for examples. The calculations, which happen as you upload the 
+ligand, will take some time (expect 40-60 minutes), so please be patient."""
 
-instructions_text_2 = """Of note are certain wildcard symbols that can be used in place of element symbols when "
-                            "creating ligand input files."""
+instructions_text_2 = """To allow some flexibility in defining ligands, wildcards are allowed. We provide three
+wildcards (* to match anything, % to match metals, and # to match C and H only), and you can use the following format 
+in the second line of the file in order to define custom wildcards for your own use:<br><t>Wca = <comma separated list of 
+atomic symbols><br>Or, if it should match most elements with certain exceptions:<br><t>Wca = not <comma separated list of 
+atomic symbols><br>You can define multiple wildcards separated by semicolons, using Wca, Wcb, Wcc, Wcd, etc. for the 
+wildcard symbols. For example, a line may look like:<br><t>Wca=V,Nb,Ta,Db; Wcb=not H<br>Spaces and tabs are ignored."""
 
-instructions_text_3 = """For example, you can search for mofs that have water bonded to atoms other than metal by "
-                            "requiring a ligand that is a water molecule bonded to a * atom (see the provided "
-                            "H2O_bonded.xyz) and excluding a ligand that is a water molecule bonded to a % atom."""
+instructions_text_3 = """Wildcards in xyz files are usually correct, but an unknown atom has an unknown bond radius, 
+so sometimes the program has difficulty knowing which atoms it should be bonded to."""
 
-instructions_text_4 = """You can (optionally) put an integer after the wildcard symbol in order to specify the number of
-                         other molecules within the ligand to which it should be bonded. For example, the %4 in 
-                         M6_node.xyz means that each metal must be bonded to the 4 closest other atoms in the xyz file 
-                         (all Oxygen in this case), and may also be bonded to additional atoms outside the xyz file- 
-                         connectors, auxililary groups, water, etc."""
 
-"""Of note are certain wildcard symbols that can be used when creating ligand input files."""
+def line_correct(text):
+    text = ' '.join(text.split())
+    text = text.replace('<br>', '\n')
+    text = text.replace('<t>', '\t')
+    return text
 
 
 class AddLigandPage(FrameWithProcess.Frame):
@@ -40,25 +42,9 @@ class AddLigandPage(FrameWithProcess.Frame):
         super().__init__(self.parent, self.upload_ligand)
         self.mol = None
         self.molecule_v = None
-        instructions = tk.Label(self, text=instruction_text, justify=tk.LEFT)
-        instructions.pack()
-        tk.Label(self, text=instructions_text_2, justify=tk.LEFT).pack()
-        wildcard_instructions_grid = tk.Frame(self)
-        tk.Label(wildcard_instructions_grid, text='symbol').grid(sticky=tk.W, row=0, column=0)
-        tk.Label(wildcard_instructions_grid, text='use as wildcard').grid(sticky=tk.W, row=0, column=1)
-        tk.Label(wildcard_instructions_grid, text='assumed maximum covalent radius').grid(sticky=tk.W, row=0, column=2)
-        tk.Label(wildcard_instructions_grid, text='*').grid(sticky=tk.W, row=1, column=0)
-        tk.Label(wildcard_instructions_grid, text='matches all atoms').grid(sticky=tk.W, row=1, column=1)
-        tk.Label(wildcard_instructions_grid, text='1.7').grid(sticky=tk.W, row=1, column=2)
-        tk.Label(wildcard_instructions_grid, text='%').grid(sticky=tk.W, row=2, column=0)
-        tk.Label(wildcard_instructions_grid, text='matches metal atoms').grid(sticky=tk.W, row=2, column=1)
-        tk.Label(wildcard_instructions_grid, text='1.7').grid(sticky=tk.W, row=2, column=2)
-        tk.Label(wildcard_instructions_grid, text='#').grid(sticky=tk.W, row=3, column=0)
-        tk.Label(wildcard_instructions_grid, text='matches carbon and hydrogen atoms').grid(sticky=tk.W, row=3, column=1)
-        tk.Label(wildcard_instructions_grid, text='1.1').grid(sticky=tk.W, row=3, column=2)
-        wildcard_instructions_grid.pack()
-        tk.Label(self, text=instructions_text_3, justify=tk.LEFT).pack()
-        tk.Label(self, text=instructions_text_4, justify=tk.LEFT).pack()
+        self.label_of(instruction_text).pack()
+        self.label_of(instructions_text_2).pack()
+        self.label_of(instructions_text_3).pack()
         btn = StyledButton.make(self, 'Open Ligand', lambda: self.open_file())
         btn.pack()
         self.frm_ligand_preview = tk.Frame(self)
@@ -91,3 +77,13 @@ class AddLigandPage(FrameWithProcess.Frame):
             except:
                 self._show_error("Unable to extract a molecule from this file")
                 return
+
+    def label_of(self, text):
+        l = tk.Label(self, text=line_correct(text), justify=tk.LEFT, width=100, anchor=tk.W, pady=8)
+        l.bind("<Configure>", self.set_label_wrap)
+        return l
+
+    def set_label_wrap(self, event):
+        wraplength = event.width - 8
+        event.widget.configure(wraplength=wraplength)
+
