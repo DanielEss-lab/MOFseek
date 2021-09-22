@@ -1,10 +1,10 @@
 import tkinter as tk
 from pathlib import Path
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilenames
 
 from DAO.LigandDatabase import LigandDatabase
 from GUI.Utility import FrameWithProcess, StyledButton
-from GUI.Views import LigandView
+from GUI.Views import LigandView, MultiLigandView
 from DAO import LigandDAO
 from MofIdentifier.fileIO import LigandReader
 
@@ -16,17 +16,19 @@ connections other than the ones within the ligand itself. Put a ` symbol (the on
 keyboards) right after the atomic symbol of any atom that should be open to connecting into the larger structure; the 
 program will then allow that marked symbols may have more bonds, and it will require that any atoms not marked as 
 such do not have more bonds; see other ligand files for examples. The calculations, which happen as you upload the 
-ligand, will take some time (expect 40-60 minutes), so please be patient."""
+ligand, will take some time (expect 40-80 minutes per ligand), so please be patient."""
 
-instructions_text_2 = """To allow some flexibility in defining ligands, wildcards are allowed. We provide three
+instructions_text_2 = """To allow some flexibility in defining ligands, wildcards are allowed. We provide three 
 wildcards (* to match anything, % to match metals, and # to match C and H only), and you can use the following format 
-in the second line of the file in order to define custom wildcards for your own use:<br><t>Wca = <comma separated list of 
-atomic symbols><br>Or, if it should match most elements with certain exceptions:<br><t>Wca = not <comma separated list of 
-atomic symbols><br>You can define multiple wildcards separated by semicolons, using Wca, Wcb, Wcc, Wcd, etc. for the 
-wildcard symbols. For example, a line may look like:<br><t>Wca=V,Nb,Ta,Db; Wcb=not H<br>Spaces and tabs are ignored."""
+in the second line of the file in order to define custom wildcards for your own use:<br><t>Wca = <comma separated 
+list of atomic symbols><br>Or, if it should match most elements with certain exceptions:<br><t>Wca = not <comma 
+separated list of atomic symbols><br>You can define multiple wildcards separated by semicolons, using Wca, Wcb, Wcc, 
+Wcd, etc. for the wildcard symbols. For example, a line may look like:<br><t>Wca=V,Nb,Ta,Db; Wcb=not H<br>Spaces and 
+tabs are ignored. """
 
 instructions_text_3 = """Wildcards in xyz files are usually correct, but an unknown atom has an unknown bond radius, 
-so sometimes the program has difficulty knowing which atoms it should be bonded to."""
+so sometimes the program has difficulty knowing which atoms it should be bonded to. For this reason, using smiles is 
+recommended for complex ligands involving wildcards."""
 
 
 def line_correct(text):
@@ -40,43 +42,41 @@ class AddLigandPage(FrameWithProcess.Frame):
     def __init__(self, parent):
         self.parent = parent
         super().__init__(self.parent, self.upload_ligand)
-        self.mol = None
-        self.molecule_v = None
+        self.ligands = []
         self.label_of(instruction_text).pack()
         self.label_of(instructions_text_2).pack()
         self.label_of(instructions_text_3).pack()
-        btn = StyledButton.make(self, 'Open Ligand', lambda: self.open_file())
+        btn = StyledButton.make(self, 'Choose ligand(s)', lambda: self.open_files())
         btn.pack()
-        self.frm_ligand_preview = tk.Frame(self)
-        # LigandView.make_view()
-        self.frm_ligand_preview.pack()
-        self.add_btn = StyledButton.make(self, 'Add to DB', lambda: self.start_process(self.mol))
+        self.ligand_preview = MultiLigandView.View(self)
+        self.ligand_preview.pack()
+        self.add_btn = StyledButton.make(self, 'Add to DB', lambda: self.start_process(self.ligands))
         self.add_btn['state'] = "disabled"
         self.add_btn.pack()
 
     def upload_ligand(self, mol):
         self.add_btn['state'] = "disabled"
-        self.molecule_v.destroy()
-        if mol is not None:
+        if len(self.ligands) > 0:
             LigandDAO.add_ligand_to_db(mol)
-            print('done')
             self.winfo_toplevel().reload_ligands()
-        self.mol_for_db = None
+        self.ligands = []
 
-    def open_file(self):
-        filename = askopenfilename(filetypes=[('XYZ Files', '*.xyz'), ('SMILES Files', '*.smiles')])
-        if filename is not None and len(filename) > 0:
-            if self.molecule_v is not None:
-                self.molecule_v.destroy()
-            try:
-                self.mol = LigandReader.get_mol_from_file(str(Path(filename)))
-                fake_db_mol = LigandDatabase(self.mol.label, self.mol.file_content, [])
-                self.molecule_v = LigandView.View(self.frm_ligand_preview, fake_db_mol)
+    def open_files(self):
+        filenames = askopenfilenames(filetypes=[('XYZ Files', '*.xyz'), ('SMILES Files', '*.smiles')])
+        if filenames is not None and len(filenames) > 0:
+            self.ligands = []
+            ligands_for_display = []
+            for filename in filenames:
+                try:
+                    ligand = LigandReader.get_mol_from_file(str(Path(filename)))
+                    self.ligands.append(ligand)
+                    ligands_for_display.append(LigandDatabase(ligand.label, ligand.file_content, []))
+                except:
+                    self._show_error('Unable to extract molecule from ' + filename)
+
+            self.ligand_preview.display_results(ligands_for_display)
+            if len(ligands_for_display) > 0:
                 self.add_btn['state'] = "normal"
-                self.molecule_v.pack()
-            except:
-                self._show_error("Unable to extract a molecule from this file")
-                return
 
     def label_of(self, text):
         l = tk.Label(self, text=line_correct(text), justify=tk.LEFT, width=100, anchor=tk.W, pady=8)
