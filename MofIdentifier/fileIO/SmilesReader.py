@@ -136,7 +136,7 @@ def mol_from_networkx_graph(graph, mol_name, file_string):
 
 
 if __name__ == '__main__':
-    mol = mol_from_str('[O`][P`]([O`])([O`])[O`]', 'PO4')
+    mol = mol_from_str('[%][%]', 'MM')
     print(mol)
     print(mol.atoms[0].is_bond_limited)
     print(*mol.atoms, sep='\n')

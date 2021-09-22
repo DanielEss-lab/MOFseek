@@ -54,10 +54,11 @@ class AddLigandPage(FrameWithProcess.Frame):
         self.add_btn['state'] = "disabled"
         self.add_btn.pack()
 
-    def upload_ligand(self, mol):
+    def upload_ligand(self, ligands):
         self.add_btn['state'] = "disabled"
         if len(self.ligands) > 0:
-            LigandDAO.add_ligand_to_db(mol)
+            for ligand in ligands:
+                LigandDAO.add_ligand_to_db(ligand)
             self.winfo_toplevel().reload_ligands()
         self.ligands = []
 
