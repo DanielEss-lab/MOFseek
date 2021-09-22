@@ -5,7 +5,7 @@ import tkinter.font as tkFont
 import re
 from tkinter import ttk
 
-from GUI import Attributes
+from GUI import Attributes, Settings
 from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
 from GUI.Pages.Search.SearchTerms import SearchTerms
 from DAO import MOFDAO, SBUDAO, LigandDAO
@@ -157,7 +157,7 @@ class View(FrameWithProcess.Frame):
         self.attribute_row = tk.Frame(self)
         attribute_heading(self.attribute_row).pack(side='left')
         for name, attr in Attributes.attributes.items():
-            if attr.enabled:
+            if Settings.attribute_is_enabled[name]:
                 entry = make_attribute_entry(self.attribute_row, name, attr)
                 self.attribute_entries.append(entry)
                 entry.pack(side='left')

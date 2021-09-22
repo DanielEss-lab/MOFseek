@@ -108,7 +108,7 @@ class View(FrameWithProcess.Frame):
     def build_sort_options(self):
         sort_options = [self.default_sort_string]
         for name, attr in Attributes.attributes.items():
-            if attr.enabled and (attr.var_type is int or attr.var_type is float):
+            if Settings.attribute_is_enabled[name] and (attr.var_type is int or attr.var_type is float):
                 sort_options.append(name + ' | high first')
                 sort_options.append(name + ' | low first')
         return sort_options

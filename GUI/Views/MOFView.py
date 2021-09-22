@@ -118,12 +118,11 @@ class View(tk.Frame):
         row = tk.Frame(master=self, height=20)
         i = 0
         for text, attr in Attributes.attributes.items():
-            if attr.enabled:
+            if Settings.attribute_is_enabled[text]:
                 val = attr.calculate(self.mof)
                 if attr.var_type is bool and val is not None:
                     val = "True" if val else "False"
-                _attribute_view(row, text, val, attr.description).grid(column=i, row=0,
-                                                                                            sticky=tk.EW)
+                _attribute_view(row, text, val, attr.description).grid(column=i, row=0, sticky=tk.EW)
                 row.grid_columnconfigure(i, weight=1)
                 i += 1
         row.grid(sticky=tk.EW, row=1, columnspan=3)

@@ -3,6 +3,7 @@ import tkinter.filedialog as fd
 from tkinter import messagebox
 import shelve
 
+from GUI import Attributes
 
 with shelve.open("MOFseek_settings") as s:
     download_filepath = s.get("download_path", "")
@@ -13,6 +14,10 @@ with shelve.open("MOFseek_settings") as s:
     allow_disorder = s.get("allow_disorder", False)
     allow_not_organic = s.get("allow_not_organic", True)
     allow_no_metal = s.get("allow_no_metal", False)
+    use_sbu_search = s.get("use_sbu_search", False)
+    attribute_is_enabled = dict()
+    for name, attr in Attributes.attributes.items():
+        attribute_is_enabled[name] = s.get(name, attr.enabled)
 
 
 def change_download_filepath():
@@ -48,6 +53,13 @@ def change_app_filepath(file_extension):
             shelf["open" + file_extension] = open_app_filepath[file_extension]
 
 
+def toggle_attribute_display(attribute_name, enabled):
+    global attribute_is_enabled
+    attribute_is_enabled[attribute_name] = enabled
+    with shelve.open("MOFseek_settings", 'w') as shelf:
+        shelf[attribute_name] = enabled
+
+
 def toggle_solvent(enabled):
     global keep_solvent
     keep_solvent = enabled
@@ -74,3 +86,10 @@ def toggle_allow_no_metal(enabled):
     allow_no_metal = enabled
     with shelve.open("MOFseek_settings", 'w') as shelf:
         shelf["allow_no_metal"] = allow_no_metal
+
+
+def toggle_sbu(enabled):
+    global use_sbu_search
+    use_sbu_search = enabled
+    with shelve.open("MOFseek_settings", 'w') as shelf:
+        shelf["use_sbu_search"] = use_sbu_search

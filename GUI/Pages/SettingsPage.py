@@ -19,8 +19,11 @@ class Page(ScrollFrame):
         for attr in Attributes.attributes:
             Page.AttributeSetting(self.frame, attr).grid(sticky=tk.W)
 
-        Page.Setting(self.frame, 'SBU search', 'Enable the powerful (but situational) SBU search', 0,
-                     lambda enabled: self.winfo_toplevel().toggle_sbu_search(enabled)).grid(sticky=tk.W, pady=(20, 0))
+        def sbu_button_action(enabled):
+            Settings.toggle_sbu(enabled)
+            self.winfo_toplevel().toggle_sbu_search(enabled)
+        Page.Setting(self.frame, 'SBU search', 'Enable the powerful (but situational) SBU search',
+                     Settings.use_sbu_search, sbu_button_action).grid(sticky=tk.W, pady=(20, 0))
 
         def solvent_button_action(enabled):
             Settings.toggle_solvent(enabled)
@@ -78,10 +81,10 @@ class Page(ScrollFrame):
     class AttributeSetting(Setting):
         def __init__(self, parent, attribute_name):
             def change_attribute(now_enabled):
-                Attributes.attributes[self.name].enabled = now_enabled
+                Settings.toggle_attribute_display(attribute_name, now_enabled)
 
             super().__init__(parent, attribute_name, Attributes.attributes[attribute_name].description,
-                             1 if Attributes.attributes[attribute_name].enabled else 0, change_attribute)
+                             1 if Settings.attribute_is_enabled[attribute_name] else 0, change_attribute)
 
     def make_download_filepath_option_row(self):
         row = tk.Frame(self.frame)

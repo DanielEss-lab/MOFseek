@@ -1,6 +1,7 @@
 import platform
 import tkinter as tk
 
+from GUI import Settings
 from GUI.Pages.Search import SearchView, SearchResultsView
 from GUI.Views import MoleculeView
 
@@ -14,7 +15,8 @@ class SearchPage(tk.Frame):
         self.search_v.pack()
         self.search_results_v = SearchResultsView.View(self)
         self.search_results_v.pack(fill=tk.BOTH, expand=True)
-
+        if Settings.use_sbu_search:
+            self.show_sbu_search()
         self.molecule_v = None
 
     def highlight_molecule(self, mol):
