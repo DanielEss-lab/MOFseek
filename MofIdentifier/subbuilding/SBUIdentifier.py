@@ -1,4 +1,7 @@
+import collections
+
 import MofIdentifier
+from MofIdentifier.Molecules import atom
 from MofIdentifier.bondTools import Distances
 from MofIdentifier.fileIO import XyzWriter
 from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
@@ -39,7 +42,34 @@ def reduce_duplicates(sbu_list, is_duplicate):
 
 
 def check_for_infinite_band(sbu_atoms):
-    # If any molecule can traverse the cluster or connector and get to itself by crossing cell boundary
+    # Imagine the walls of the unit cell as panes through which atoms bond. If any atom can connect, through any
+    # number of bonds, to an atom in its own cluster by going through both an odd and an even numbers of panes,
+    # then it actually touches that atom twice, in two different copies of the unit cell- so, the cluster extends
+    # infinitely in at least one direction, and might be a metal line or metal pole rather than a single metal node.
+    starting_atom = None
+    for atom in sbu_atoms:
+        starting_atom = atom
+        break
+    panes_in_path = {starting_atom: 0}
+    explore_queue = collections.deque()
+    explore_queue.append(starting_atom)
+
+    while len(panes_in_path) < len(sbu_atoms):
+        atom = explore_queue.popleft()
+        for neighbor in in_sbu_neighbors(atom, sbu_atoms):
+            panes_start_to_neighbor = panes_in_path[atom] + panes_crossed_in_bond(atom, neighbor)
+            if neighbor in panes_in_path:
+                # If one path is odd and the other path is even
+                if panes_in_path[neighbor] % 2 != panes_start_to_neighbor % 2:
+                    return True
+            else:
+                panes_in_path[neighbor] = panes_start_to_neighbor
+                explore_queue.append(neighbor)
+    return False
+
+
+def old_check_for_infinite_band(sbu_atoms):
+    # If any atom can traverse the cluster or connector and get to itself by crossing cell boundary
     # panes an odd number of times, then all molecules can, and then they are an infinite band.
     for starting_atom in sbu_atoms:
         if len(in_sbu_neighbors(starting_atom, sbu_atoms)) > 1:  # If it only has one neighbor, algorithm won't work
@@ -174,7 +204,7 @@ class SBUIdentifier:
         atoms.add(metal_atom)
         self.mark_group(metal_atom, self.next_group_id)
         for neighbor in metal_atom.bondedAtoms:
-            if MofIdentifier.Molecules.atom.is_metal(neighbor.type_symbol) and not self.been_visited(neighbor):
+            if atom.is_metal(neighbor.type_symbol) and not self.been_visited(neighbor):
                 self.identify_cluster_recurse(neighbor, atoms)
         # The following section helps to identify more complex nodes by including metal atoms two steps away
         # It does this only when the intermediate molecule (usually Oxygen) ONLY connects to metals.
@@ -186,7 +216,7 @@ class SBUIdentifier:
         if not self.been_visited(possible_in_node_link):
             has_been_added = False
             for second_neighbor in possible_in_node_link.bondedAtoms:
-                if not MofIdentifier.Molecules.atom.is_metal(second_neighbor.type_symbol):
+                if not atom.is_metal(second_neighbor.type_symbol):
                     return
             for second_neighbor in possible_in_node_link.bondedAtoms:
                 if second_neighbor not in atoms:
@@ -216,7 +246,7 @@ class SBUIdentifier:
         for neighbor in nonmetal_atom.bondedAtoms:
             if not self.been_visited(neighbor):
                 self.identify_ligand_recurse(neighbor, ligand_atoms, adjacent_cluster_ids)
-            elif MofIdentifier.Molecules.atom.is_metal(neighbor.type_symbol):
+            elif atom.is_metal(neighbor.type_symbol):
                 adjacent_cluster_ids.add(self.group_id_of(neighbor))
 
     def successfully_adds_to_cluster(self, atom):

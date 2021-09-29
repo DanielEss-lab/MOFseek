@@ -60,6 +60,12 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.connectors[0].adjacent_auxiliary_ids) == 0)
         assert (len(sbu_breakdown.connectors[0].atoms) == 5)
 
+    def test_breaking_up_large_clusters(self):
+        mof_dotyes = get_mof('../mofsForTests/DOTYES_clean.cif')
+        sbu_breakdown = mof_dotyes.sbus()
+        assert (len(sbu_breakdown.clusters) > 1)
+        assert (len(sbu_breakdown.connectors) > 1)
+
     def test_notalladjacent_core(self):
         mof_akoheo = get_mof('../mofsForTests/AKOHEO_clean.cif')
         sbu_breakdown = mof_akoheo.sbus()
