@@ -41,58 +41,36 @@ def reduce_duplicates(sbu_list, is_duplicate):
     return new_sbu_list
 
 
-def check_for_infinite_band(sbu_atoms):
+def is_infinite_band(sbu_atoms):
     # Imagine the walls of the unit cell as panes through which atoms bond. If any atom can connect, through any
-    # number of bonds, to an atom in its own cluster by going through both an odd and an even numbers of panes,
+    # number of bonds, to an atom in its own cluster by going through paths with different numbers of panes,
     # then it actually touches that atom twice, in two different copies of the unit cell- so, the cluster extends
     # infinitely in at least one direction, and might be a metal line or metal pole rather than a single metal node.
     starting_atom = None
     for atom in sbu_atoms:
+        # print(atom)
         starting_atom = atom
         break
-    panes_in_path = {starting_atom: 0}
+    panes_in_path = {starting_atom: PanesCrossed()}  # default PanesCrossed is 0 panes
     explore_queue = collections.deque()
     explore_queue.append(starting_atom)
 
     while len(panes_in_path) < len(sbu_atoms):
         atom = explore_queue.popleft()
         for neighbor in in_sbu_neighbors(atom, sbu_atoms):
-            panes_start_to_neighbor = panes_in_path[atom] + panes_crossed_in_bond(atom, neighbor)
-            if neighbor in panes_in_path:
-                # If one path is odd and the other path is even
-                if panes_in_path[neighbor] % 2 != panes_start_to_neighbor % 2:
+            panes_from_start_to_neighbor: PanesCrossed = panes_in_path[atom] + panes_crossed_in_bond(atom, neighbor)
+            if neighbor in panes_in_path:  # ie, if it has already been visted (or at least queued to explore)
+                # If the two paths go through different numbers of panes, then it wraps around
+                if panes_in_path[neighbor].total() != panes_from_start_to_neighbor.total():
                     return True
             else:
-                panes_in_path[neighbor] = panes_start_to_neighbor
+                panes_in_path[neighbor] = panes_from_start_to_neighbor
                 explore_queue.append(neighbor)
-    return False
-
-
-def old_check_for_infinite_band(sbu_atoms):
-    # If any atom can traverse the cluster or connector and get to itself by crossing cell boundary
-    # panes an odd number of times, then all molecules can, and then they are an infinite band.
-    for starting_atom in sbu_atoms:
-        if len(in_sbu_neighbors(starting_atom, sbu_atoms)) > 1:  # If it only has one neighbor, algorithm won't work
-            if check_for_inf_recurse(sbu_atoms, set(), starting_atom, starting_atom, 0):
-                return True
     return False
 
 
 def in_sbu_neighbors(atom, sbu_atoms):
     return [neighbor for neighbor in atom.bondedAtoms if neighbor in sbu_atoms]
-
-
-def check_for_inf_recurse(sbu_atoms, visited, target_atom, atom, panes_crossed):
-    visited.add(atom)
-    for neighbor in in_sbu_neighbors(atom, sbu_atoms):
-        if neighbor == target_atom and panes_crossed + panes_crossed_in_bond(atom, neighbor) % 2 == 1:
-            # if panes_crossed (plus possible pane in traversal from atom to neighbor) is odd:
-            return True
-        if neighbor not in visited:
-            crosses_pane = panes_crossed_in_bond(atom, neighbor)
-            if check_for_inf_recurse(sbu_atoms, visited, target_atom, neighbor, panes_crossed + crosses_pane):
-                return True
-    return False
 
 
 def panes_crossed_in_bond(a, b):
@@ -101,36 +79,42 @@ def panes_crossed_in_bond(a, b):
         atom_1 = atom_1.original
     while not atom_2.is_in_unit_cell():
         atom_2 = atom_2.original
+    panes_crossed = PanesCrossed()
     if Distances.are_within_bond_range(atom_1, atom_2):
-        return 0  # only works on MOFS with unit cell lengths > 8ish; I hope that's not a problem
-    num_panes = 0
-    if atom_2.a - atom_1.a > 0.5 or atom_2.a - atom_1.a < -0.5:
-        num_panes += 1
-    if atom_2.b - atom_1.b > 0.5 or atom_2.b - atom_1.b < -0.5:
-        num_panes += 1
-    if atom_2.c - atom_1.c > 0.5 or atom_2.c - atom_1.c < -0.5:
-        num_panes += 1
-    return num_panes
+        return panes_crossed  # only works on MOFS with unit cell lengths > 8ish; I hope that's not a problem
+    if atom_2.a - atom_1.a > 0.5:
+        panes_crossed.a += 1
+    elif atom_2.a - atom_1.a < -0.5:
+        panes_crossed.a -= 1
+    if atom_2.b - atom_1.b > 0.5:
+        panes_crossed.b += 1
+    elif atom_2.b - atom_1.b < -0.5:
+        panes_crossed.b -= 1
+    if atom_2.c - atom_1.c > 0.5:
+        panes_crossed.c += 1
+    elif atom_2.c - atom_1.c < -0.5:
+        panes_crossed.c -= 1
+    return panes_crossed
 
 
-def panes_between(start, end, cluster):
-    _, panes = panes_between_recurse(start, end, set(), 0, cluster)
-    assert panes is not None
-    return panes
+class PanesCrossed:
+    def __init__(self):
+        self.a = 0
+        self.b = 0
+        self.c = 0
 
+    def __add__(self, other):
+        result = PanesCrossed()
+        result.a = self.a + other.a
+        result.b = self.b + other.b
+        result.c = self.c + other.c
+        return result
 
-def panes_between_recurse(atom, end, visited, num_panes, cluster):
-    if atom == end:
-        return True, num_panes
-    visited.add(atom)
-    for neighbor in atom.bondedAtoms:
-        if neighbor in cluster.atoms:  # Only look within the cluster
-            if neighbor not in visited:
-                crosses_pane = panes_crossed_in_bond(atom, neighbor)
-                found_end, panes = panes_between_recurse(neighbor, end, visited, num_panes + crosses_pane, cluster)
-                if found_end:
-                    return found_end, panes
-    return False, None
+    def __str__(self):
+        return f"{self.a}, {self.b}, {self.c}"
+
+    def total(self):
+        return abs(self.a) + abs(self.b) + abs(self.c)
 
 
 class SBUIdentifier:
@@ -195,7 +179,7 @@ class SBUIdentifier:
     def identify_cluster(self, metal_atom):
         atoms = set()
         self.identify_cluster_recurse(metal_atom, atoms)
-        if check_for_infinite_band(atoms):
+        if is_infinite_band(atoms):
             return changeableSBU(self.next_group_id, UnitType.CLUSTER, atoms, float('inf'))
         else:
             return changeableSBU(self.next_group_id, UnitType.CLUSTER, atoms)
@@ -214,16 +198,14 @@ class SBUIdentifier:
 
     def check_for_including_distant_metals(self, possible_in_node_link, atoms):
         if not self.been_visited(possible_in_node_link):
-            has_been_added = False
+            # disqualify if the oxygen touches any non-metal atoms
             for second_neighbor in possible_in_node_link.bondedAtoms:
                 if not atom.is_metal(second_neighbor.type_symbol):
                     return
+            atoms.add(possible_in_node_link)
+            self.mark_group(possible_in_node_link, self.next_group_id)
             for second_neighbor in possible_in_node_link.bondedAtoms:
                 if second_neighbor not in atoms:
-                    if not has_been_added:
-                        atoms.add(possible_in_node_link)
-                        self.mark_group(possible_in_node_link, self.next_group_id)
-                        has_been_added = True
                     self.identify_cluster_recurse(second_neighbor, atoms)
 
     def identify_ligand(self, nonmetal_atom):
@@ -235,7 +217,7 @@ class SBUIdentifier:
             ligand_type = UnitType.CONNECTOR
         else:
             ligand_type = UnitType.AUXILIARY
-        if check_for_infinite_band(atoms):
+        if is_infinite_band(atoms):
             return changeableSBU(self.next_group_id, ligand_type, atoms, float('inf'), adjacent_cluster_ids)
         else:
             return changeableSBU(self.next_group_id, ligand_type, atoms, 1, adjacent_cluster_ids)
@@ -293,35 +275,58 @@ class SBUIdentifier:
                     else:
                         cluster.adjacent_auxiliary_ids.add(neighbor_id)
 
-    def correct_adjacent_recurse(self, ligand_atoms, adjacent_cluster_ids, visited, num_panes_to_neighbor,
-                                 atom, panes_crossed, representative_atom_of_cluster):
+    def correct_adjacent_cluster_ids(self, ligand_atoms, adjacent_cluster_ids):
+        # If it can touch an atom (ie part of a cluster) by going through different panes,
+        # then it actually touches that atom twice, in two different copies of the unit cell- so, another connection
+        for starting_atom in ligand_atoms:
+            self.correct_adjacent_recurse(ligand_atoms, adjacent_cluster_ids, set(), dict(), starting_atom,
+                                          PanesCrossed(), dict())
+            break
+
+    def correct_adjacent_recurse(self, ligand_atoms, adjacent_cluster_ids, visited, num_panes_to_cluster,
+                                 atom, panes_crossed_so_far, representative_atom_of_cluster):
         visited.add(atom)
         for neighbor in atom.bondedAtoms:
+            panes_crossed_to_neighbor = panes_crossed_so_far + panes_crossed_in_bond(atom, neighbor)
             if neighbor in ligand_atoms:
                 if neighbor not in visited:
-                    crosses_pane = panes_crossed_in_bond(atom, neighbor)
-                    self.correct_adjacent_recurse(ligand_atoms, adjacent_cluster_ids, visited, num_panes_to_neighbor,
-                                                  neighbor, panes_crossed+crosses_pane, representative_atom_of_cluster)
-            else:  # must belong to a cluster
+                    self.correct_adjacent_recurse(ligand_atoms, adjacent_cluster_ids, visited, num_panes_to_cluster,
+                                                  neighbor, panes_crossed_to_neighbor, representative_atom_of_cluster)
+            else:  # must belong to a cluster, by definition of ligand
                 cluster_id = self.atom_to_SBU[neighbor.label]
                 if cluster_id in representative_atom_of_cluster:
                     repr_atom = representative_atom_of_cluster[cluster_id]
-                    num_panes_to_repr_atom = panes_between(neighbor, repr_atom, self.groups[cluster_id]) \
-                        + panes_crossed + panes_crossed_in_bond(atom, neighbor)
-                    if abs(num_panes_to_repr_atom - num_panes_to_neighbor[repr_atom.label]) % 2 == 1:  # Off by 1,3,etc
-                        adjacent_cluster_ids.add(-1 * cluster_id)
+                    # The panes between the starting atom and the atom chosen to represent this cluster (through this
+                    # path) is equal to [the panes between the neighbor and its cluster's representative,
+                    # traveling within the cluster] plus [the panes crossed from the starting atom to the neighbor]
+                    panes_to_repr_atom = panes_between(neighbor, repr_atom, self.groups[cluster_id]) \
+                                             + panes_crossed_to_neighbor
+                    if panes_to_repr_atom.total() != num_panes_to_cluster[repr_atom.label].total():
+                        adjacent_cluster_ids.add(-1 * cluster_id)  # Negative to signify that the two connections reach
+                        # different copies of the same cluster
                 else:
                     representative_atom_of_cluster[cluster_id] = neighbor
-                    panes_crossed_to_neighbor = panes_crossed + panes_crossed_in_bond(atom, neighbor)
-                    num_panes_to_neighbor[neighbor.label] = panes_crossed_to_neighbor
-
-    def correct_adjacent_cluster_ids(self, ligand_atoms, adjacent_cluster_ids):
-        # If it can touch an atom (ie part of a cluster) by going through both odd and even numbers of panes,
-        # then it actually touches that atom twice, in two different copies of the unit cell- so, another connection
-        for starting_atom in ligand_atoms:
-            self.correct_adjacent_recurse(ligand_atoms, adjacent_cluster_ids, set(), dict(), starting_atom, 0, dict())
-            break
+                    num_panes_to_cluster[neighbor.label] = panes_crossed_to_neighbor
 
     @classmethod
     def copy_from(cls, other):
         return SBUIdentifier(other.mof, other.show_duplicates)
+
+
+def panes_between(start, end, cluster):
+    _, panes = panes_between_recurse(start, end, set(), PanesCrossed(), cluster)
+    return panes
+
+
+def panes_between_recurse(atom, end, visited, panes_so_far, cluster):
+    if atom == end:
+        return True, panes_so_far
+    visited.add(atom)
+    for neighbor in atom.bondedAtoms:
+        if neighbor in cluster.atoms:  # Only look within the cluster
+            if neighbor not in visited:
+                crosses_pane = panes_crossed_in_bond(atom, neighbor)
+                found_end, panes = panes_between_recurse(neighbor, end, visited, panes_so_far + crosses_pane, cluster)
+                if found_end:
+                    return found_end, panes
+    return False, None

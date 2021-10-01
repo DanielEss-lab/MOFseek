@@ -137,6 +137,6 @@ def lookup(symbol):
 
 
 if __name__ == '__main__':
-    radius_1 = lookup('U')
-    radius_2 = lookup('P')
-    print((radius_1 + radius_2) * 1.11 + 0.05)
+    radius_1 = lookup('Co')
+    radius_2 = lookup('O')
+    print((radius_1 + radius_2) * 1.10 + 0.05)

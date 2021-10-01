@@ -134,3 +134,7 @@ def delete_all_mofs():
 
 def get_num_mofs():
     return mof_collection.count()
+
+
+def _delete_mof(name):
+    mof_collection.delete_one({"ligand_names": name})

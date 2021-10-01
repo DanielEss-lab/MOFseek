@@ -1,7 +1,7 @@
 import unittest
 
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import XyzReader
+from MofIdentifier.fileIO import XyzReader, XyzWriter
 from MofIdentifier.fileIO.CifReader import get_mof
 
 
@@ -59,12 +59,6 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.connectors[0].adjacent_connector_ids) == 0)
         assert (len(sbu_breakdown.connectors[0].adjacent_auxiliary_ids) == 0)
         assert (len(sbu_breakdown.connectors[0].atoms) == 5)
-
-    def test_breaking_up_large_clusters(self):
-        mof_dotyes = get_mof('../mofsForTests/DOTYES_clean.cif')
-        sbu_breakdown = mof_dotyes.sbus()
-        assert (len(sbu_breakdown.clusters) > 1)
-        assert (len(sbu_breakdown.connectors) > 1)
 
     def test_notalladjacent_core(self):
         mof_akoheo = get_mof('../mofsForTests/AKOHEO_clean.cif')
@@ -143,14 +137,43 @@ class SBUIdentifierTest(unittest.TestCase):
 
     def test_infinite_band_connector(self):
         mof_24205 = get_mof('../mofsForTests/acscombsci.5b00188_24205_clean.cif')
-        conn_74 = XyzReader.get_molecule('../ligands/test_resources/connector_74.xyz')
+        connector = XyzReader.get_molecule('../ligands/test_resources/5b00188_24205_inf_conn.xyz')
         sbu_breakdown = mof_24205.sbus()
 
         assert (len(sbu_breakdown.clusters) == 1)
         assert (len(sbu_breakdown.auxiliaries) == 0)
         assert (len(sbu_breakdown.connectors) == 3)
         infinite_connector = [c for c in sbu_breakdown.connectors if len(c.atoms) == 23][0]
-        self.assertTrue(SubGraphMatcher.match(infinite_connector, conn_74))
+        self.assertTrue(SubGraphMatcher.match(infinite_connector, connector))
+
+
+class BreakLargeClustersTest(unittest.TestCase):
+    def test_breaking_up_large_clusters(self):
+        mof_dotyes = get_mof('../mofsForTests/DOTYES_clean.cif')
+        sbu_breakdown = mof_dotyes.sbus()
+        self.assertTrue(len(sbu_breakdown.clusters) > 1)
+        self.assertTrue(len(sbu_breakdown.clusters[0].atoms) < 100)
+
+    def test_breaking_up_on_different_metal_type(self):
+        mof_enafab = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ENAFAB_clean.cif')
+        sbu_breakdown = mof_enafab.sbus()
+        self.assertTrue(len(sbu_breakdown.clusters) > 1)
+        self.assertTrue(len(sbu_breakdown.clusters[0].atoms) < 100)
+
+    def test_breaking_unknown(self):
+        mof_ocuvuf = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\OCUVUF_clean.cif')
+        sbu_breakdown = mof_ocuvuf.sbus()
+        self.assertTrue(len(sbu_breakdown.clusters) > 1)
+        self.assertTrue(len(sbu_breakdown.clusters[0].atoms) < 100)
+
+    def test_breaking_unknown_3(self):
+        # Test currently passes SOMETIMES, which is awful
+        mof_yojman = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\YOJMAN_clean.cif')
+        sbu_breakdown = mof_yojman.sbus()
+        self.assertTrue(len(sbu_breakdown.clusters) > 1)
+        print([len(cluster.atoms) for cluster in sbu_breakdown.clusters])
+        self.assertTrue(len(sbu_breakdown.clusters[0].atoms) < 100)
+        self.assertTrue(len(sbu_breakdown.clusters[1].atoms) < 100)
 
 
 if __name__ == '__main__':
