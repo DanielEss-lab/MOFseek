@@ -151,29 +151,29 @@ class BreakLargeClustersTest(unittest.TestCase):
     def test_breaking_up_large_clusters(self):
         mof_dotyes = get_mof('../mofsForTests/DOTYES_clean.cif')
         sbu_breakdown = mof_dotyes.sbus()
-        self.assertTrue(len(sbu_breakdown.clusters) > 1)
-        self.assertTrue(len(sbu_breakdown.clusters[0].atoms) < 100)
+        self.assertEqual(2, len(sbu_breakdown.clusters))
+        large_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 57][0]
+        small_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 1][0]
+        self.assertEqual(8, large_cluster.frequency)
+        self.assertEqual(12, small_cluster.frequency)
+        self.assertEqual(21, len([atom for atom in large_cluster.atoms if atom.is_metal()]))
 
-    def test_breaking_up_on_different_metal_type(self):
-        mof_enafab = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ENAFAB_clean.cif')
-        sbu_breakdown = mof_enafab.sbus()
-        self.assertTrue(len(sbu_breakdown.clusters) > 1)
-        self.assertTrue(len(sbu_breakdown.clusters[0].atoms) < 100)
+    def test_breaking_up_large_clusters_in_complex_mof(self):
+        mof_yojman = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\YOJMAN_clean.cif')
+        sbu_breakdown = mof_yojman.sbus()
+        self.assertGreater(9, len(sbu_breakdown.clusters))
+        self.assertGreater(len(sbu_breakdown.clusters), 3)
+        large_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 54][0]
+        med_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 4][0]
+        self.assertEqual(4, large_cluster.frequency)
+        self.assertEqual(4, med_cluster.frequency)
+        self.assertEqual(18, len([atom for atom in large_cluster.atoms if atom.is_metal()]))
 
-    def test_breaking_unknown(self):
+    def test_breaking_up_different_clusters_when_they_are_connected_in_multiple_spots(self):
         mof_ocuvuf = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\OCUVUF_clean.cif')
         sbu_breakdown = mof_ocuvuf.sbus()
         self.assertTrue(len(sbu_breakdown.clusters) > 1)
         self.assertTrue(len(sbu_breakdown.clusters[0].atoms) < 100)
-
-    def test_breaking_unknown_3(self):
-        # Test currently passes SOMETIMES, which is awful
-        mof_yojman = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\YOJMAN_clean.cif')
-        sbu_breakdown = mof_yojman.sbus()
-        self.assertTrue(len(sbu_breakdown.clusters) > 1)
-        print([len(cluster.atoms) for cluster in sbu_breakdown.clusters])
-        self.assertTrue(len(sbu_breakdown.clusters[0].atoms) < 100)
-        self.assertTrue(len(sbu_breakdown.clusters[1].atoms) < 100)
 
 
 if __name__ == '__main__':

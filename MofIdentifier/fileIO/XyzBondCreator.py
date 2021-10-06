@@ -1,3 +1,7 @@
+import itertools
+
+import numpy as np
+
 from MofIdentifier.bondTools import Distances
 
 
@@ -46,6 +50,28 @@ def compare_for_bond(atom_a, atom_b):
         atom_b.bondedAtoms.append(atom_a)
 
 
+def undo_bad_metal_bonds(atoms):
+    metals = (atom for atom in atoms if atom.is_metal())
+    for metal_a, metal_b in itertools.combinations(metals, 2):
+        if blocked_bond(metal_a, metal_b):
+            metal_a.bondedAtoms.remove(metal_b)
+            metal_b.bondedAtoms.remove(metal_a)
+
+
+def blocked_bond(metal_a, metal_b):
+    for connecting_atom in metal_a.bondedAtoms:
+        if connecting_atom.is_metal():
+            continue
+        if metal_b in connecting_atom.bondedAtoms:
+            dist_a = Distances.distance(metal_a, connecting_atom)
+            dist_b = Distances.distance(metal_b, connecting_atom)
+            dist_c = Distances.distance(metal_a, metal_b)
+            c_angle = np.arccos((dist_a ** 2 + dist_b ** 2 - dist_c ** 2) / (2 * dist_a * dist_b))
+            # The wider the angle, the more directly the connector is in between the metals.
+            if c_angle > Distances.metal_bond_breakup_angle_margin:
+                return True
+
+
 def connect_atoms(molecule):
     atoms = molecule.atoms
     for i in range(len(atoms)):
@@ -55,4 +81,5 @@ def connect_atoms(molecule):
         for j in range(i+1, len(atoms)):
             compare_for_bond(atoms[i], atoms[j])
     enforce_single_hydrogen_bonds(atoms)
+    undo_bad_metal_bonds(atoms)
     return molecule

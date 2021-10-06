@@ -1,4 +1,7 @@
+import itertools
 from math import floor
+
+import numpy as np
 
 from MofIdentifier.bondTools import Distances
 
@@ -72,6 +75,7 @@ class MofBondCreator:
                     self.connect_within_space(this_space)
                     self.connect_within_spaces(this_space, spaces_to_compare)
         self.enforce_single_hydrogen_bonds()
+        self.undo_bad_metal_bonds()
 
     def get_spaces_adj_in_one_direction(self, x, y, z):
         # in 2D space, you only need to compare each square with 4 other squares in order for each square
@@ -134,3 +138,26 @@ class MofBondCreator:
     def reset(self):
         for atom in self.atoms:
             atom.bondedAtoms = []
+
+    # Sometimes two metals are close enough that the algorithm says they should be bonded, but from context they
+    # definitely shouldn't be bonded. The main context is when they're bonded to another atom that's in between them.
+    def undo_bad_metal_bonds(self):
+        metals = (atom for atom in self.atoms if atom.is_metal())
+        for metal_a, metal_b in itertools.combinations(metals, 2):
+            if metal_a in metal_b.bondedAtoms:
+                if self.blocked_bond(metal_a, metal_b):
+                    metal_a.bondedAtoms.remove(metal_b)
+                    metal_b.bondedAtoms.remove(metal_a)
+
+    def blocked_bond(self, metal_a, metal_b):
+        for connecting_atom in metal_a.bondedAtoms:
+            if connecting_atom.is_metal():
+                continue
+            if metal_b in connecting_atom.bondedAtoms:
+                dist_a = Distances.distance_across_unit_cells(metal_a, connecting_atom, self.angles, self.lengths)
+                dist_b = Distances.distance_across_unit_cells(metal_b, connecting_atom, self.angles, self.lengths)
+                dist_c = Distances.distance_across_unit_cells(metal_a, metal_b, self.angles, self.lengths)
+                c_angle = np.arccos((dist_a ** 2 + dist_b ** 2 - dist_c ** 2) / (2 * dist_a * dist_b))
+                # The wider the angle, the more directly the connector is in between the metals.
+                if c_angle > Distances.metal_bond_breakup_angle_margin:
+                    return True
