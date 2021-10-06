@@ -161,12 +161,6 @@ class changeableSBU(Molecule.Molecule):
     def __hash__(self):
         return self.hash
 
-    def __copy__(self):
-        cls = self.__class__
-        result = cls.__new__(cls)
-        result.__dict__.update(self.__dict__)
-        return result
-
     def __eq__(self, other):
         is_isomorphic = SubGraphMatcher.match(self, other)
         if isinstance(other, changeableSBU):
