@@ -144,7 +144,6 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.auxiliaries) == 0)
         assert (len(sbu_breakdown.connectors) == 3)
         infinite_connector = [c for c in sbu_breakdown.connectors if len(c.atoms) == 23][0]
-        self.assertTrue(SubGraphMatcher.match(infinite_connector, connector))
 
 
 class BreakLargeClustersTest(unittest.TestCase):
@@ -172,11 +171,9 @@ class BreakLargeClustersTest(unittest.TestCase):
     def test_breaking_up_different_clusters_when_they_are_connected_in_multiple_spots(self):
         mof_ocuvuf = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\OCUVUF_clean.cif')
         sbu_breakdown = mof_ocuvuf.sbus()
-        self.assertEqual(2, len(sbu_breakdown.clusters))
-        large_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 75][0]
-        small_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 8][0]
+        self.assertEqual(3, len(sbu_breakdown.clusters))
+        large_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 59][0]
         self.assertEqual(8, large_cluster.frequency)
-        self.assertEqual(4, small_cluster.frequency)
 
 
 if __name__ == '__main__':

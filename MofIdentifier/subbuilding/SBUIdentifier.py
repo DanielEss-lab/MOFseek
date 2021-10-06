@@ -3,7 +3,7 @@ import collections
 import MofIdentifier
 import copy
 from MofIdentifier.Molecules import atom
-from MofIdentifier.bondTools import Distances
+from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import XyzWriter
 from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
 
@@ -246,7 +246,7 @@ class SBUIdentifier:
             atoms.add(possible_in_node_link)
             self.mark_group(possible_in_node_link, self.next_group_id)
             for second_neighbor in possible_in_node_link.bondedAtoms:
-                if second_neighbor not in atoms:
+                if second_neighbor not in atoms and second_neighbor.is_metal():
                     self.identify_cluster_recurse(second_neighbor, atoms)
 
     def does_split_on_bridges(self, big_cluster, clusters, tightness):
@@ -426,6 +426,9 @@ def split_on_oxygen_bridges(sbu_atoms, tightness):
                 # The definition of shortish gets tighter until the solution looks right. Extra tightness if the two
                 # metals are different.
                 penalty = 0 if neighbors[0].type_symbol == neighbors[1].type_symbol else 1
+                if penalty:
+                    penalty *= abs(CovalentRadiusLookup.lookup(neighbors[0].type_symbol) - CovalentRadiusLookup.lookup(
+                        neighbors[1].type_symbol))/40
                 if not exists_route_with_constraints(neighbors[0], neighbors[1], forbidden_atoms=[atom],
                                                      max_steps=tightness - penalty, max_successive_nonmetal_steps=3):
                     split_points.append(atom)
