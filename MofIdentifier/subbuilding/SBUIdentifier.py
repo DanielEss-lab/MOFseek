@@ -1,6 +1,7 @@
 import collections
 
 import MofIdentifier
+import copy
 from MofIdentifier.Molecules import atom
 from MofIdentifier.bondTools import Distances
 from MofIdentifier.fileIO import XyzWriter
@@ -38,7 +39,7 @@ def reduce_duplicates(sbu_list, is_duplicate):
     new_sbu_list = list()
     i = 0
     while i < len(sbu_list):
-        new_sbu_list.append(sbu_list[i])
+        new_sbu_list.append(copy.copy(sbu_list[i]))
         j = i + 1
         while j < len(sbu_list):
             if is_duplicate(sbu_list[i], sbu_list[j]):
@@ -146,23 +147,14 @@ class SBUIdentifier:
         return self.atom_to_SBU[atom.label]
 
     def run_algorithm(self):
-        clusters = list(())
         connectors = list(())
         auxiliaries = list(())
-        for atom in self.atoms:
-            if MofIdentifier.Molecules.atom.is_metal(atom.type_symbol) and not self.been_visited(atom):
-                sbu = self.identify_cluster(atom)
-                if sbu.frequency == float('inf') and self.allow_two_steps:
-                    if self.does_split_on_bridges(sbu, clusters):
-                        continue
-                    else:
-                        raise InfiniteBandWithTwoStepFindingException
-                else:
-                    clusters.append(sbu)
-                    self.groups[self.next_group_id] = sbu
-                    self.next_group_id += 1
-        if len(clusters) == 0:
-            raise Exception(f'Exiting algorithm early because no metal atoms found for mof {self.mof.label}')
+        # Define clusters
+        max_steps_used_to_separate_clusters = 12
+        clusters = self.get_clusters(12)
+
+
+        # define connectors and auxiliaries
         for atom in self.atoms:
             if not self.been_visited(atom):
                 if self.successfully_adds_to_cluster(atom):
@@ -184,6 +176,43 @@ class SBUIdentifier:
             sbu.normalize_atoms(self.mof)
             sbu.file_content = XyzWriter.atoms_to_xyz_string(sbu.atoms, '')
         return SBUCollection(clusters, connectors, auxiliaries)
+
+    def get_clusters(self, tightness):
+        clusters = list(())
+        for atom in self.atoms:
+            if MofIdentifier.Molecules.atom.is_metal(atom.type_symbol) and not self.been_visited(atom):
+                sbu = self.identify_cluster(atom)
+                if sbu.frequency == float('inf') and self.allow_two_steps:
+                    if self.does_split_on_bridges(sbu, clusters, tightness):
+                        continue  # Don't need to add cluster to clusters here bc in this case there are multiple
+                        # clusters, so I just add them all one by one within the does_split_on_bridges function
+                    elif tightness < 5:
+                        raise InfiniteBandWithTwoStepFindingException
+                    else:
+                        self.atom_to_SBU = dict()
+                        self.next_group_id = 1
+                        self.groups = dict()
+                        return self.get_clusters(tightness - 1)
+                else:
+                    clusters.append(sbu)
+                    self.groups[self.next_group_id] = sbu
+                    self.next_group_id += 1
+        if len(clusters) == 0:
+            raise Exception(f'Exiting algorithm early because no metal atoms found for mof {self.mof.label}')
+        temp_clusters = reduce_duplicates(clusters, lambda x, y: x == y)
+        if any(cluster.frequency == 1 or len(cluster.atoms) > 100 or is_infinite_band(cluster.atoms)
+               for cluster in temp_clusters):
+            if tightness < 5:
+                if self.allow_two_steps:
+                    raise InfiniteBandWithTwoStepFindingException
+                else:
+                    return clusters
+            else:
+                self.atom_to_SBU = dict()
+                self.next_group_id = 1
+                self.groups = dict()
+                return self.get_clusters(tightness - 1)
+        return clusters
 
     def identify_cluster(self, metal_atom):
         atoms = set()
@@ -209,7 +238,10 @@ class SBUIdentifier:
         if not self.been_visited(possible_in_node_link):
             # disqualify if the oxygen touches any non-metal atoms
             for second_neighbor in possible_in_node_link.bondedAtoms:
-                if not atom.is_metal(second_neighbor.type_symbol):
+                if second_neighbor.type_symbol == 'C':
+                    if len([atom for atom in possible_in_node_link.bondedAtoms if atom.is_metal()]) < 3:
+                        return
+                elif not second_neighbor.is_metal():
                     return
             atoms.add(possible_in_node_link)
             self.mark_group(possible_in_node_link, self.next_group_id)
@@ -217,10 +249,10 @@ class SBUIdentifier:
                 if second_neighbor not in atoms:
                     self.identify_cluster_recurse(second_neighbor, atoms)
 
-    def does_split_on_bridges(self, big_cluster, clusters):
+    def does_split_on_bridges(self, big_cluster, clusters, tightness):
         if len(big_cluster.atoms) < 120:
             return False
-        smaller_clusters, non_node_atoms = split_on_oxygen_bridges(big_cluster.atoms)
+        smaller_clusters, non_node_atoms = split_on_oxygen_bridges(big_cluster.atoms, tightness)
         if len(smaller_clusters) == 1:
             return False
         for atom in non_node_atoms:
@@ -228,7 +260,7 @@ class SBUIdentifier:
         for atoms in smaller_clusters:
             for atom in atoms:
                 self.atom_to_SBU[atom.label] = self.next_group_id
-
+            if is_infinite_band(atoms):
                 cluster = changeableSBU(self.next_group_id, UnitType.CLUSTER, atoms, float('inf'))
             else:
                 cluster = changeableSBU(self.next_group_id, UnitType.CLUSTER, atoms)
@@ -263,6 +295,7 @@ class SBUIdentifier:
     def successfully_adds_to_cluster(self, atom):
         num_cluster_neighbors = 0
         num_noncluster_neighbors = 0
+        noncluster_neighbor = None
         cluster_ids = set()
         cluster = None
         for neighbor in atom.bondedAtoms:
@@ -275,6 +308,8 @@ class SBUIdentifier:
                     num_noncluster_neighbors += 1  # TODO: clarify in comment when this scenario occurs
             else:
                 num_noncluster_neighbors += 1
+                noncluster_neighbor = neighbor
+
         if atom.type_symbol == 'H':
             assert len(atom.bondedAtoms) <= 1
             for neighbor in atom.bondedAtoms:
@@ -282,21 +317,31 @@ class SBUIdentifier:
                     cluster = self.groups[self.group_id_of(neighbor)]
                     cluster.add_atom(atom)
                     self.mark_group(atom, cluster.sbu_id)
+                    cluster.add_atom(atom)
+                    self.mark_group(atom, cluster.sbu_id)
                     return True
         if atom.type_symbol == 'O' and len(atom.bondedAtoms) == 1:
             for neighbor in atom.bondedAtoms:
                 if neighbor.is_metal():
                     return False
-        if num_cluster_neighbors > 1 + num_noncluster_neighbors and len(cluster_ids) == 1:
-            for neighbor in atom.bondedAtoms:
-                if neighbor.type_symbol == 'S' or \
-                        neighbor.type_symbol == 'P':
-                    return False
-            # if num_noncluster_neighbors == 1 then it's likely to be part of an aux sbu, not part of the cluster
+
+        if len(cluster_ids) != 1:
+            return False
+        if num_noncluster_neighbors == 0 and num_cluster_neighbors > 1:
             cluster.add_atom(atom)
             self.mark_group(atom, cluster.sbu_id)
             return True
-        return False
+        elif num_noncluster_neighbors > 1:
+            return False
+        elif num_noncluster_neighbors >= num_cluster_neighbors:
+            return False
+        else:
+            if noncluster_neighbor.type_symbol in ['C', 'O', 'H']:
+                cluster.add_atom(atom)
+                self.mark_group(atom, cluster.sbu_id)
+                return True
+            else:
+                return False
 
     def set_adj_ids(self, cluster):
         for atom in cluster.atoms:
@@ -365,7 +410,7 @@ def panes_between_recurse(atom, end, visited, panes_so_far, cluster):
     return False, None
 
 
-def split_on_oxygen_bridges(sbu_atoms):
+def split_on_oxygen_bridges(sbu_atoms, tightness):
     split_points = list()
     for atom in sbu_atoms:
         # if atom.is_metal():
@@ -378,8 +423,11 @@ def split_on_oxygen_bridges(sbu_atoms):
                 # How will we differentiate between oxygens that bridge clusters and oxygens within a cluster?
                 # If the two metals it touches have an alternate route between them THAT IS SHORTISH, then it is
                 # within a cluster; otherwise, it divides the two metals pretty well into different clusters.
-                if not exists_route_with_constraints(neighbors[0], neighbors[1], forbidden_atoms=[atom], max_steps=9,
-                                                     max_successive_nonmetal_steps=3):
+                # The definition of shortish gets tighter until the solution looks right. Extra tightness if the two
+                # metals are different.
+                penalty = 0 if neighbors[0].type_symbol == neighbors[1].type_symbol else 1
+                if not exists_route_with_constraints(neighbors[0], neighbors[1], forbidden_atoms=[atom],
+                                                     max_steps=tightness - penalty, max_successive_nonmetal_steps=3):
                     split_points.append(atom)
     visited = list()
     explore_queue = collections.deque()
@@ -397,7 +445,6 @@ def split_on_oxygen_bridges(sbu_atoms):
                         visited.append(neighbor)
                         cluster.add(neighbor)
                         explore_queue.append(neighbor)
-
             clusters.append(cluster)
     # If at least one larger cluster and not too many weirdly sized clusters
     if any(len(cluster) > 10 for cluster in clusters) \
