@@ -137,7 +137,6 @@ class SBUIdentifierTest(unittest.TestCase):
 
     def test_infinite_band_connector(self):
         mof_24205 = get_mof('../mofsForTests/acscombsci.5b00188_24205_clean.cif')
-        connector = XyzReader.get_molecule('../ligands/test_resources/5b00188_24205_inf_conn.xyz')
         sbu_breakdown = mof_24205.sbus()
 
         assert (len(sbu_breakdown.clusters) == 1)

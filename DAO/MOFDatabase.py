@@ -83,6 +83,7 @@ class MOFDatabase:
         self.conn_connectivity = dictionary['conn_connectivity']
         self.node_connectivity = dictionary['node_connectivity']
         self.elements_present = dictionary['elements_present']
+        self.node_size = dictionary['node_size']
 
     def complex_initialize(self, dictionary):
         try:
@@ -162,6 +163,9 @@ class MOFDatabase:
         self.node_connectivity = self.get_or_calculate('node_connectivity',
                                                        lambda mof: mof.sbus().avg_node_connectivity, dictionary)
         self.elements_present = self.get_or_calculate('elements_present', lambda mof: mof.elementsPresent, dictionary)
+        self.node_size = self.get_or_calculate('node_size',
+                                               lambda mof: max(len(cluster.atoms) for cluster in mof.sbus().clusters),
+                                               dictionary)
 
     def get_mof(self):
         if self._mof is None:

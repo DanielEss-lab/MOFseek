@@ -53,9 +53,10 @@ def compare_for_bond(atom_a, atom_b):
 def undo_bad_metal_bonds(atoms):
     metals = (atom for atom in atoms if atom.is_metal())
     for metal_a, metal_b in itertools.combinations(metals, 2):
-        if blocked_bond(metal_a, metal_b):
-            metal_a.bondedAtoms.remove(metal_b)
-            metal_b.bondedAtoms.remove(metal_a)
+        if metal_a in metal_b.bondedAtoms:
+            if blocked_bond(metal_a, metal_b):
+                metal_a.bondedAtoms.remove(metal_b)
+                metal_b.bondedAtoms.remove(metal_a)
 
 
 def blocked_bond(metal_a, metal_b):

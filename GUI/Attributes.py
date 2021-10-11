@@ -48,6 +48,8 @@ attributes = {
                                        lambda mof: round(max(mof.angles) - min(mof.angles), 2), False, float),
     "Num Atoms": Attribute("The number of atoms in the MOF's unit cell",
                            lambda mof: mof.num_atoms, True, int),
+    "Node Atoms": Attribute("The number of atoms in the largest of the MOF's metal nodes",
+                           lambda mof: mof.node_size, True, int),
     "Conn/Node A": Attribute("The ratio within the MOF of atoms in connecting ligands vs atoms in metal nodes",
                              lambda mof: round(mof.conn_node_atom_ratio, 2), False, float),
     "Aux/\u212B\u00B3": Attribute("The density of auxiliary groups in the MOF, measured in groups/Angstroms cubed",
