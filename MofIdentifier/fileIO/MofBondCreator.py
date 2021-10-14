@@ -157,7 +157,10 @@ class MofBondCreator:
                 dist_a = Distances.distance_across_unit_cells(metal_a, connecting_atom, self.angles, self.lengths)
                 dist_b = Distances.distance_across_unit_cells(metal_b, connecting_atom, self.angles, self.lengths)
                 dist_c = Distances.distance_across_unit_cells(metal_a, metal_b, self.angles, self.lengths)
-                c_angle = np.arccos((dist_a ** 2 + dist_b ** 2 - dist_c ** 2) / (2 * dist_a * dist_b))
+                arccos_input = (dist_a ** 2 + dist_b ** 2 - dist_c ** 2) / (2 * dist_a * dist_b)
+                if arccos_input > 1 or arccos_input < -1:
+                    continue
+                c_angle = np.arccos(arccos_input)
                 # The wider the angle, the more directly the connector is in between the metals.
                 if c_angle > Distances.metal_bond_breakup_angle_margin:
                     return True

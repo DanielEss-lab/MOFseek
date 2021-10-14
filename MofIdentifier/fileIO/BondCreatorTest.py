@@ -1,5 +1,6 @@
 import unittest
 
+from DAO import SBUDAO
 from MofIdentifier.bondTools import Distances
 from MofIdentifier.fileIO import CifReader
 

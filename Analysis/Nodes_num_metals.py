@@ -15,17 +15,19 @@ def create_scatter_plot(x_values, y_values):
 def chart():
     output_lines = ['node name, number of metal atoms']
     num_sbus_by_num_metal = defaultdict(lambda: 0)
+    num_c = 0
     for sbu in SBUDAO.get_sbu_iterator():
+        num_c += 1
         if sbu.type == 'cluster':
+            print(sbu.name)
             sbu_object = sbu.get_sbu()
             m_atoms = num_metal(sbu_object)
             num_sbus_by_num_metal[m_atoms] += 1
             output_lines.append(f'{sbu.name}, {m_atoms}')
-            if m_atoms > 80:
-                print(f"{sbu.name} in {sbu.mofs}")
     y_values = num_sbus_by_num_metal.keys()
     x_values = num_sbus_by_num_metal.values()
-    create_scatter_plot(x_values, y_values)
+    print(num_c)
+    create_scatter_plot(y_values, x_values)
     with open(f"output/cluster_num_metals.csv", "w") as f:
         f.write('\n'.join(output_lines))
 

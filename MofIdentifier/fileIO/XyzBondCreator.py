@@ -67,7 +67,10 @@ def blocked_bond(metal_a, metal_b):
             dist_a = Distances.distance(metal_a, connecting_atom)
             dist_b = Distances.distance(metal_b, connecting_atom)
             dist_c = Distances.distance(metal_a, metal_b)
-            c_angle = np.arccos((dist_a ** 2 + dist_b ** 2 - dist_c ** 2) / (2 * dist_a * dist_b))
+            arccos_input = (dist_a ** 2 + dist_b ** 2 - dist_c ** 2) / (2 * dist_a * dist_b)
+            if arccos_input > 1 or arccos_input < -1:
+                continue
+            c_angle = np.arccos(arccos_input)
             # The wider the angle, the more directly the connector is in between the metals.
             if c_angle > Distances.metal_bond_breakup_angle_margin:
                 return True

@@ -106,8 +106,7 @@ def extract_float(text):
 
 if __name__ == '__main__':
     # uses https://pypi.org/project/PyCifRW/4.3/#description to read CIF files
-    MOF = get_mof(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\mofsForTests\other_format'
-                  r'\c8ce00072g2.cif')
+    MOF = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\CAXTEC_clean.cif')
 
-    print(MOF.has_metal)
+    print(MOF.sbus())
     print(MOF.is_organic)

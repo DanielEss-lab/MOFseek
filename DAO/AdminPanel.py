@@ -62,7 +62,7 @@ def add_all_mofs(mofs_path):
             try:
                 filepath = Path(file_name).resolve()
                 filepath = str(filepath)
-                print(f"\n{filepath} will be read now...")
+                # print(f"\n{filepath} will be read now...")
                 mof = get_mof(filepath)
                 MOFDAO.add_mof(mof)
                 i += 1

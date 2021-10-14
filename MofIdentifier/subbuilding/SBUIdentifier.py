@@ -320,12 +320,10 @@ class SBUIdentifier:
                     cluster.add_atom(atom)
                     self.mark_group(atom, cluster.sbu_id)
                     return True
-        if atom.type_symbol == 'O' and len(atom.bondedAtoms) == 1:
-            for neighbor in atom.bondedAtoms:
-                if neighbor.is_metal():
-                    return False
 
-        if len(cluster_ids) != 1:
+        if len(atom.bondedAtoms) <= 1:
+            return False
+        elif len(cluster_ids) != 1:
             return False
         if num_noncluster_neighbors == 0 and num_cluster_neighbors > 1:
             cluster.add_atom(atom)
