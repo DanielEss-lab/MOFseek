@@ -21,7 +21,7 @@ def distance_across_unit_cells(base_atom, neighbor, angles, lengths):
     return min(distances)
 
 
-def move_neighbor_if_distant(base_atom, neighbor, angles, lengths, fractional_distance_required):
+def move_neighbor_if_distant(base_atom, neighbor, angles, lengths, fractional_distance_required=0.49):
     da = db = dc = 0
     if neighbor.a - base_atom.a > fractional_distance_required:
         da -= 1.0
