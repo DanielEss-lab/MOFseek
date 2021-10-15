@@ -1,6 +1,5 @@
 import unittest
 
-from DAO import SBUDAO
 from MofIdentifier.bondTools import Distances
 from MofIdentifier.fileIO import CifReader
 
@@ -23,24 +22,6 @@ class MyTestCase(unittest.TestCase):
         self.assertNotIn(w21, k4.bondedAtoms)
         self.assertIn(w21, o65.bondedAtoms)
         self.assertIn(k4, o65.bondedAtoms)
-
-    def test_breaking_metals_based_on_borderline_angles(self):
-        complex_mof = CifReader.get_mof('../mofsForTests/YOJMAN_clean.cif')
-        na1 = None
-        k8 = None
-        n4 = None
-        for atom in complex_mof.atoms:
-            if atom.label == 'K8':
-                k8 = atom
-            if atom.label == 'Na1':
-                na1 = atom
-            if atom.label == 'N4':
-                n4 = atom
-
-        self.assertNotIn(k8, na1.bondedAtoms)
-        self.assertNotIn(na1, k8.bondedAtoms)
-        self.assertIn(na1, n4.bondedAtoms)
-        self.assertIn(k8, n4.bondedAtoms)
 
     def test_arccos(self):
         mof = CifReader.get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\AKUHOD01_clean.cif')
