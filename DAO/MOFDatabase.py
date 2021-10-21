@@ -163,9 +163,10 @@ class MOFDatabase:
         self.node_connectivity = self.get_or_calculate('node_connectivity',
                                                        lambda mof: mof.sbus().avg_node_connectivity, dictionary)
         self.elements_present = self.get_or_calculate('elements_present', lambda mof: mof.elementsPresent, dictionary)
+        print(self.get_mof().label)
         self.node_size = self.get_or_calculate('node_size',
-                                               lambda mof: max(len(cluster.atoms) for cluster in mof.sbus().clusters),
-                                               dictionary)
+                                               lambda mof: max(len(cluster.atoms) for cluster in mof.sbus().clusters)
+                                               if mof.has_metal else 0, dictionary)
 
     def get_mof(self):
         if self._mof is None:

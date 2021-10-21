@@ -72,6 +72,7 @@ attributes = {
     "NAV_cm3_g": Attribute("Non-Accessible Volume", lambda mof: round(mof.NAV_cm3_g, 7) if mof.NAV_cm3_g is not None else None, False, float),
     "Has_OMS": Attribute("Has Open Metal Sites", lambda mof: mof.Has_OMS, False, bool),  # Boolean
     "OMS": Attribute("Open Metal Sites", lambda mof: str(mof.Open_Metal_Sites)[1:-1] if mof.Open_Metal_Sites is not None else None, False, str),  # could be list of str
+    "Node atoms": Attribute("Number of atoms in largest node", lambda mof: mof.node_size, False, int),
     # "Extension": Attribute("Last bit of filename", lambda mof: mof.Extension, False, str),  # str
     # "FSR_overlap": Attribute("Unknown acronym", lambda mof: mof.FSR_overlap, False, bool),  # Boolean
     # "from_CSD": Attribute("Unknown acronym", lambda mof: mof.from_CSD, False, bool),  # Boolean
