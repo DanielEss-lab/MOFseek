@@ -4,11 +4,12 @@ import math
 import numpy as np
 
 from MofIdentifier.Molecules import MOF
-from MofIdentifier.bondTools import Distances
+from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import CifReader
 
-ACCEPTABLE_DISTANCE_ERROR = 0.10
-ACCEPTABLE_ANGLE_ERROR = 10
+ACCEPTABLE_DISTANCE_ERROR = 0.55  # Increasing distance makes it harder for a metal to qualify as having open sites
+ACCEPTABLE_ANGLE_ERROR = 20
+TETRAHEDRON_ANGLE = 110
 
 
 def process(mof: MOF.MOF, verbose=False):
@@ -22,12 +23,12 @@ def process(mof: MOF.MOF, verbose=False):
             centroid = center_of_bonded_atoms(atom, mof)
             metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, mof.angles,
                                                                             mof.fractional_lengths)
-            if metal_to_center_distance > ACCEPTABLE_DISTANCE_ERROR:
+            if metal_to_center_distance > distance_cutoff_for(atom.type_symbol):
                 atoms_with_open_metal_sites.append(atom)
             elif len(atom.bondedAtoms) == 4:
                 # A metal with 4 bonds might have open sites even if the ligands all cancel out spatially
                 angles = all_angles_around(atom, mof)
-                avg_angle_deviation = sum(abs(angle - 110) for angle in angles) / len(angles)
+                avg_angle_deviation = sum(abs(angle - TETRAHEDRON_ANGLE) for angle in angles) / len(angles)
                 if avg_angle_deviation > ACCEPTABLE_ANGLE_ERROR:
                     atoms_with_open_metal_sites.append(atom)  # square planar; open metal sites
                 else:
@@ -36,7 +37,8 @@ def process(mof: MOF.MOF, verbose=False):
         if len(atoms_with_open_metal_sites) > 0:
             example_atom = atoms_with_open_metal_sites[0]
             example_num_bonds = len(example_atom.bondedAtoms)
-            example_distance = Distances.distance_across_unit_cells(example_atom, center_of_bonded_atoms(example_atom, mof),
+            example_distance = Distances.distance_across_unit_cells(example_atom,
+                                                                    center_of_bonded_atoms(example_atom, mof),
                                                                     mof.angles, mof.fractional_lengths)
             return atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance
         else:
@@ -50,21 +52,24 @@ def center_of_bonded_atoms(atom, mof):
                     for bonded_atom in atom.bondedAtoms]
     unfiltered_unit_vectors = [unit_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
     unit_vectors = [v for v in unfiltered_unit_vectors if v is not None]
-    centeroid_x = sum(v[0] for v in unit_vectors)
-    centeroid_y = sum(v[1] for v in unit_vectors)
-    centeroid_z = sum(v[2] for v in unit_vectors)
-    return atom.from_cartesian('Centroid', None, centeroid_x, centeroid_y, centeroid_z, mof)
+    assert (all(0.98 < v[0] ** 2 + v[1] ** 2 + v[2] ** 2 < 1.02 for v in unit_vectors))
+    centeroid_relative_x = sum(v[0] for v in unit_vectors)
+    centeroid_relative_y = sum(v[1] for v in unit_vectors)
+    centeroid_relative_z = sum(v[2] for v in unit_vectors)
+    return atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
+                               centeroid_relative_y + atom.y,
+                               centeroid_relative_z + atom.z, mof)
 
 
 def unit_vectorize_bond(atom, bonded_atom):
     x_vector = bonded_atom.x - atom.x
     y_vector = bonded_atom.y - atom.y
     z_vector = bonded_atom.z - atom.z
-    if x_vector + y_vector + z_vector < 0.001:
+    if abs(x_vector) + abs(y_vector) + abs(z_vector) < 0.001:
         # The two atoms have the same location (malformed MOF)
         return None
     norm = math.sqrt(x_vector ** 2 + y_vector ** 2 + z_vector ** 2)
-    return x_vector/norm, y_vector/norm, z_vector/norm
+    return x_vector / norm, y_vector / norm, z_vector / norm
 
 
 def all_angles_around(atom, mof):
@@ -92,11 +97,23 @@ def all_angles_around(atom, mof):
     return angles
 
 
+def distance_cutoff_for(type_symbol: str):
+    covalent_radius = CovalentRadiusLookup.lookup(type_symbol)
+    normalized_radius = (covalent_radius - CovalentRadiusLookup.smallest_radius()) \
+                        / (CovalentRadiusLookup.greatest_radius() - CovalentRadiusLookup.smallest_radius())
+    multiplier = 0.1 + normalized_radius
+    return multiplier * ACCEPTABLE_DISTANCE_ERROR
+
+
 if __name__ == '__main__':
-    mof = CifReader.get_mof(r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\cm901983a_si_001_clean.cif")
-    print(mof.sbus().clusters)
-    atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance = process(mof, True)
-    print(*atoms_with_open_metal_sites)
-    print(example_atom)
-    print(example_num_bonds)
-    print(example_distance)
+    # mof = CifReader.get_mof(r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ABAYIO_clean.cif")
+    # print(mof.sbus().clusters)
+    # atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance = process(mof, True)
+    # print(*atoms_with_open_metal_sites)
+    # print(example_atom)
+    # print(example_num_bonds)
+    # print(example_distance)
+    print(CovalentRadiusLookup.greatest_radius())
+    print(CovalentRadiusLookup.smallest_radius())
+    for symbol, radius in CovalentRadiusLookup.data.items():
+        print(f"{symbol}:\tradius {radius},\tcutoff {distance_cutoff_for(symbol)}")

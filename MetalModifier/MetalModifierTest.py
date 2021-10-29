@@ -1,9 +1,10 @@
 import os
 import unittest
 
+from MetalModifier import extract_cluster
 from MetalModifier.main import *
 from MofIdentifier.Molecules.atom import Atom
-from MofIdentifier.fileIO import CifReader
+from MofIdentifier.fileIO import CifReader, XyzReader
 from MofIdentifier.subbuilding import SBUIdentifier
 
 
@@ -186,6 +187,12 @@ class ChangeMetalTest(unittest.TestCase):
         self.assertTrue('Nb' in new_mof.atoms_string())
         self.assertEqual(protons_needed('Nb'), count_node_protons(new_mof))
 
+
+class ExtractClusterTest(unittest.TestCase):
+    def test_extract(self):
+        extract_cluster.extract_cluster(r'../MofIdentifier/mofsForTests/smod7-pos-1.cif', r'TestResources/smod7-cluster.xyz')
+        cluster = XyzReader.get_molecule(r'TestResources/smod7-cluster.xyz')
+        self.assertEqual(len(cluster.atoms), 50)
 
 
 if __name__ == '__main__':

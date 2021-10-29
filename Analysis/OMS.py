@@ -26,7 +26,11 @@ def chart_oms():
     for mof_d in MOFDAO.get_mof_iterator():
         mof = mof_d.get_mof()
         atoms_with_oms, example_atom, example_num_bonds, example_d = OpenMetalSites.process(mof, True)
-        output_lines.append(f'{mof.label}, {example_atom.label}, {example_num_bonds}, {example_d}, {atoms_with_oms}')
+        if example_atom is None:
+            output_lines.append(f'{mof.label}, no open metal sites detected')
+        else:
+            output_lines.append(f'{mof.label}, {example_atom.label if example_atom is not None else None}, '
+                                f'{example_num_bonds}, {example_d}, {" ".join([atom.label for atom in atoms_with_oms])}')
         elements_open = set()
         for atom in atoms_with_oms:
             elements_open.add(atom.type_symbol)
@@ -34,7 +38,7 @@ def chart_oms():
     # create_bar_plot(presence.keys(), presence.values())
     with open("output/open_metal_sites.csv", "w") as f:
         f.write('\n'.join(output_lines))
-    print(num_elements_with_open_sites)
+    print(dict(num_elements_with_open_sites))
 
 
 if __name__ == '__main__':

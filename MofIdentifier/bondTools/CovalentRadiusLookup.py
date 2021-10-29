@@ -127,6 +127,8 @@ data = {
     '*': 170,
     '%': 170,
 }
+smallest_r = None
+greatest_r = None
 
 
 def lookup(symbol):
@@ -134,6 +136,23 @@ def lookup(symbol):
         return data[symbol] / 100
     except KeyError:
         return 1.60
+
+
+def smallest_radius():
+    global smallest_r
+    if smallest_r is None:
+        # all_but_smallest_data = data.copy()
+        # del all_but_smallest_data['H']
+        # del all_but_smallest_data['He']
+        smallest_r = min(data.values()) / 100
+    return smallest_r
+
+
+def greatest_radius():
+    global greatest_r
+    if greatest_r is None:
+        greatest_r = max(data.values()) / 100
+    return greatest_r
 
 
 if __name__ == '__main__':
