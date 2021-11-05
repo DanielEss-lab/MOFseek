@@ -6,7 +6,7 @@ import CifFile.StarFile  # PyCifRW (4.4.3 works, but other versions should work 
 from CifFile import ReadCif
 
 from MofIdentifier.Molecules.MOF import MOF
-from MofIdentifier.Molecules.atom import Atom
+from MofIdentifier.Molecules.Atom import Atom
 
 
 def get_mof(filename):

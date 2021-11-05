@@ -2,7 +2,7 @@ import collections
 
 import MofIdentifier
 import copy
-from MofIdentifier.Molecules import atom
+from MofIdentifier.Molecules import Atom
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import XyzWriter
 from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
@@ -180,7 +180,7 @@ class SBUIdentifier:
     def get_clusters(self, tightness):
         clusters = list(())
         for atom in self.atoms:
-            if MofIdentifier.Molecules.atom.is_metal(atom.type_symbol) and not self.been_visited(atom):
+            if MofIdentifier.Molecules.Atom.is_metal(atom.type_symbol) and not self.been_visited(atom):
                 sbu = self.identify_cluster(atom)
                 if sbu.frequency == float('inf') and self.allow_two_steps:
                     if self.does_split_on_bridges(sbu, clusters, tightness):
@@ -226,7 +226,7 @@ class SBUIdentifier:
         atoms.add(metal_atom)
         self.mark_group(metal_atom, self.next_group_id)
         for neighbor in metal_atom.bondedAtoms:
-            if atom.is_metal(neighbor.type_symbol) and not self.been_visited(neighbor):
+            if Atom.is_metal(neighbor.type_symbol) and not self.been_visited(neighbor):
                 self.identify_cluster_recurse(neighbor, atoms)
         # The following section helps to identify more complex nodes by including metal atoms two steps away
         # It does this only when the intermediate molecule (usually Oxygen) ONLY connects to metals.
@@ -289,7 +289,7 @@ class SBUIdentifier:
         for neighbor in nonmetal_atom.bondedAtoms:
             if not self.been_visited(neighbor):
                 self.identify_ligand_recurse(neighbor, ligand_atoms, adjacent_cluster_ids)
-            elif atom.is_metal(neighbor.type_symbol):
+            elif Atom.is_metal(neighbor.type_symbol):
                 adjacent_cluster_ids.add(self.group_id_of(neighbor))
 
     def successfully_adds_to_cluster(self, atom):

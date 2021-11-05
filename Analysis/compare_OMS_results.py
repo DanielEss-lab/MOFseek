@@ -27,7 +27,7 @@ if __name__ == '__main__':
             label_with_extension = line[0:line.index(',')]
             label = label_with_extension[0:label_with_extension.rfind('.')]
             has_OMS = not 'no open' in line
-            if (control[label] and has_OMS):
+            if control[label] and has_OMS:
                 have_OMS += 1
             elif has_OMS:
                 mismatches.append((label, f'only we say that it has OMS'))

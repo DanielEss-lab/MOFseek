@@ -3,18 +3,21 @@ from math import floor
 
 import numpy as np
 
-from MofIdentifier.bondTools import Distances
+from MofIdentifier.bondTools import Distances, OpenMetalSites, CovalentRadiusLookup
+from collections import namedtuple
+from MofIdentifier.Molecules.Atom import Atom
 
-max_bond_length = 4
+max_bond_length = 4.1
 # max_bond_length 5.2 is a worst-case scenario that probably won't occur in most real mofs;
 # a more realistic (and still cautious) value would be ~3.5
 
 
 class MofBondCreator:
-    def __init__(self, atoms, angles, fractional_lengths, cartesian_lengths):
+    def __init__(self, atoms, angles, fractional_lengths, cartesian_lengths, volume):
         self.angles = angles
         self.lengths = fractional_lengths
-        self.atoms = atoms
+        self.atoms: list[Atom] = atoms
+        self.volume = volume
         # Floor the number of buckets to overestimate the size of buckets
         # to ensure we're comparing at all viable distances
         self.num_x_buckets = floor(cartesian_lengths[0] / max_bond_length) if cartesian_lengths[0] > max_bond_length else 1
@@ -34,7 +37,7 @@ class MofBondCreator:
             self.cellSpace[z_bucket][y_bucket][x_bucket].append(atom)
         self.error_margin = Distances.bond_length_multiplicative_error_margin
 
-    def get_bucket(self, z, y, x):
+    def get_bucket(self, z, y, x) -> list:
         bucket_belongs_to_unit_cell = True
         da, db, dc = 0, 0, 0
         if 0 <= z < self.num_z_buckets:
@@ -75,6 +78,7 @@ class MofBondCreator:
                     self.connect_within_space(this_space)
                     self.connect_within_spaces(this_space, spaces_to_compare)
         self.enforce_single_hydrogen_bonds()
+        self.fill_nearly_closed_metal_sites()
         self.undo_bad_metal_bonds()
 
     def get_spaces_adj_in_one_direction(self, x, y, z):
@@ -96,6 +100,23 @@ class MofBondCreator:
                      + self.get_bucket(z, y+1, x-1) \
                      + self.get_bucket(z+1, y-1, x+1) \
                      + self.get_bucket(z+1, y+1, x-1)
+        return near_space
+
+    def get_all_nearby_space(self, x, y, z):
+        near_space = self.get_bucket(z, y, x) \
+                     + self.get_bucket(z,   y,   x+1) + self.get_bucket(z,   y,   x-1) \
+                     + self.get_bucket(z,   y+1, x)   + self.get_bucket(z,   y-1, x)   \
+                     + self.get_bucket(z+1, y,   x)   + self.get_bucket(z-1, y,   x)   \
+                     + self.get_bucket(z,   y+1, x+1) + self.get_bucket(z,   y-1, x-1) \
+                     + self.get_bucket(z+1, y,   x+1) + self.get_bucket(z-1, y,   x-1) \
+                     + self.get_bucket(z+1, y+1, x)   + self.get_bucket(z-1, y-1, x)   \
+                     + self.get_bucket(z+1, y+1, x+1) + self.get_bucket(z-1, y-1, x-1) \
+                     + self.get_bucket(z-1, y,   x+1) + self.get_bucket(z+1, y,   x-1) \
+                     + self.get_bucket(z-1, y+1, x+1) + self.get_bucket(z+1, y-1, x-1) \
+                     + self.get_bucket(z-1, y+1, x)   + self.get_bucket(z+1, y-1, x)   \
+                     + self.get_bucket(z,   y+1, x-1) + self.get_bucket(z,   y-1, x+1) \
+                     + self.get_bucket(z+1, y-1, x+1) + self.get_bucket(z-1, y+1, x-1) \
+                     + self.get_bucket(z+1, y+1, x-1) + self.get_bucket(z-1, y-1, x+1)
         return near_space
 
     def connect_within_space(self, space):
@@ -138,6 +159,92 @@ class MofBondCreator:
     def reset(self):
         for atom in self.atoms:
             atom.bondedAtoms = []
+
+    # Sometimes a particular bond is larger than I can stretch my algorithms to allow, but is clearly there. The main
+    # indicator of this is assymetry in a metal's bonds, where it may see that there is an open metal site but really
+    # there's simply an atom that the metal is bonding but the algorithm didn't catch.
+    def fill_nearly_closed_metal_sites(self):
+        Moflike = namedtuple('Moflike', 'fractional_lengths angles unit_volume')
+        mof = Moflike(self.lengths, self.angles, self.volume)
+        open_site_metals = (atom for atom in self.atoms if OpenMetalSites.has_open_metal_site(atom, mof))
+        for atom in open_site_metals:
+            centroid = OpenMetalSites.center_of_bonded_atoms(atom, mof)
+            metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, self.angles, self.lengths)
+            if len(atom.bondedAtoms) == 4 and metal_to_center_distance < 0.1:
+                self.attempt_to_fill_antiplanar_sites(atom, mof)
+            else:
+                self.attempt_to_fill_countercenter_site(atom, centroid, metal_to_center_distance, mof)
+
+    def attempt_to_fill_countercenter_site(self, atom, centroid, metal_to_center_distance, mof):
+        centroid_opposite_dx = atom.x - centroid.x
+        centroid_opposite_dy = atom.y - centroid.y
+        centroid_opposite_dz = atom.z - centroid.z
+        # length = twice the covalent radius of the atom
+        estimated_distance = CovalentRadiusLookup.lookup(atom.type_symbol) * 1.5
+        if not 0.05 < metal_to_center_distance < 10:
+            print(metal_to_center_distance)
+        estimated_x = atom.x + centroid_opposite_dx / metal_to_center_distance * estimated_distance
+        estimated_y = atom.y + centroid_opposite_dy / metal_to_center_distance * estimated_distance
+        estimated_z = atom.z + centroid_opposite_dz / metal_to_center_distance * estimated_distance
+        estimate = Atom.from_cartesian('Estimate', None, estimated_x, estimated_y, estimated_z, mof)
+        filling_atom = self.atom_near(estimate, estimated_distance / 4, atom)
+        if filling_atom is not None:
+            atom.bondedAtoms.append(filling_atom)
+            filling_atom.bondedAtoms.append(atom)
+
+    def attempt_to_fill_antiplanar_sites(self, metal, mof):
+        dim_1_atom = metal.bondedAtoms[0]
+        dim_2_atom = None
+        for atom in metal.bondedAtoms:
+            dist_a = Distances.distance_across_unit_cells(atom, metal, self.angles, self.lengths)
+            dist_b = Distances.distance_across_unit_cells(dim_1_atom, metal, self.angles, self.lengths)
+            dist_c = Distances.distance_across_unit_cells(atom, dim_1_atom, self.angles, self.lengths)
+            arccos_input = (dist_a ** 2 + dist_b ** 2 - dist_c ** 2) / (2 * dist_a * dist_b)
+            if abs(abs(arccos_input) - 1) < 0.1:
+                continue
+            else:
+                dim_2_atom = atom
+                break
+        assert dim_2_atom is not None
+        v1 = np.array([metal.x - dim_1_atom.x, metal.y - dim_1_atom.y, metal.z - dim_1_atom.z])
+        v1 /= np.linalg.norm(v1)
+        v2 = np.array([metal.x - dim_2_atom.x, metal.y - dim_2_atom.y, metal.z - dim_2_atom.z])
+        v2 /= np.linalg.norm(v2)
+        v3 = np.cross(v1, v2)
+        v3 /= np.linalg.norm(v3)
+
+        estimated_distance = CovalentRadiusLookup.lookup(metal.type_symbol) * 1.6
+        estimated_x = metal.x + v3[0] * estimated_distance
+        estimated_y = metal.y + v3[1] * estimated_distance
+        estimated_z = metal.z + v3[2] * estimated_distance
+        estimate = Atom.from_cartesian('Estimate', None, estimated_x, estimated_y, estimated_z, mof)
+        filling_atom = self.atom_near(estimate, estimated_distance / 4, metal)
+        if filling_atom is not None:
+            metal.bondedAtoms.append(filling_atom)
+            filling_atom.bondedAtoms.append(metal)
+
+        estimated_x = metal.x - v3[0] * estimated_distance
+        estimated_y = metal.y - v3[1] * estimated_distance
+        estimated_z = metal.z - v3[2] * estimated_distance
+        estimate = Atom.from_cartesian('Estimate', None, estimated_x, estimated_y, estimated_z, mof)
+        filling_atom = self.atom_near(estimate, estimated_distance / 4, metal)
+        if filling_atom is not None:
+            metal.bondedAtoms.append(filling_atom)
+            filling_atom.bondedAtoms.append(metal)
+
+    def atom_near(self, spot: Atom, search_width, nonbonded_atom=None):
+        x_bucket = floor(spot.a * self.num_x_buckets)
+        y_bucket = floor(spot.b * self.num_y_buckets)
+        z_bucket = floor(spot.c * self.num_z_buckets)
+        viable_zone = self.get_all_nearby_space(x_bucket, y_bucket, z_bucket)
+        for possible_atom in viable_zone:
+            if nonbonded_atom is not None and possible_atom in nonbonded_atom.bondedAtoms:
+                continue
+            dist_from_estimate = Distances.distance_across_unit_cells(spot, possible_atom, self.angles,
+                                                                      self.lengths)
+            if dist_from_estimate < search_width:
+                return possible_atom
+
 
     # Sometimes two metals are close enough that the algorithm says they should be bonded, but from context they
     # definitely shouldn't be bonded. The main context is when they're bonded to another atom that's in between them.

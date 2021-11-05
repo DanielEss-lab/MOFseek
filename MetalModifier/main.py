@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 from MetalModifier import TetrahedronTools
-from MofIdentifier.Molecules.atom import Atom
+from MofIdentifier.Molecules.Atom import Atom
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import CifReader
 from MofIdentifier.subbuilding import SBUIdentifier

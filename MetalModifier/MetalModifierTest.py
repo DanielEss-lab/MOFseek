@@ -3,7 +3,7 @@ import unittest
 
 from MetalModifier import extract_cluster
 from MetalModifier.main import *
-from MofIdentifier.Molecules.atom import Atom
+from MofIdentifier.Molecules.Atom import Atom
 from MofIdentifier.fileIO import CifReader, XyzReader
 from MofIdentifier.subbuilding import SBUIdentifier
 

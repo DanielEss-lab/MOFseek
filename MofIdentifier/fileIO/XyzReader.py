@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 from MofIdentifier.Molecules.Ligand import Ligand
-from MofIdentifier.Molecules.atom import Atom
+from MofIdentifier.Molecules.Atom import Atom
 from MofIdentifier.SubGraphMatching import CustomWildcard
 from MofIdentifier.fileIO import XyzBondCreator
 

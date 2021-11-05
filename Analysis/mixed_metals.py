@@ -2,7 +2,7 @@ from matplotlib import pyplot as plt
 from collections import defaultdict
 
 from DAO import SBUDAO
-from MofIdentifier.Molecules.atom import Atom
+from MofIdentifier.Molecules.Atom import Atom
 
 
 def create_scatter_plot(x_values, y_values):

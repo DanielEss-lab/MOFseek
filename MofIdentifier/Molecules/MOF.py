@@ -1,5 +1,5 @@
 from MofIdentifier.Molecules import Molecule
-from MofIdentifier.Molecules.atom import conversion_to_Cartesian, is_metal
+from MofIdentifier.Molecules.Atom import conversion_to_Cartesian, is_metal
 from MofIdentifier.bondTools import SolventTools
 from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
 from MofIdentifier.subbuilding import SBUIdentifier
@@ -26,7 +26,7 @@ class MOF(Molecule.Molecule):
         self.unit_volume = length_x * length_y * length_z
         self.cartesian_lengths = (length_x, length_y, length_z)
 
-        bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths)
+        bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths, self.unit_volume)
         self._sbus = None
 
         for x in range(1, 5):  # try 4 times

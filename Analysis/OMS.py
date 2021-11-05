@@ -21,7 +21,8 @@ def create_bar_plot(x_values, y_values):
 
 
 def chart_oms():
-    output_lines = ['mof name, example OMS atom, example OMS atom bond number, example OMS atom distance from center of position, all metal atoms with open site']
+    output_lines = ['mof name, example OMS atom, example OMS atom bond number, example OMS atom distance from center '
+                    'of position, all metal atoms with open site']
     num_elements_with_open_sites = defaultdict(lambda: 0)
     for mof_d in MOFDAO.get_mof_iterator():
         mof = mof_d.get_mof()

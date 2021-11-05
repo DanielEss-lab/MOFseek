@@ -3,7 +3,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from DAO import MOFDAO
-from MofIdentifier.Molecules import atom
+from MofIdentifier.Molecules import Atom
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import XyzReader, LigandReader
 
@@ -34,7 +34,7 @@ def create_file_of_MOFs_with_MOMs():
     containing_mofs = ["mof label, metal(s)"]
     for mof_db in MOFDAO.get_mof_iterator():
         if 'MOM.xyz' in mof_db.ligand_names:
-            metals = [elem for elem in mof_db.elementsPresent if atom.is_metal(elem)]
+            metals = [elem for elem in mof_db.elementsPresent if Atom.is_metal(elem)]
             MOM_metal_strings = []
             for first_metal, second_metal in itertools.combinations_with_replacement(metals, 2):
                 metal_string = f'{first_metal}-O-{second_metal}'

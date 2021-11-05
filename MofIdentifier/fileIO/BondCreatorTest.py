@@ -5,6 +5,15 @@ from MofIdentifier.fileIO import CifReader
 
 
 class MyTestCase(unittest.TestCase):
+    def test_fill_nearly_closed_metal_sites(self):
+        complex_mof = CifReader.get_mof('../mofsForTests/ABEXEN_clean.cif')
+        In1 = None
+        for atom in complex_mof.atoms:
+            if atom.label == 'In1':
+                In1 = atom
+
+        self.assertEqual(8, len(In1.bondedAtoms))
+
     def test_breaking_metals_based_on_obvious_angles(self):
         complex_mof = CifReader.get_mof('../mofsForTests/YOJMAN_clean.cif')
         k4 = None

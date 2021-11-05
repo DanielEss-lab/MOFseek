@@ -1,4 +1,4 @@
-from MofIdentifier.Molecules import atom
+from MofIdentifier.Molecules import Atom
 import time
 
 
@@ -16,7 +16,7 @@ import time
 def elements_are_compatible(elem_1, elem_2, additional_wildcards):
     return elem_1 == elem_2 \
            or elem_1 == '*' or elem_2 == '*' \
-           or (elem_1 == '%' and atom.is_metal(elem_2)) or (elem_2 == '%' and atom.is_metal(elem_1)) \
+           or (elem_1 == '%' and Atom.is_metal(elem_2)) or (elem_2 == '%' and Atom.is_metal(elem_1)) \
            or (elem_1 == '#' and (elem_2 == 'H' or elem_2 == 'C')) \
            or (elem_2 == '#' and (elem_1 == 'H' or elem_1 == 'C')) \
            or (elem_1 in additional_wildcards and additional_wildcards[elem_1].matches(elem_2)) \
@@ -70,7 +70,7 @@ def element_in_mof(element, mof):
     elif element[0] == '#':
         return any(elem == 'H' or elem == 'C' for elem in mof.elementsPresent)
     elif element[0] == '%':
-        return any(atom.is_metal(elem) for elem in mof.elementsPresent)
+        return any(Atom.is_metal(elem) for elem in mof.elementsPresent)
     else:
         return element in mof.elementsPresent
 

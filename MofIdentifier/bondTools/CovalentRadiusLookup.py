@@ -156,6 +156,6 @@ def greatest_radius():
 
 
 if __name__ == '__main__':
-    radius_1 = lookup('N')
-    radius_2 = lookup('K')
+    radius_1 = lookup('In')
+    radius_2 = lookup('O')
     print((radius_1 + radius_2) * 1.10 + 0.05)

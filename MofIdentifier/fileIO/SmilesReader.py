@@ -1,7 +1,7 @@
 from pysmiles import read_smiles
 
 from MofIdentifier.Molecules.Ligand import Ligand
-from MofIdentifier.Molecules.atom import Atom
+from MofIdentifier.Molecules.Atom import Atom
 from MofIdentifier.SubGraphMatching import CustomWildcard
 
 OPEN_MARK_REPLACEMENT = 'z'
