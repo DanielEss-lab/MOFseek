@@ -21,19 +21,17 @@ def create_bar_plot(x_values, y_values):
 
 
 def chart_oms():
-    output_lines = ['mof name, example OMS atom, example OMS atom bond number, example OMS atom distance from center '
-                    'of position, all metal atoms with open site']
+    output_lines = ['mof name, num atoms with OMS, all metal atoms with open site(s)']
     num_elements_with_open_sites = defaultdict(lambda: 0)
     for mof_d in MOFDAO.get_mof_iterator():
         mof = mof_d.get_mof()
-        atoms_with_oms, example_atom, example_num_bonds, example_d = OpenMetalSites.process(mof, True)
-        if example_atom is None:
+        if len(mof.open_metal_sites) == 0:
             output_lines.append(f'{mof.label}, no open metal sites detected')
         else:
-            output_lines.append(f'{mof.label}, {example_atom.label if example_atom is not None else None}, '
-                                f'{example_num_bonds}, {example_d}, {" ".join([atom.label for atom in atoms_with_oms])}')
+            output_lines.append(f'{mof.label}, {len(mof.open_metal_sites)}, '
+                                f'{" ".join([atom.label for atom in mof.open_metal_sites])}')
         elements_open = set()
-        for atom in atoms_with_oms:
+        for atom in mof.open_metal_sites:
             elements_open.add(atom.type_symbol)
         num_elements_with_open_sites[len(elements_open)] += 1
     # create_bar_plot(presence.keys(), presence.values())

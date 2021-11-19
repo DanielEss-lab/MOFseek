@@ -30,7 +30,7 @@ class MOF(Molecule.Molecule):
         self._sbus = None
 
         for x in range(1, 5):  # try 4 times
-            bond_creator.connect_atoms()
+            self.open_metal_sites = bond_creator.connect_atoms()
             try:
                 components = SolventTools.get_connected_components(self.atoms)
                 atoms = []

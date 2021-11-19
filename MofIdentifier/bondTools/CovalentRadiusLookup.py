@@ -6,7 +6,7 @@ data = {
     'B': 85,
     'C': 76,
     'N': 71,
-    'O': 66,
+    'O': 71, # 66?
     'F': 64,
     'Ne': 67,
     'Na': 166,
@@ -156,6 +156,6 @@ def greatest_radius():
 
 
 if __name__ == '__main__':
-    radius_1 = lookup('In')
+    radius_1 = lookup('Zn')
     radius_2 = lookup('O')
     print((radius_1 + radius_2) * 1.10 + 0.05)

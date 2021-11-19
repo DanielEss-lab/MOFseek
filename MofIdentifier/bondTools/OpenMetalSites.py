@@ -6,7 +6,7 @@ import numpy as np
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import CifReader
 
-ACCEPTABLE_DISTANCE_ERROR = 0.70  # Increasing distance makes it harder for a metal to qualify as having open sites
+ACCEPTABLE_DISTANCE_ERROR = 0.40  # Increasing distance makes it harder for a metal to qualify as having open sites
 ACCEPTABLE_ANGLE_ERROR = 20
 TETRAHEDRON_ANGLE = 110
 
@@ -36,7 +36,7 @@ def has_open_metal_site(atom, mof):
         centroid = center_of_bonded_atoms(atom, mof)
         metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, mof.angles,
                                                                         mof.fractional_lengths)
-        if metal_to_center_distance - 0.08 * max(0, len(atom.bondedAtoms) - 5) > distance_cutoff_for(atom.type_symbol):
+        if metal_to_center_distance > distance_cutoff_for(atom.type_symbol):
             return True
         elif len(atom.bondedAtoms) == 4:
             # A metal with 4 bonds might have open sites even if the bonded atom directions all cancel out spatially
@@ -49,7 +49,7 @@ def has_open_metal_site(atom, mof):
 
 def center_of_bonded_atoms(atom, mof):
     bonded_atoms = [Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
-                    for bonded_atom in atom.bondedAtoms]
+                    for bonded_atom in collapsed_bonds(atom)]
     unfiltered_unit_vectors = [unit_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
     unit_vectors = [v for v in unfiltered_unit_vectors if v is not None]
     assert (all(0.98 < v[0] ** 2 + v[1] ** 2 + v[2] ** 2 < 1.02 for v in unit_vectors))
@@ -59,6 +59,24 @@ def center_of_bonded_atoms(atom, mof):
     return atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
                                centeroid_relative_y + atom.y,
                                centeroid_relative_z + atom.z, mof)
+
+
+#For example, the nitrogen ligands on the Tb atoms in LOQSOA_clean
+def collapsed_bonds(metal):
+    collapsed_bonds = []
+    neighbors = metal.bondedAtoms.copy()
+    while len(neighbors) > 0:
+        neighbor = neighbors.pop()
+        if neighbor.type_symbol == 'O':
+            if len(neighbor.bondedAtoms) == 2:
+                center_of_bonds = [atom for atom in neighbor.bondedAtoms if atom != metal][0]
+                neighbors_to_both = [atom for atom in center_of_bonds.bondedAtoms if atom in metal.bondedAtoms and
+                             atom.type_symbol == 'O' and len(atom.bondedAtoms) == 2]
+                if len(neighbors_to_both) == 2:
+                    collapsed_bonds.append(center_of_bonds)
+                    continue
+        collapsed_bonds.append(neighbor)
+    return collapsed_bonds
 
 
 def unit_vectorize_bond(atom, bonded_atom):
@@ -101,12 +119,12 @@ def distance_cutoff_for(type_symbol: str):
     covalent_radius = CovalentRadiusLookup.lookup(type_symbol)
     normalized_radius = (covalent_radius - CovalentRadiusLookup.smallest_radius()) \
                         / (CovalentRadiusLookup.greatest_radius() - CovalentRadiusLookup.smallest_radius())
-    multiplier = normalized_radius
+    multiplier = 0.25 + normalized_radius
     return multiplier * ACCEPTABLE_DISTANCE_ERROR
 
 
 if __name__ == '__main__':
-    mof = CifReader.get_mof(r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ACOGEF_clean.cif")
+    mof = CifReader.get_mof(r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ac403674p_si_001_clean.cif")
     print(mof.sbus().clusters)
     atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance = process(mof, True)
     print(*atoms_with_open_metal_sites)
