@@ -32,6 +32,29 @@ class MyTestCase(unittest.TestCase):
         self.assertIn(w21, o65.bondedAtoms)
         self.assertIn(k4, o65.bondedAtoms)
 
+    def test_breaking_nonmetal_bonds(self):
+        mof = CifReader.get_mof('../mofsForTests/LOQSOA_clean.cif')
+        tb1 = None
+        n6 = None
+        o12 = None
+        o13 = None
+        for atom in mof.atoms:
+            if atom.label == 'Tb1':
+                tb1 = atom
+            if atom.label == 'N6':
+                n6 = atom
+            if atom.label == 'O12':
+                o12 = atom
+            if atom.label == 'O13':
+                o13 = atom
+
+        self.assertNotIn(tb1, n6.bondedAtoms)
+        self.assertNotIn(n6, tb1.bondedAtoms)
+        self.assertIn(n6, o12.bondedAtoms)
+        self.assertIn(tb1, o12.bondedAtoms)
+        self.assertIn(n6, o13.bondedAtoms)
+        self.assertIn(tb1, o13.bondedAtoms)
+
     def test_arccos(self):
         mof = CifReader.get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\AKUHOD01_clean.cif')
         Gd2 = None

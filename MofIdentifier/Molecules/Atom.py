@@ -84,6 +84,13 @@ class Atom:
         return cls(label, type_symbol, float('inf'), float('inf'), float('inf'), float('inf'), float('inf'),
                    float('inf'))
 
+    @classmethod
+    def center_of(cls, atoms, mof):
+        x = sum(a.x for a in atoms)/len(atoms)
+        y = sum(a.y for a in atoms)/len(atoms)
+        z = sum(a.z for a in atoms)/len(atoms)
+        return cls.from_cartesian('Centroid', None, x, y, z, mof)
+
     def __str__(self):
         bonds_string = ''
         for atom in self.bondedAtoms:

@@ -6,7 +6,7 @@ import numpy as np
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import CifReader
 
-ACCEPTABLE_DISTANCE_ERROR = 0.40  # Increasing distance makes it harder for a metal to qualify as having open sites
+ACCEPTABLE_DISTANCE_ERROR = 0.45  # Increasing distance makes it harder for a metal to qualify as having open sites
 ACCEPTABLE_ANGLE_ERROR = 20
 TETRAHEDRON_ANGLE = 110
 
@@ -36,7 +36,7 @@ def has_open_metal_site(atom, mof):
         centroid = center_of_bonded_atoms(atom, mof)
         metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, mof.angles,
                                                                         mof.fractional_lengths)
-        if metal_to_center_distance > distance_cutoff_for(atom.type_symbol):
+        if metal_to_center_distance > distance_cutoff_for(atom.type_symbol, len(atom.bondedAtoms)):
             return True
         elif len(atom.bondedAtoms) == 4:
             # A metal with 4 bonds might have open sites even if the bonded atom directions all cancel out spatially
@@ -61,7 +61,7 @@ def center_of_bonded_atoms(atom, mof):
                                centeroid_relative_z + atom.z, mof)
 
 
-#For example, the nitrogen ligands on the Tb atoms in LOQSOA_clean
+# For example, the nitrogen ligands on the Tb atoms in LOQSOA_clean
 def collapsed_bonds(metal):
     collapsed_bonds = []
     neighbors = metal.bondedAtoms.copy()
@@ -115,24 +115,30 @@ def all_angles_around(atom, mof):
     return angles
 
 
-def distance_cutoff_for(type_symbol: str):
+def distance_cutoff_for(type_symbol: str, num_ligands):
     covalent_radius = CovalentRadiusLookup.lookup(type_symbol)
-    normalized_radius = (covalent_radius - CovalentRadiusLookup.smallest_radius()) \
-                        / (CovalentRadiusLookup.greatest_radius() - CovalentRadiusLookup.smallest_radius())
-    multiplier = 0.25 + normalized_radius
+    multiplier = (0.08 * num_ligands) + normalized_radius(covalent_radius)
     return multiplier * ACCEPTABLE_DISTANCE_ERROR
 
 
-if __name__ == '__main__':
-    mof = CifReader.get_mof(r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ac403674p_si_001_clean.cif")
-    print(mof.sbus().clusters)
-    atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance = process(mof, True)
-    print(*atoms_with_open_metal_sites)
-    print(example_atom)
-    print(example_num_bonds)
-    print(example_distance)
+def normalized_radius(covalent_radius):
+    return (covalent_radius - CovalentRadiusLookup.smallest_radius())/(CovalentRadiusLookup.greatest_radius() - CovalentRadiusLookup.smallest_radius())
 
-    # print(CovalentRadiusLookup.greatest_radius())
-    # print(CovalentRadiusLookup.smallest_radius())
+
+if __name__ == '__main__':
+    # mof = CifReader.get_mof(r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ac403674p_si_001_clean.cif")
+    # print(mof.sbus().clusters)
+    # atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance = process(mof, True)
+    # print(*atoms_with_open_metal_sites)
+    # print(example_atom)
+    # print(example_num_bonds)
+    # print(example_distance)
+
+    print(CovalentRadiusLookup.greatest_radius())
+    print(CovalentRadiusLookup.smallest_radius())
+    symbol = 'Zr'
+    print(f"{symbol}:\tradius {CovalentRadiusLookup.lookup(symbol)},\tnormalized radius "
+          f"{normalized_radius(CovalentRadiusLookup.lookup(symbol))},\tcutoff 4 ligands "
+          f"{distance_cutoff_for(symbol, 4)},\tcutoff 8 ligands {distance_cutoff_for(symbol, 8)}\n\n---\n")
     # for symbol, radius in CovalentRadiusLookup.data.items():
-    #     print(f"{symbol}:\tradius {radius},\tcutoff {distance_cutoff_for(symbol)}")
+    #     print(f"{symbol}:\tradius {radius},\tcutoff {distance_cutoff_for(symbol, 6)}")

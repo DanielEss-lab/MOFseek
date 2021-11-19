@@ -2,11 +2,28 @@ import numpy as np
 
 from MofIdentifier.bondTools import Distances
 
+max_bond_breakup_angle_margin = 0.88  # About a 50 degree angle
+bond_breakup_angle_margin = 2.04  # About a 120 degree angle
+# bond_breakup_angle_margin of 2.09 or greater breaks test_abnormal_fractional_coordinates in SBUIdentifierTest
 
-def angle(end_a, middle, end_b, angles, lengths):
+
+def mof_angle(end_a, middle, end_b, angles, lengths):
     dist_a = Distances.distance_across_unit_cells(end_a, middle, angles, lengths)
     dist_b = Distances.distance_across_unit_cells(end_b, middle, angles, lengths)
     dist_c = Distances.distance_across_unit_cells(end_a, end_b, angles, lengths)
+    if dist_a < 0.005 or dist_b < 0.005:
+        return float('NaN')
+    arccos_input = (dist_a ** 2 + dist_b ** 2 - dist_c ** 2) / (2 * dist_a * dist_b)
+    if arccos_input > 1 or arccos_input < -1:
+        return float('NaN')
+    c_angle = np.arccos(arccos_input)
+    return c_angle
+
+
+def angle(end_a, middle, end_b):
+    dist_a = Distances.distance(end_a, middle)
+    dist_b = Distances.distance(end_b, middle)
+    dist_c = Distances.distance(end_a, end_b)
     if dist_a < 0.005 or dist_b < 0.005:
         return float('NaN')
     arccos_input = (dist_a ** 2 + dist_b ** 2 - dist_c ** 2) / (2 * dist_a * dist_b)

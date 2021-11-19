@@ -1,28 +1,32 @@
-import itertools
 from math import floor
-
-import numpy as np
 
 from MofIdentifier.bondTools import Distances, OpenMetalSites, CovalentRadiusLookup, Angles
 from collections import namedtuple
 from MofIdentifier.Molecules.Atom import Atom
 
 max_bond_length = 4.1
+
+
 # max_bond_length 5.2 is a worst-case scenario that probably won't occur in most real mofs;
 # a more realistic (and still cautious) value would be ~3.5
 
 
 class MofBondCreator:
     def __init__(self, atoms, angles, fractional_lengths, cartesian_lengths, volume):
+        Moflike = namedtuple('Moflike', 'fractional_lengths angles unit_volume')
         self.angles = angles
         self.lengths = fractional_lengths
         self.atoms: list[Atom] = atoms
         self.volume = volume
+        self.mof = Moflike(self.lengths, self.angles, self.volume)
         # Floor the number of buckets to overestimate the size of buckets
         # to ensure we're comparing at all viable distances
-        self.num_x_buckets = floor(cartesian_lengths[0] / max_bond_length) if cartesian_lengths[0] > max_bond_length else 1
-        self.num_y_buckets = floor(cartesian_lengths[1] / max_bond_length) if cartesian_lengths[1] > max_bond_length else 1
-        self.num_z_buckets = floor(cartesian_lengths[2] / max_bond_length) if cartesian_lengths[2] > max_bond_length else 1
+        self.num_x_buckets = floor(cartesian_lengths[0] / max_bond_length) if cartesian_lengths[
+                                                                                  0] > max_bond_length else 1
+        self.num_y_buckets = floor(cartesian_lengths[1] / max_bond_length) if cartesian_lengths[
+                                                                                  1] > max_bond_length else 1
+        self.num_z_buckets = floor(cartesian_lengths[2] / max_bond_length) if cartesian_lengths[
+                                                                                  2] > max_bond_length else 1
         self.cellSpace = [[[list(()) for _ in range(self.num_x_buckets)] for _ in range(self.num_y_buckets)]
                           for _ in range(self.num_z_buckets)]
         # To calculate accurate distances, and therefore to calculate the number of partitions in the 3D space,
@@ -79,7 +83,6 @@ class MofBondCreator:
                     self.connect_within_spaces(this_space, spaces_to_compare)
         self.enforce_single_hydrogen_bonds()
         open_metal_sites = self.fill_nearly_closed_metal_sites()
-        self.undo_bad_metal_bonds()
         return open_metal_sites
 
     def get_spaces_adj_in_one_direction(self, x, y, z):
@@ -88,41 +91,41 @@ class MofBondCreator:
         # each square with the square to its right, you don't also need to compare each square with the square to
         # its left. The following code makes use of that principle except in 3Dspace. These 13, their opposites,
         # and the cube itself comprise the entire 3x3x3 region. This way, no comparison happens twice.
-        near_space = self.get_bucket(z, y, x+1) \
-                     + self.get_bucket(z, y+1, x) \
-                     + self.get_bucket(z+1, y, x) \
-                     + self.get_bucket(z, y+1, x+1) \
-                     + self.get_bucket(z+1, y, x+1) \
-                     + self.get_bucket(z+1, y+1, x) \
-                     + self.get_bucket(z+1, y+1, x+1) \
-                     + self.get_bucket(z-1, y, x+1) \
-                     + self.get_bucket(z-1, y+1, x+1) \
-                     + self.get_bucket(z-1, y+1, x) \
-                     + self.get_bucket(z, y+1, x-1) \
-                     + self.get_bucket(z+1, y-1, x+1) \
-                     + self.get_bucket(z+1, y+1, x-1)
+        near_space = self.get_bucket(z, y, x + 1) \
+                     + self.get_bucket(z, y + 1, x) \
+                     + self.get_bucket(z + 1, y, x) \
+                     + self.get_bucket(z, y + 1, x + 1) \
+                     + self.get_bucket(z + 1, y, x + 1) \
+                     + self.get_bucket(z + 1, y + 1, x) \
+                     + self.get_bucket(z + 1, y + 1, x + 1) \
+                     + self.get_bucket(z - 1, y, x + 1) \
+                     + self.get_bucket(z - 1, y + 1, x + 1) \
+                     + self.get_bucket(z - 1, y + 1, x) \
+                     + self.get_bucket(z, y + 1, x - 1) \
+                     + self.get_bucket(z + 1, y - 1, x + 1) \
+                     + self.get_bucket(z + 1, y + 1, x - 1)
         return near_space
 
     def get_all_nearby_space(self, x, y, z):
         near_space = self.get_bucket(z, y, x) \
-                     + self.get_bucket(z,   y,   x+1) + self.get_bucket(z,   y,   x-1) \
-                     + self.get_bucket(z,   y+1, x)   + self.get_bucket(z,   y-1, x)   \
-                     + self.get_bucket(z+1, y,   x)   + self.get_bucket(z-1, y,   x)   \
-                     + self.get_bucket(z,   y+1, x+1) + self.get_bucket(z,   y-1, x-1) \
-                     + self.get_bucket(z+1, y,   x+1) + self.get_bucket(z-1, y,   x-1) \
-                     + self.get_bucket(z+1, y+1, x)   + self.get_bucket(z-1, y-1, x)   \
-                     + self.get_bucket(z+1, y+1, x+1) + self.get_bucket(z-1, y-1, x-1) \
-                     + self.get_bucket(z-1, y,   x+1) + self.get_bucket(z+1, y,   x-1) \
-                     + self.get_bucket(z-1, y+1, x+1) + self.get_bucket(z+1, y-1, x-1) \
-                     + self.get_bucket(z-1, y+1, x)   + self.get_bucket(z+1, y-1, x)   \
-                     + self.get_bucket(z,   y+1, x-1) + self.get_bucket(z,   y-1, x+1) \
-                     + self.get_bucket(z+1, y-1, x+1) + self.get_bucket(z-1, y+1, x-1) \
-                     + self.get_bucket(z+1, y+1, x-1) + self.get_bucket(z-1, y-1, x+1)
+                     + self.get_bucket(z, y, x + 1) + self.get_bucket(z, y, x - 1) \
+                     + self.get_bucket(z, y + 1, x) + self.get_bucket(z, y - 1, x) \
+                     + self.get_bucket(z + 1, y, x) + self.get_bucket(z - 1, y, x) \
+                     + self.get_bucket(z, y + 1, x + 1) + self.get_bucket(z, y - 1, x - 1) \
+                     + self.get_bucket(z + 1, y, x + 1) + self.get_bucket(z - 1, y, x - 1) \
+                     + self.get_bucket(z + 1, y + 1, x) + self.get_bucket(z - 1, y - 1, x) \
+                     + self.get_bucket(z + 1, y + 1, x + 1) + self.get_bucket(z - 1, y - 1, x - 1) \
+                     + self.get_bucket(z - 1, y, x + 1) + self.get_bucket(z + 1, y, x - 1) \
+                     + self.get_bucket(z - 1, y + 1, x + 1) + self.get_bucket(z + 1, y - 1, x - 1) \
+                     + self.get_bucket(z - 1, y + 1, x) + self.get_bucket(z + 1, y - 1, x) \
+                     + self.get_bucket(z, y + 1, x - 1) + self.get_bucket(z, y - 1, x + 1) \
+                     + self.get_bucket(z + 1, y - 1, x + 1) + self.get_bucket(z - 1, y + 1, x - 1) \
+                     + self.get_bucket(z + 1, y + 1, x - 1) + self.get_bucket(z - 1, y - 1, x + 1)
         return near_space
 
     def connect_within_space(self, space):
         for i in range(len(space)):
-            for j in range(i+1, len(space)):
+            for j in range(i + 1, len(space)):
                 self.compare_for_bond(space[i], space[j])
 
     def connect_within_spaces(self, space_a, space_b):
@@ -133,11 +136,47 @@ class MofBondCreator:
     def compare_for_bond(self, atom_a, atom_b):
         dist = Distances.distance(atom_a, atom_b)
         if Distances.is_bond_distance(dist, atom_a, atom_b, self.error_margin):
-            if not atom_a.is_in_unit_cell() or not atom_b.is_in_unit_cell():
-                if not atom_a.is_in_unit_cell() and not atom_b.is_in_unit_cell():
-                    raise Exception
-            atom_a.bondedAtoms.append(atom_b)
-            atom_b.bondedAtoms.append(atom_a)
+            if not self.is_blocked_bond(atom_a, atom_b):
+                atom_a.bondedAtoms.append(atom_b)
+                atom_b.bondedAtoms.append(atom_a)
+                self.break_blocked_bonds(atom_a, atom_b)
+
+    def is_blocked_bond(self, atom_a, atom_b):
+        # Sometimes two atoms are close enough that distance says they should be bonded, but from context they
+        # clearly shouldn't be bonded, ie when they're bonded to another atom that's in between them.
+        triangling_atoms = [Distances.move_neighbor_if_distant(atom_a, atom, self.angles, self.lengths)
+                            for atom in atom_a.bondedAtoms if atom in atom_b.bondedAtoms]
+        between_atoms = {atom: Angles.mof_angle(atom_a, atom, atom_b, self.angles, self.lengths) for atom in
+                         triangling_atoms if Angles.mof_angle(atom_a, atom, atom_b, self.angles, self.lengths) >
+                         Angles.max_bond_breakup_angle_margin}
+        # The wider the angle, the more directly the connector is in between the metals.
+        if len(between_atoms) > 0:
+            if any(angle > Angles.bond_breakup_angle_margin for angle in between_atoms.values()):
+                return True
+            if len(between_atoms) > 1:
+                # try combining the best two, then best three, etc. to see if their combined locations block the bond
+                possible_blocks = list(between_atoms.items())
+                possible_blocks.sort(key=lambda e: e[1], reverse=True)
+                for i in range(1, len(between_atoms)):
+                    best_blocks_here = [tup[0] for tup in possible_blocks[0:i+1]]
+                    center = Atom.center_of(best_blocks_here, self.mof)
+                    if Angles.mof_angle(atom_a, center, atom_b, self.angles, self.lengths) > \
+                            Angles.bond_breakup_angle_margin:
+                        return True
+        return False
+
+    def break_blocked_bonds(self, atom_a, atom_b):
+        # if adding a bond between atom a and atom b has caused a previously established bond to be blocked
+        # (as per definition of blocked_bond() above), we need to undo that previous bond.
+        triangling_atoms = [Distances.move_neighbor_if_distant(atom_a, atom, self.angles, self.lengths)
+                            for atom in atom_a.bondedAtoms if atom in atom_b.bondedAtoms]
+        for atom in triangling_atoms:
+            if self.is_blocked_bond(atom_a, atom):
+                atom_a.bondedAtoms.remove(atom)
+                atom.bondedAtoms.remove(atom_a)
+            elif self.is_blocked_bond(atom_b, atom):
+                atom_b.bondedAtoms.remove(atom)
+                atom.bondedAtoms.remove(atom_b)
 
     def enforce_single_hydrogen_bonds(self):
         for atom in self.atoms:
@@ -166,16 +205,14 @@ class MofBondCreator:
     # there's simply an atom that the metal is bonding but the algorithm didn't catch.
     def fill_nearly_closed_metal_sites(self):
         open_metal_sites = list()
-        Moflike = namedtuple('Moflike', 'fractional_lengths angles unit_volume')
-        mof = Moflike(self.lengths, self.angles, self.volume)
-        open_site_metals = (atom for atom in self.atoms if OpenMetalSites.has_open_metal_site(atom, mof))
+        open_site_metals = (atom for atom in self.atoms if OpenMetalSites.has_open_metal_site(atom, self.mof))
         for atom in open_site_metals:
-            centroid = OpenMetalSites.center_of_bonded_atoms(atom, mof)
+            centroid = OpenMetalSites.center_of_bonded_atoms(atom, self.mof)
             metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, self.angles, self.lengths)
             if len(atom.bondedAtoms) == 4 and metal_to_center_distance < 0.1:
-                self.attempt_to_fill_antiplanar_sites(atom, mof)
+                self.attempt_to_fill_antiplanar_sites(atom, self.mof)
             else:
-                self.attempt_to_fill_countercenter_site(atom, centroid, metal_to_center_distance, mof)
+                self.attempt_to_fill_countercenter_site(atom, centroid, metal_to_center_distance, self.mof)
             if atom.open_metal_site:
                 open_metal_sites.append(atom)
         return open_metal_sites
@@ -206,7 +243,7 @@ class MofBondCreator:
         viable_zone = self.get_all_nearby_space(x_bucket, y_bucket, z_bucket)
         atoms_to_add = set()
         for possible_atom in viable_zone:
-            if all(85 < Angles.degrees(Angles.angle(neighbor, metal, possible_atom, mof.angles, mof.fractional_lengths))
+            if all(85 < Angles.degrees(Angles.mof_angle(neighbor, metal, possible_atom, mof.angles, mof.fractional_lengths))
                    < 95 for neighbor in metal.bondedAtoms):
                 distance_from_metal = Distances.distance_across_unit_cells(metal, possible_atom,
                                                                            self.angles, self.lengths)
@@ -230,26 +267,3 @@ class MofBondCreator:
                                                                       self.lengths)
             if dist_from_estimate < search_width:
                 return possible_atom
-
-
-    # Sometimes two metals are close enough that the algorithm says they should be bonded, but from context they
-    # definitely shouldn't be bonded. The main context is when they're bonded to another atom that's in between them.
-    def undo_bad_metal_bonds(self):
-        metals = (atom for atom in self.atoms if atom.is_metal())
-        for metal_a, metal_b in itertools.combinations(metals, 2):
-            if metal_a in metal_b.bondedAtoms:
-                if self.blocked_bond(metal_a, metal_b):
-                    metal_a.bondedAtoms.remove(metal_b)
-                    metal_b.bondedAtoms.remove(metal_a)
-
-    def blocked_bond(self, metal_a, metal_b):
-        for connecting_atom in metal_a.bondedAtoms:
-            if connecting_atom.is_metal():
-                continue
-            if metal_b in connecting_atom.bondedAtoms:
-                angle = Angles.angle(metal_a, connecting_atom, metal_b, self.angles, self.lengths)
-                if angle == float('NaN'):
-                    continue
-                # The wider the angle, the more directly the connector is in between the metals.
-                if angle > Distances.metal_bond_breakup_angle_margin:
-                    return True

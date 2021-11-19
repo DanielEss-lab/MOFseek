@@ -4,7 +4,6 @@ from MofIdentifier.bondTools.CovalentRadiusLookup import lookup
 
 bond_length_flat_error_margin = 0.05
 bond_length_multiplicative_error_margin = 1.10
-metal_bond_breakup_angle_margin = 0.88  # About a 45 degree angle
 
 
 def distance(a, b):
