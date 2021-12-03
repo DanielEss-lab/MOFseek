@@ -3,12 +3,33 @@ import math
 
 import numpy as np
 
+from MofIdentifier.Molecules.Atom import Atom
+from MofIdentifier.Molecules.Ligand import Ligand
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
-from MofIdentifier.fileIO import CifReader
+from MofIdentifier.fileIO import CifReader, XyzWriter
 
-ACCEPTABLE_DISTANCE_ERROR = 0.45  # Increasing distance makes it harder for a metal to qualify as having open sites
+ACCEPTABLE_DISTANCE_ERROR = 0.40  # Increasing distance makes it harder for a metal to qualify as having open sites
 ACCEPTABLE_ANGLE_ERROR = 20
 TETRAHEDRON_ANGLE = 110
+
+
+def write_estimate(atom, centroid, estimate, name):
+    atoms = list()
+    atoms.append(atom)
+    atoms.extend([Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
+                  for bonded_atom in atom.bondedAtoms])
+    atoms.append(Atom.copy_with_different_type(centroid, 'Si'))
+    estimate_symbol = 'He' if atom.open_metal_site else 'Xe'
+    atoms.append(Atom.copy_with_different_type(estimate, estimate_symbol))
+    mol = Ligand("temp", atoms, None)
+    XyzWriter.write_molecule_to_file(fr"C:\Users\mdavid4\Downloads\{name}.xyz", mol, name)
+
+
+def write_atom_in_mof(atom_label, mof, name):
+    for atom in mof.atoms:
+        if atom.label == atom_label:
+            centroid = center_of_bonded_atoms(atom, mof)
+            write_estimate(atom, centroid, estimated_bond_site(atom, centroid, mof), name)
 
 
 def process(mof, verbose=False):
@@ -36,20 +57,26 @@ def has_open_metal_site(atom, mof):
         centroid = center_of_bonded_atoms(atom, mof)
         metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, mof.angles,
                                                                         mof.fractional_lengths)
-        if metal_to_center_distance > distance_cutoff_for(atom.type_symbol, len(atom.bondedAtoms)):
+        cutoff = distance_cutoff_for(atom.type_symbol, len(atom.bondedAtoms))
+        if metal_to_center_distance > cutoff:
             return True
         elif len(atom.bondedAtoms) == 4:
             # A metal with 4 bonds might have open sites even if the bonded atom directions all cancel out spatially
-            angles = all_angles_around(atom, mof)
-            avg_angle_deviation = sum(abs(angle - TETRAHEDRON_ANGLE) for angle in angles) / len(angles)
-            if avg_angle_deviation > ACCEPTABLE_ANGLE_ERROR:
-                return True  # square planar; open metal sites
-            else:
-                return False  # tetrahedral shape; no open metal site
+            return square_planar_angles(atom, mof)
+
+
+def square_planar_angles(atom, mof):
+    angles = all_angles_around(atom, mof)
+    avg_angle_deviation = sum(abs(angle - TETRAHEDRON_ANGLE) for angle in angles) / len(angles)
+    if avg_angle_deviation > ACCEPTABLE_ANGLE_ERROR:
+        return True  # square planar; open metal sites
+    else:
+        return False  # tetrahedral shape; no open metal site
+
 
 def center_of_bonded_atoms(atom, mof):
     bonded_atoms = [Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
-                    for bonded_atom in collapsed_bonds(atom)]
+                    for bonded_atom in atom.bondedAtoms]
     unfiltered_unit_vectors = [unit_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
     unit_vectors = [v for v in unfiltered_unit_vectors if v is not None]
     assert (all(0.98 < v[0] ** 2 + v[1] ** 2 + v[2] ** 2 < 1.02 for v in unit_vectors))
@@ -59,24 +86,27 @@ def center_of_bonded_atoms(atom, mof):
     return atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
                                centeroid_relative_y + atom.y,
                                centeroid_relative_z + atom.z, mof)
+    # assert len(bonded_atoms) != 0
+    # average_x = sum(v.x for v in bonded_atoms) / len(bonded_atoms)
+    # average_y = sum(v.y for v in bonded_atoms) / len(bonded_atoms)
+    # average_z = sum(v.z for v in bonded_atoms) / len(bonded_atoms)
+    # return atom.from_cartesian('Centroid', None, average_x, average_y, average_z, mof)
 
 
-# For example, the nitrogen ligands on the Tb atoms in LOQSOA_clean
-def collapsed_bonds(metal):
-    collapsed_bonds = []
-    neighbors = metal.bondedAtoms.copy()
-    while len(neighbors) > 0:
-        neighbor = neighbors.pop()
-        if neighbor.type_symbol == 'O':
-            if len(neighbor.bondedAtoms) == 2:
-                center_of_bonds = [atom for atom in neighbor.bondedAtoms if atom != metal][0]
-                neighbors_to_both = [atom for atom in center_of_bonds.bondedAtoms if atom in metal.bondedAtoms and
-                             atom.type_symbol == 'O' and len(atom.bondedAtoms) == 2]
-                if len(neighbors_to_both) == 2:
-                    collapsed_bonds.append(center_of_bonds)
-                    continue
-        collapsed_bonds.append(neighbor)
-    return collapsed_bonds
+def estimated_bond_site(atom, centroid, mof):
+    centroid_opposite_dx = atom.x - centroid.x
+    centroid_opposite_dy = atom.y - centroid.y
+    centroid_opposite_dz = atom.z - centroid.z
+    # length = twice the covalent radius of the atom
+    estimated_distance = CovalentRadiusLookup.lookup(atom.type_symbol) * 1.5
+    metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, mof.angles, mof.fractional_lengths)
+    if metal_to_center_distance < 0.05 and len(atom.bondedAtoms) < 4:
+        return
+    estimated_x = atom.x + centroid_opposite_dx / metal_to_center_distance * estimated_distance
+    estimated_y = atom.y + centroid_opposite_dy / metal_to_center_distance * estimated_distance
+    estimated_z = atom.z + centroid_opposite_dz / metal_to_center_distance * estimated_distance
+    estimate = Atom.from_cartesian('Estimate', None, estimated_x, estimated_y, estimated_z, mof)
+    return estimate
 
 
 def unit_vectorize_bond(atom, bonded_atom):
@@ -122,11 +152,20 @@ def distance_cutoff_for(type_symbol: str, num_ligands):
 
 
 def normalized_radius(covalent_radius):
-    return (covalent_radius - CovalentRadiusLookup.smallest_radius())/(CovalentRadiusLookup.greatest_radius() - CovalentRadiusLookup.smallest_radius())
+    return (covalent_radius - CovalentRadiusLookup.smallest_radius()) / (
+            CovalentRadiusLookup.greatest_radius() - CovalentRadiusLookup.smallest_radius())
 
 
 if __name__ == '__main__':
-    # mof = CifReader.get_mof(r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ac403674p_si_001_clean.cif")
+    for name, metal in {'LOQSOA_clean': 'Tb1',
+                        'AGUTUS_clean': 'Cu1',
+                        'ABAYIO_clean': 'Mn31',
+                        'AFITUF_clean': 'Zn11',
+                        'ac403674p_si_001_clean': 'Zn1',
+                        'ACAKUM_clean': 'La3'}.items():
+        mof = CifReader.get_mof(
+            fr"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\{name}.cif")
+        write_atom_in_mof(metal, mof, f'{name}_OMS_calculation')
     # print(mof.sbus().clusters)
     # atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance = process(mof, True)
     # print(*atoms_with_open_metal_sites)
@@ -134,11 +173,17 @@ if __name__ == '__main__':
     # print(example_num_bonds)
     # print(example_distance)
 
-    print(CovalentRadiusLookup.greatest_radius())
-    print(CovalentRadiusLookup.smallest_radius())
-    symbol = 'Zr'
-    print(f"{symbol}:\tradius {CovalentRadiusLookup.lookup(symbol)},\tnormalized radius "
-          f"{normalized_radius(CovalentRadiusLookup.lookup(symbol))},\tcutoff 4 ligands "
-          f"{distance_cutoff_for(symbol, 4)},\tcutoff 8 ligands {distance_cutoff_for(symbol, 8)}\n\n---\n")
+    # mof = CifReader.get_mof(
+    #     r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\AQOLID_clean.cif")
+    # for atom in mof.atoms:
+    #     if len(atom.bondedAtoms) == 0:
+    #         print(atom.label)
+
+    # print(CovalentRadiusLookup.greatest_radius())
+    # print(CovalentRadiusLookup.smallest_radius())
+    # symbol = 'Zr'
+    # print(f"{symbol}:\tradius {CovalentRadiusLookup.lookup(symbol)},\tnormalized radius "
+    #       f"{normalized_radius(CovalentRadiusLookup.lookup(symbol))},\tcutoff 4 ligands "
+    #       f"{distance_cutoff_for(symbol, 4)},\tcutoff 8 ligands {distance_cutoff_for(symbol, 8)}\n\n---\n")
     # for symbol, radius in CovalentRadiusLookup.data.items():
     #     print(f"{symbol}:\tradius {radius},\tcutoff {distance_cutoff_for(symbol, 6)}")

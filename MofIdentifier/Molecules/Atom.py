@@ -119,3 +119,9 @@ class Atom:
         atom.original = self
         atom.bondedAtoms = self.bondedAtoms
         return atom
+
+    def copy_with_different_type(self, new_type_symbol):
+        atom = Atom(self.label, new_type_symbol, self.x, self.y, self.z, self.a, self.b, self.c)
+        atom.original = self
+        atom.bondedAtoms = self.bondedAtoms
+        return atom

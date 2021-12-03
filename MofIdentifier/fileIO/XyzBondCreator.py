@@ -55,13 +55,13 @@ def is_blocked_bond(atom_a, atom_b):
     triangling_atoms = [atom for atom in atom_a.bondedAtoms if atom in atom_b.bondedAtoms]
     between_atoms = [atom for atom in triangling_atoms if
                      Angles.angle(atom_a, atom, atom_b) >
-                     Angles.max_bond_breakup_angle_margin]
+                     Angles.max_bond_breakup_angle]
     # The wider the angle, the more directly the connector is in between the metals.
     if len(between_atoms) > 0:
         angles = [Angles.angle(atom_a, a, atom_b) for a in between_atoms]
         angles.append(
             Angles.angle(atom_a, Atom.center_of(between_atoms, None), atom_b))
-        if any(angle > Angles.bond_breakup_angle_margin for angle in angles):
+        if any(angle > Angles.bond_breakup_angle for angle in angles):
             return True
     return False
 

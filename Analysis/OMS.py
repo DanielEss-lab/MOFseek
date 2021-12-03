@@ -1,28 +1,12 @@
 from collections import defaultdict
-
-from matplotlib import pyplot as plt
-
 from DAO import MOFDAO
-from MofIdentifier.bondTools import CovalentRadiusLookup, OpenMetalSites
+limit_sample = True
 
 
-def create_bar_plot(x_values, y_values):
-    x_numbers = [2.0 * x for x in range(len(x_values))]
-    fig = plt.figure(figsize=(20, 4))
-    ax = fig.add_subplot(111)
-    ax.bar(x_numbers, y_values, 1.4, log=True)
-    ax.set(xlabel='element symbol', ylabel='number of MOFs in which element is present',
-           title=f'Element frequencies in database')
-    ax.set_xticks(x_numbers)
-    ax.set_xticklabels(x_values)
-    for item in (ax.get_xticklabels()):
-        item.set_fontsize(7)
-    # ax.grid()
-
-
-def chart_oms():
+def calculate_oms():
     output_lines = ['mof name, num atoms with OMS, all metal atoms with open site(s)']
     num_elements_with_open_sites = defaultdict(lambda: 0)
+    num_covered = 0
     for mof_d in MOFDAO.get_mof_iterator():
         mof = mof_d.get_mof()
         if len(mof.open_metal_sites) == 0:
@@ -34,6 +18,9 @@ def chart_oms():
         for atom in mof.open_metal_sites:
             elements_open.add(atom.type_symbol)
         num_elements_with_open_sites[len(elements_open)] += 1
+        num_covered += 1
+        if num_covered >= 2000 and limit_sample:
+            break
     # create_bar_plot(presence.keys(), presence.values())
     with open("output/open_metal_sites.csv", "w") as f:
         f.write('\n'.join(output_lines))
@@ -41,5 +28,4 @@ def chart_oms():
 
 
 if __name__ == '__main__':
-    chart_oms()
-    # plt.show()
+    calculate_oms()

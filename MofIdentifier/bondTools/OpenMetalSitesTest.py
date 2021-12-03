@@ -5,24 +5,31 @@ from MofIdentifier.fileIO import CifReader
 
 
 class MyTestCase(unittest.TestCase):
-    def test_double_metal_inner_sites(self):
+    def test_close_double_metal_inner_sites(self):
         mof = CifReader.get_mof(
-            r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ABAYIO_clean.cif")
-        self.assertGreater(len(mof.open_metal_sites), 0)
+            r'../mofsForTests/ABAYIO_clean.cif')
+        self.assertGreater(0, len(mof.open_metal_sites))
 
+    def test_far_double_metal_inner_sites(self):
         mof = CifReader.get_mof(
-            r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\AFITUF_clean.cif")
-        self.assertGreater(len(mof.open_metal_sites), 0)
+            r'../mofsForTests/AFITUF_clean.cif')
+        self.assertGreater(0, len(mof.open_metal_sites))
+
+    def test_metal_with_five_bonds(self):
+        mof = CifReader.get_mof(
+            r'../mofsForTests/ac403674p_si_001_clean.cif')
+        self.assertEqual(6, len(mof.open_metal_sites))
 
     def test_metal_with_many_bonds(self):
         mof = CifReader.get_mof(
-            r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\ac403674p_si_001_clean.cif")
-        self.assertEqual(len(mof.open_metal_sites), 0)
+            r'../mofsForTests/LOQSOA_clean.cif')
+        self.assertEqual(0, len(mof.open_metal_sites))
 
-    def test_metal_with_collapsing_bonds(self):
+    def test_filling_one_side_of_square_planar(self):
         mof = CifReader.get_mof(
-            r"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\LOQSOA_clean.cif")
-        self.assertEqual(len(mof.open_metal_sites), 0)
+            r'../mofsForTests/AGUTUS_clean.cif')
+        self.assertTrue([atom for atom in mof.atoms if atom.label == 'Cu1'][0].open_metal_site)
+        self.assertEqual(5, len([atom for atom in mof.atoms if atom.label == 'Cu1'][0].bondedAtoms))
 
 
 if __name__ == '__main__':
