@@ -28,3 +28,8 @@ class SBUDatabase:
             else:
                 return None
         return self._sbu
+
+    def get_num_atoms(self):
+        atom_lines = [line.strip() for line in self.file_content.split('\n')[2:]]
+        return sum(1 if len(line) > 2 else 0 for line in atom_lines)
+

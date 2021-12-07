@@ -5,7 +5,7 @@ import numpy as np
 
 from MofIdentifier.Molecules.Atom import Atom
 from MofIdentifier.Molecules.Ligand import Ligand
-from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
+from MofIdentifier.bondTools import Distances, CovalentRadiusLookup, MassLookup
 from MofIdentifier.fileIO import CifReader, XyzWriter
 
 ACCEPTABLE_DISTANCE_ERROR = 0.40  # Increasing distance makes it harder for a metal to qualify as having open sites
@@ -13,14 +13,16 @@ ACCEPTABLE_ANGLE_ERROR = 20
 TETRAHEDRON_ANGLE = 110
 
 
-def write_estimate(atom, centroid, estimate, name):
+def write_estimate(atom, centroids, estimates, name):
     atoms = list()
     atoms.append(atom)
     atoms.extend([Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
                   for bonded_atom in atom.bondedAtoms])
-    atoms.append(Atom.copy_with_different_type(centroid, 'Si'))
+    atoms.append(Atom.copy_with_different_type(centroids[0], 'Si'))
+    atoms.append(Atom.copy_with_different_type(centroids[1], 'Sn'))
     estimate_symbol = 'He' if atom.open_metal_site else 'Xe'
-    atoms.append(Atom.copy_with_different_type(estimate, estimate_symbol))
+    for estimate in estimates:
+        atoms.append(Atom.copy_with_different_type(estimate, estimate_symbol))
     mol = Ligand("temp", atoms, None)
     XyzWriter.write_molecule_to_file(fr"C:\Users\mdavid4\Downloads\{name}.xyz", mol, name)
 
@@ -28,8 +30,8 @@ def write_estimate(atom, centroid, estimate, name):
 def write_atom_in_mof(atom_label, mof, name):
     for atom in mof.atoms:
         if atom.label == atom_label:
-            centroid = center_of_bonded_atoms(atom, mof)
-            write_estimate(atom, centroid, estimated_bond_site(atom, centroid, mof), name)
+            centroids = centers_of_bonded_atoms(atom, mof)
+            write_estimate(atom, centroids, estimated_bond_sites(atom, centroids, mof), name)
 
 
 def process(mof, verbose=False):
@@ -38,10 +40,10 @@ def process(mof, verbose=False):
         if len(atoms_with_open_metal_sites) > 0:
             example_atom = atoms_with_open_metal_sites[0]
             example_num_bonds = len(example_atom.bondedAtoms)
-            example_distance = Distances.distance_across_unit_cells(example_atom,
-                                                                    center_of_bonded_atoms(example_atom, mof),
-                                                                    mof.angles, mof.fractional_lengths)
-            return atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance
+            centers = centers_of_bonded_atoms(example_atom, mof)
+            example_distances = [Distances.distance_across_unit_cells(example_atom, center, mof.angles,
+                                                                     mof.fractional_lengths) for center in centers]
+            return atoms_with_open_metal_sites, example_atom, example_num_bonds, max(example_distances)
         else:
             return [], None, None, None
     else:
@@ -54,11 +56,13 @@ def has_open_metal_site(atom, mof):
     if len(atom.bondedAtoms) < 4:
         return True
     else:  # 4 or more bonds
-        centroid = center_of_bonded_atoms(atom, mof)
-        metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, mof.angles,
-                                                                        mof.fractional_lengths)
+        geom_centroid, mass_centroid = centers_of_bonded_atoms(atom, mof)
+        metal_to_center_distances = (Distances.distance_across_unit_cells(atom, geom_centroid, mof.angles,
+                                                                          mof.fractional_lengths),
+                                     Distances.distance_across_unit_cells(atom, mass_centroid, mof.angles,
+                                                                          mof.fractional_lengths))
         cutoff = distance_cutoff_for(atom.type_symbol, len(atom.bondedAtoms))
-        if metal_to_center_distance > cutoff:
+        if any(d > cutoff for d in metal_to_center_distances):
             return True
         elif len(atom.bondedAtoms) == 4:
             # A metal with 4 bonds might have open sites even if the bonded atom directions all cancel out spatially
@@ -74,7 +78,7 @@ def square_planar_angles(atom, mof):
         return False  # tetrahedral shape; no open metal site
 
 
-def center_of_bonded_atoms(atom, mof):
+def centers_of_bonded_atoms(atom, mof):
     bonded_atoms = [Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
                     for bonded_atom in atom.bondedAtoms]
     unfiltered_unit_vectors = [unit_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
@@ -83,9 +87,18 @@ def center_of_bonded_atoms(atom, mof):
     centeroid_relative_x = sum(v[0] for v in unit_vectors)
     centeroid_relative_y = sum(v[1] for v in unit_vectors)
     centeroid_relative_z = sum(v[2] for v in unit_vectors)
-    return atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
-                               centeroid_relative_y + atom.y,
-                               centeroid_relative_z + atom.z, mof)
+    geometric_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
+                                           centeroid_relative_y + atom.y,
+                                           centeroid_relative_z + atom.z, mof)
+    unfiltered_mass_vectors = [mass_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
+    mass_vectors = [v for v in unfiltered_mass_vectors if v is not None]
+    centeroid_relative_x = sum(v[0] for v in mass_vectors)
+    centeroid_relative_y = sum(v[1] for v in mass_vectors)
+    centeroid_relative_z = sum(v[2] for v in mass_vectors)
+    mass_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
+                                      centeroid_relative_y + atom.y,
+                                      centeroid_relative_z + atom.z, mof)
+    return geometric_center, mass_center
     # assert len(bonded_atoms) != 0
     # average_x = sum(v.x for v in bonded_atoms) / len(bonded_atoms)
     # average_y = sum(v.y for v in bonded_atoms) / len(bonded_atoms)
@@ -108,6 +121,13 @@ def estimated_bond_site(atom, centroid, mof):
     estimate = Atom.from_cartesian('Estimate', None, estimated_x, estimated_y, estimated_z, mof)
     return estimate
 
+def estimated_bond_sites(atom, centroids, mof):
+    estimates = []
+    for centroid in centroids:
+        estimate = estimated_bond_site(atom, centroid, mof)
+        estimates.append(estimate)
+    return estimates
+
 
 def unit_vectorize_bond(atom, bonded_atom):
     x_vector = bonded_atom.x - atom.x
@@ -118,6 +138,20 @@ def unit_vectorize_bond(atom, bonded_atom):
         return None
     norm = math.sqrt(x_vector ** 2 + y_vector ** 2 + z_vector ** 2)
     return x_vector / norm, y_vector / norm, z_vector / norm
+
+
+def mass_vectorize_bond(atom, bonded_atom):
+    x_vector = bonded_atom.x - atom.x
+    y_vector = bonded_atom.y - atom.y
+    z_vector = bonded_atom.z - atom.z
+    if abs(x_vector) + abs(y_vector) + abs(z_vector) < 0.001:
+        # The two atoms have the same location (malformed MOF)
+        return None
+    norm = math.sqrt(x_vector ** 2 + y_vector ** 2 + z_vector ** 2)
+    x = x_vector / norm * MassLookup.lookup(bonded_atom.type_symbol) / MassLookup.lookup(atom.type_symbol)
+    y = y_vector / norm * MassLookup.lookup(bonded_atom.type_symbol) / MassLookup.lookup(atom.type_symbol)
+    z = z_vector / norm * MassLookup.lookup(bonded_atom.type_symbol) / MassLookup.lookup(atom.type_symbol)
+    return x, y, z
 
 
 def all_angles_around(atom, mof):
@@ -162,6 +196,7 @@ if __name__ == '__main__':
                         'ABAYIO_clean': 'Mn31',
                         'AFITUF_clean': 'Zn11',
                         'ac403674p_si_001_clean': 'Zn1',
+                        'acs.inorgchem.6b00894_ic6b00894_si_003_clean': 'Cd11',
                         'ACAKUM_clean': 'La3'}.items():
         mof = CifReader.get_mof(
             fr"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\{name}.cif")

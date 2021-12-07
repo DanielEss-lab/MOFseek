@@ -209,26 +209,29 @@ class MofBondCreator:
         for atom in open_site_metals:
             if len(atom.bondedAtoms) == 0:
                 continue
-            centroid = OpenMetalSites.center_of_bonded_atoms(atom, self.mof)
-            metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, self.angles, self.lengths)
             if len(atom.bondedAtoms) == 4 and OpenMetalSites.square_planar_angles(atom, self.mof):
                 self.attempt_to_fill_antiplanar_sites(atom, self.mof)
             else:
-                self.attempt_to_fill_countercenter_site(atom, centroid, metal_to_center_distance, self.mof)
+                self.attempt_to_fill_countercenter_site(atom, self.mof)
             if atom.open_metal_site:
                 open_metal_sites.append(atom)
         return open_metal_sites
 
-    def attempt_to_fill_countercenter_site(self, atom, centroid, metal_to_center_distance, mof):
+    def attempt_to_fill_countercenter_site(self, atom, mof):
         # length = twice the covalent radius of the atom
         search_radius = CovalentRadiusLookup.lookup(atom.type_symbol) * 3 / 8
+        geom_center, mass_center = OpenMetalSites.centers_of_bonded_atoms(atom, self.mof)
+        metal_to_center_distance = Distances.distance_across_unit_cells(atom, geom_center, self.angles, self.lengths)
         if metal_to_center_distance < 0.05 and len(atom.bondedAtoms) < 4:
             return
-        estimate = OpenMetalSites.estimated_bond_site(atom, centroid, mof)
+        farthest_center = geom_center if metal_to_center_distance > Distances.distance_across_unit_cells(atom,
+                mass_center, self.angles, self.lengths) else mass_center
+        estimate = OpenMetalSites.estimated_bond_site(atom, farthest_center, mof)
         filling_atom = self.atom_near(estimate, search_radius)
         if filling_atom is None:
             angles = [Angles.mof_angle(neighbor, atom, estimate, self.angles, self.lengths) for neighbor in atom.bondedAtoms]
-            if all(angle > Angles.bond_coexistance_angle for angle in angles):
+            angles.sort()
+            if len(angles) < 2 or (angles[0] + angles[1]) / 2 > Angles.bond_coexistance_angle:
                 atom.open_metal_site = True
         elif filling_atom not in atom.bondedAtoms:
             atom.bondedAtoms.append(filling_atom)

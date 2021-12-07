@@ -1,6 +1,6 @@
 from collections import defaultdict
 from DAO import MOFDAO
-limit_sample = True
+limit_sample = False
 
 
 def calculate_oms():

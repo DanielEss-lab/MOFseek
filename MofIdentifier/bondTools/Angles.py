@@ -4,7 +4,7 @@ from MofIdentifier.bondTools import Distances
 
 max_bond_breakup_angle = 0.88  # About a 50 degree angle
 bond_breakup_angle = 2.04  # About a 120 degree angle
-bond_coexistance_angle = 1.05  # will not identify open site if it would be close than this to another atom
+bond_coexistance_angle = 0.98  # will not identify open site if it would be closer than this to another atom
 # bond_breakup_angle_margin of 2.09 or greater breaks test_abnormal_fractional_coordinates in SBUIdentifierTest
 
 
