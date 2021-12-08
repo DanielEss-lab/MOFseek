@@ -72,6 +72,7 @@ class MofBondCreator:
             return bucket_copy
 
     def connect_atoms(self):
+        # First processing
         if self.error_margin != Distances.bond_length_multiplicative_error_margin:
             self.reset()
         for z in range(self.num_z_buckets):
@@ -81,7 +82,9 @@ class MofBondCreator:
                     spaces_to_compare = self.get_spaces_adj_in_one_direction(x, y, z)
                     self.connect_within_space(this_space)
                     self.connect_within_spaces(this_space, spaces_to_compare)
+        # Going back to fix funky areas
         self.enforce_single_hydrogen_bonds()
+        self.enfore_OCO_consistency()
         open_metal_sites = self.fill_nearly_closed_metal_sites()
         return open_metal_sites
 
@@ -158,7 +161,7 @@ class MofBondCreator:
                 possible_blocks = list(between_atoms.items())
                 possible_blocks.sort(key=lambda e: e[1], reverse=True)
                 for i in range(1, len(between_atoms)):
-                    best_blocks_here = [tup[0] for tup in possible_blocks[0:i+1]]
+                    best_blocks_here = [tup[0] for tup in possible_blocks[0:i + 1]]
                     center = Atom.center_of(best_blocks_here, self.mof)
                     if Angles.mof_angle(atom_a, center, atom_b, self.angles, self.lengths) > \
                             Angles.bond_breakup_angle:
@@ -196,6 +199,31 @@ class MofBondCreator:
                 neighbor.bondedAtoms.remove(atom)
                 atom.bondedAtoms.remove(neighbor)
 
+    # A certain pattern at the end of linkers has a carbon attached to two oxygen, which are attached to a metal.
+    # Sometimes, one of the O-metal distances is a tad too long for the algorithm to catch. This fixes that.
+    def enfore_OCO_consistency(self):
+        for atom in self.atoms:
+            if atom.type_symbol == 'O' and len(atom.bondedAtoms) == 2:
+                metals = [a for a in atom.bondedAtoms if a.is_metal()]
+                carbons = [a for a in atom.bondedAtoms if a.type_symbol == 'C']
+                if len(metals) != 1 or len(carbons) != 1:
+                    continue
+                carbon = carbons[0]
+                metal = metals[0]
+                if len(carbon.bondedAtoms ) == 3:
+                    other_oxygens = [a for a in carbon.bondedAtoms if a.type_symbol == 'O' and a.label != atom.label]
+                    if len(other_oxygens) != 1:
+                        continue
+                    oxygen = other_oxygens[0]
+                else:
+                    continue
+                if metal not in oxygen.bondedAtoms and oxygen not in metal.bondedAtoms:
+                    distance = Distances.distance_across_unit_cells(metal, oxygen, self.angles, self.lengths)
+                    required_distance = Distances.bond_distance(metal, oxygen, self.error_margin + 0.2)
+                    if distance <= required_distance:
+                        oxygen.bondedAtoms.append(metal)
+                        metal.bondedAtoms.append(oxygen)
+
     def reset(self):
         for atom in self.atoms:
             atom.bondedAtoms = []
@@ -225,11 +253,14 @@ class MofBondCreator:
         if metal_to_center_distance < 0.05 and len(atom.bondedAtoms) < 4:
             return
         farthest_center = geom_center if metal_to_center_distance > Distances.distance_across_unit_cells(atom,
-                mass_center, self.angles, self.lengths) else mass_center
+                                                                                                         mass_center,
+                                                                                                         self.angles,
+                                                                                                         self.lengths) else mass_center
         estimate = OpenMetalSites.estimated_bond_site(atom, farthest_center, mof)
         filling_atom = self.atom_near(estimate, search_radius)
         if filling_atom is None:
-            angles = [Angles.mof_angle(neighbor, atom, estimate, self.angles, self.lengths) for neighbor in atom.bondedAtoms]
+            angles = [Angles.mof_angle(neighbor, atom, estimate, self.angles, self.lengths) for neighbor in
+                      atom.bondedAtoms]
             angles.sort()
             if len(angles) < 2 or (angles[0] + angles[1]) / 2 > Angles.bond_coexistance_angle:
                 atom.open_metal_site = True
@@ -244,7 +275,8 @@ class MofBondCreator:
         viable_zone = self.get_all_nearby_space(x_bucket, y_bucket, z_bucket)
         atoms_to_add = set()
         for possible_atom in viable_zone:
-            if all(80 < Angles.degrees(Angles.mof_angle(neighbor, metal, possible_atom, mof.angles, mof.fractional_lengths))
+            if all(80 < Angles.degrees(
+                    Angles.mof_angle(neighbor, metal, possible_atom, mof.angles, mof.fractional_lengths))
                    < 100 for neighbor in metal.bondedAtoms):
                 distance_from_metal = Distances.distance_across_unit_cells(metal, possible_atom,
                                                                            self.angles, self.lengths)

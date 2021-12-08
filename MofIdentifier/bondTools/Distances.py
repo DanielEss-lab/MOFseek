@@ -83,6 +83,12 @@ def is_bond_distance(d, a, b, error_margin=bond_length_multiplicative_error_marg
     return d < (rad_a + rad_b) * error_margin + bond_length_flat_error_margin
 
 
+def bond_distance(a, b, error_margin=bond_length_multiplicative_error_margin):
+    rad_a = lookup(a.type_symbol)
+    rad_b = lookup(b.type_symbol)
+    return (rad_a + rad_b) * error_margin + bond_length_flat_error_margin
+
+
 def are_within_bond_range(a, b):
     """Not recommended, except for specific situations, because it interacts strangely with unit cell boundaries."""
     return is_bond_distance(distance(a, b), a, b)

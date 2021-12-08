@@ -72,6 +72,15 @@ class MyTestCase(unittest.TestCase):
         dist_c = Distances.distance_across_unit_cells(Gd2, Gd4, mof.angles, mof.fractional_lengths)
         self.assertLess(dist_c, dist_a + dist_b)
 
+    def test_OCO_consistent_bonding(self):
+        mof = CifReader.get_mof(r'../mofsForTests/acs.inorgchem.6b00894_ic6b00894_si_003_clean.cif')
+        num_cd = 0
+        for atom in mof.atoms:
+            if atom.type_symbol == 'Cd':
+                num_cd += 1
+                self.assertEqual(6, len(atom.bondedAtoms))
+        self.assertEqual(12, num_cd)
+
 
 if __name__ == '__main__':
     unittest.main()
