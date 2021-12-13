@@ -79,6 +79,31 @@ def break_blocked_bonds(atom_a, atom_b):
             atom.bondedAtoms.remove(atom_b)
 
 
+def enfore_OCO_consistency(atoms):
+    for atom in atoms:
+        if atom.type_symbol == 'O' and len(atom.bondedAtoms) == 2:
+            metals = [a for a in atom.bondedAtoms if a.is_metal()]
+            carbons = [a for a in atom.bondedAtoms if a.type_symbol == 'C']
+            if len(metals) != 1 or len(carbons) != 1:
+                continue
+            carbon = carbons[0]
+            metal = metals[0]
+            if len(carbon.bondedAtoms) == 3:
+                other_oxygens = [a for a in carbon.bondedAtoms if a.type_symbol == 'O' and a.label != atom.label]
+                if len(other_oxygens) != 1:
+                    continue
+                oxygen = other_oxygens[0]
+            else:
+                continue
+            if metal not in oxygen.bondedAtoms and oxygen not in metal.bondedAtoms:
+                distance = Distances.distance(metal, oxygen)
+                required_distance = Distances.bond_distance(metal, oxygen,
+                                                            Distances.bond_length_multiplicative_error_margin + 0.2)
+                if distance <= required_distance:
+                    oxygen.bondedAtoms.append(metal)
+                    metal.bondedAtoms.append(oxygen)
+
+
 def connect_atoms(molecule):
     atoms = molecule.atoms
     for i in range(len(atoms)):
@@ -88,4 +113,5 @@ def connect_atoms(molecule):
         for j in range(i+1, len(atoms)):
             compare_for_bond(atoms[i], atoms[j])
     enforce_single_hydrogen_bonds(atoms)
+    enfore_OCO_consistency(atoms)
     return molecule

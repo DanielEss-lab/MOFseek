@@ -90,6 +90,14 @@ class MyTestCase(unittest.TestCase):
                 self.assertEqual(1, len(atom.bondedAtoms))
         self.assertEqual(144, num_h)
 
+        mof = CifReader.get_mof(r'../mofsForTests/TEWGEJ01_clean.cif')
+        num_h = 0
+        for atom in mof.atoms:
+            if atom.type_symbol == 'H':
+                num_h += 1
+                self.assertEqual(1, len(atom.bondedAtoms))
+        self.assertEqual(104, num_h)
+
 
 if __name__ == '__main__':
     unittest.main()

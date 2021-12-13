@@ -110,11 +110,7 @@ def array_name_of_type(sbu_type):
 def add_csv_info(csv_file_path):
     with open(csv_file_path, 'r') as file:
         csv_file = csv.DictReader(file)
-        i = 0
         for row in csv_file:
-            if i % 10 == 0:
-                print(i)
-            i += 1
             items = dict(row)
             if '' in items:
                 items.pop('')

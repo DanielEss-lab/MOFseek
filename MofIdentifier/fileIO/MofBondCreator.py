@@ -210,7 +210,7 @@ class MofBondCreator:
                     continue
                 carbon = carbons[0]
                 metal = metals[0]
-                if len(carbon.bondedAtoms ) == 3:
+                if len(carbon.bondedAtoms) == 3:
                     other_oxygens = [a for a in carbon.bondedAtoms if a.type_symbol == 'O' and a.label != atom.label]
                     if len(other_oxygens) != 1:
                         continue
@@ -275,6 +275,8 @@ class MofBondCreator:
         viable_zone = self.get_all_nearby_space(x_bucket, y_bucket, z_bucket)
         atoms_to_add = set()
         for possible_atom in viable_zone:
+            if possible_atom.type_symbol == 'H':
+                continue
             if all(80 < Angles.degrees(
                     Angles.mof_angle(neighbor, metal, possible_atom, mof.angles, mof.fractional_lengths))
                    < 100 for neighbor in metal.bondedAtoms):
