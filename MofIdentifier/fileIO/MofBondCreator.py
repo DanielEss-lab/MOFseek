@@ -257,7 +257,7 @@ class MofBondCreator:
                                                                                                          self.angles,
                                                                                                          self.lengths) else mass_center
         estimate = OpenMetalSites.estimated_bond_site(atom, farthest_center, mof)
-        filling_atom = self.atom_near(estimate, search_radius)
+        filling_atom = self.non_h_atom_near(estimate, search_radius)
         if filling_atom is None:
             angles = [Angles.mof_angle(neighbor, atom, estimate, self.angles, self.lengths) for neighbor in
                       atom.bondedAtoms]
@@ -288,7 +288,7 @@ class MofBondCreator:
             metal.bondedAtoms.append(atom)
             atom.bondedAtoms.append(metal)
 
-    def atom_near(self, spot: Atom, search_width):
+    def non_h_atom_near(self, spot: Atom, search_width):
         x_bucket = floor(spot.a * self.num_x_buckets)
         y_bucket = floor(spot.b * self.num_y_buckets)
         z_bucket = floor(spot.c * self.num_z_buckets)
@@ -296,6 +296,8 @@ class MofBondCreator:
         best_dist = search_width
         best_atom = None
         for possible_atom in viable_zone:
+            if possible_atom.type_symbol == 'H':
+                continue
             dist_from_estimate = Distances.distance_across_unit_cells(spot, possible_atom, self.angles,
                                                                       self.lengths)
             if dist_from_estimate < best_dist:

@@ -79,17 +79,18 @@ def square_planar_angles(atom, mof):
 
 
 def centers_of_bonded_atoms(atom, mof):
+    #
     bonded_atoms = [Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
                     for bonded_atom in atom.bondedAtoms]
-    unfiltered_unit_vectors = [unit_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
-    unit_vectors = [v for v in unfiltered_unit_vectors if v is not None]
-    assert (all(0.98 < v[0] ** 2 + v[1] ** 2 + v[2] ** 2 < 1.02 for v in unit_vectors))
-    centeroid_relative_x = sum(v[0] for v in unit_vectors)
-    centeroid_relative_y = sum(v[1] for v in unit_vectors)
-    centeroid_relative_z = sum(v[2] for v in unit_vectors)
-    geometric_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
-                                           centeroid_relative_y + atom.y,
-                                           centeroid_relative_z + atom.z, mof)
+    # unfiltered_unit_vectors = [unit_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
+    # unit_vectors = [v for v in unfiltered_unit_vectors if v is not None]
+    # assert (all(0.98 < v[0] ** 2 + v[1] ** 2 + v[2] ** 2 < 1.02 for v in unit_vectors))
+    # centeroid_relative_x = sum(v[0] for v in unit_vectors)
+    # centeroid_relative_y = sum(v[1] for v in unit_vectors)
+    # centeroid_relative_z = sum(v[2] for v in unit_vectors)
+    # geometric_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
+    #                                        centeroid_relative_y + atom.y,
+    #                                        centeroid_relative_z + atom.z, mof)
     unfiltered_mass_vectors = [mass_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
     mass_vectors = [v for v in unfiltered_mass_vectors if v is not None]
     centeroid_relative_x = sum(v[0] for v in mass_vectors)
@@ -98,12 +99,17 @@ def centers_of_bonded_atoms(atom, mof):
     mass_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
                                       centeroid_relative_y + atom.y,
                                       centeroid_relative_z + atom.z, mof)
+    # test code
+    unfiltered_mass_vectors = [mass_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
+    mass_vectors = [v for v in unfiltered_mass_vectors if v is not None]
+    centeroid_relative_x = sum(v[0] for v in mass_vectors)
+    centeroid_relative_y = sum(v[1] for v in mass_vectors)
+    centeroid_relative_z = sum(v[2] for v in mass_vectors)
+    geometric_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
+                                      centeroid_relative_y + atom.y,
+                                      centeroid_relative_z + atom.z, mof)
+    # end test code
     return geometric_center, mass_center
-    # assert len(bonded_atoms) != 0
-    # average_x = sum(v.x for v in bonded_atoms) / len(bonded_atoms)
-    # average_y = sum(v.y for v in bonded_atoms) / len(bonded_atoms)
-    # average_z = sum(v.z for v in bonded_atoms) / len(bonded_atoms)
-    # return atom.from_cartesian('Centroid', None, average_x, average_y, average_z, mof)
 
 
 def estimated_bond_site(atom, centroid, mof):

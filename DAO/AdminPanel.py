@@ -100,6 +100,11 @@ def refresh_active_collections_to_full():
     print_summary()
 
 
+def retrieve_all_mofs():
+    for mof in MOFDAO.get_mof_iterator():
+        pass
+
+
 def print_summary():
     print(MOFDAO.get_num_mofs(), "mofs in DB now")
     for ligand in LigandDAO.get_ligand_iterator():
@@ -141,6 +146,7 @@ if __name__ == '__main__':
     # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
     # speed_measure()
     refresh_active_collections_to_full()
+    retrieve_all_mofs()
     # add_certain_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')),
     #                    ['sulfonate.smiles', 'phosphonate.smiles', 'carboxyl.smiles'])
     # print_summary()

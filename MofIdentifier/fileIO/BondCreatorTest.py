@@ -81,6 +81,15 @@ class MyTestCase(unittest.TestCase):
                 self.assertEqual(6, len(atom.bondedAtoms))
         self.assertEqual(12, num_cd)
 
+    def test_hydrogen_only_one_bond(self):
+        mof = CifReader.get_mof(r'../mofsForTests/AWASOI_clean.cif')
+        num_h = 0
+        for atom in mof.atoms:
+            if atom.type_symbol == 'H':
+                num_h += 1
+                self.assertEqual(1, len(atom.bondedAtoms))
+        self.assertEqual(144, num_h)
+
 
 if __name__ == '__main__':
     unittest.main()

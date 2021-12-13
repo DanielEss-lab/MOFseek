@@ -311,7 +311,8 @@ class SBUIdentifier:
                 noncluster_neighbor = neighbor
 
         if atom.type_symbol == 'H':
-            assert len(atom.bondedAtoms) <= 1
+            if len(atom.bondedAtoms) > 1:
+                print(f"Potential error: {atom.label} in {self.mof.label} bonded to multiple atoms")
             for neighbor in atom.bondedAtoms:
                 if self.successfully_adds_to_cluster(neighbor):
                     cluster = self.groups[self.group_id_of(neighbor)]
