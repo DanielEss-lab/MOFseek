@@ -434,19 +434,26 @@ def get_file_content_without_atoms(file_content, atoms_to_delete):
 def get_file_content_with_atoms(file_content, atoms_to_add):
     file_lines = file_content.split('\n')
     greatest_existing_H_index = -1
+    lead_space = ""
     for line in file_lines:
+        for i in range(len(line)):
+            if line[i] != " ":
+                lead_space = line[:i]
+                break
+
+        line = line.strip()
         if line.startswith('H') and line[1].isdigit():
             index = int(re.search(r'\d+', line).group(0))
             greatest_existing_H_index = max(greatest_existing_H_index, index)
     for atom in atoms_to_add:
         greatest_existing_H_index += 1
         label = atom.type_symbol + str(greatest_existing_H_index)
-        file_lines.append(atom_to_line(label, atom))
-    return '\n'.join(file_lines)
+        file_lines.append(atom_to_line(label, atom, lead_space))
+    return '\n'.join(line for line in file_lines if len(line) > 0)
 
 
-def atom_to_line(label, atom):
-    return f'{label}   {atom.type_symbol}   {atom.a}   {atom.b}   {atom.c}   {1.0000}'
+def atom_to_line(label, atom, lead_space):
+    return f'{lead_space}{label}    {atom.type_symbol}   {atom.a % 1: 6.5f}  {atom.b % 1: 6.5f}  {atom.c % 1: 6.5f}   {1.0:.3f}'
 
 
 if __name__ == '__main__':

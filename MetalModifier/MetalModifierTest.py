@@ -187,6 +187,13 @@ class ChangeMetalTest(unittest.TestCase):
         self.assertTrue('Nb' in new_mof.atoms_string())
         self.assertEqual(protons_needed('Nb'), count_node_protons(new_mof))
 
+    def test_Zr_to_Sc_in_mof_with_whitespace(self):
+        replace_metal(r'TestResources/mof808_cellopt_pbesol-pos-final.cif',
+                      r'TestResources/mof808_cellopt_pbesol_Sc.cif', 'Sc')
+        new_mof = CifReader.get_mof(r'TestResources/mof808_cellopt_pbesol_Sc.cif')
+        self.assertTrue('Sc' in new_mof.atoms_string())
+        self.assertEqual(protons_needed('Sc'), count_node_protons(new_mof))
+
 
 class ExtractClusterTest(unittest.TestCase):
     def test_extract(self):
