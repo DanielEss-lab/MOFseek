@@ -251,22 +251,49 @@ class MofBondCreator:
         geom_center, mass_center = OpenMetalSites.centers_of_bonded_atoms(atom, self.mof)
         metal_to_center_distance = Distances.distance_across_unit_cells(atom, geom_center, self.angles, self.lengths)
         if metal_to_center_distance < 0.05 and len(atom.bondedAtoms) < 4:
-            return
-        farthest_center = geom_center if metal_to_center_distance > Distances.distance_across_unit_cells(atom,
-                                                                                                         mass_center,
-                                                                                                         self.angles,
-                                                                                                         self.lengths) else mass_center
+            atom.open_metal_site = True
+            return  # If there's only 3 atoms bonded, and they're rather symmetric, then don't stretch to find a 4th
+        farthest_center, other_center = (geom_center, mass_center) \
+                if metal_to_center_distance > Distances.distance_across_unit_cells(atom, mass_center, self.angles, self.lengths) \
+                else (mass_center, geom_center)
+
         estimate = OpenMetalSites.estimated_bond_site(atom, farthest_center, mof)
         filling_atom = self.non_h_atom_near(estimate, search_radius)
         if filling_atom is None:
-            angles = [Angles.mof_angle(neighbor, atom, estimate, self.angles, self.lengths) for neighbor in
-                      atom.bondedAtoms]
-            angles.sort()
-            if len(angles) < 2 or (angles[0] + angles[1]) / 2 > Angles.bond_coexistance_angle:
+            if self.angles_allow_adding_atom(atom, estimate):
                 atom.open_metal_site = True
+                return
         elif filling_atom not in atom.bondedAtoms:
             atom.bondedAtoms.append(filling_atom)
             filling_atom.bondedAtoms.append(atom)
+            # do everything OMS-related for this atom again now that it's changed
+            if OpenMetalSites.has_open_metal_site(atom, self.mof):
+                if len(atom.bondedAtoms) == 4 and OpenMetalSites.square_planar_angles(atom, self.mof):
+                    self.attempt_to_fill_antiplanar_sites(atom, self.mof)
+                else:
+                    self.attempt_to_fill_countercenter_site(atom, self.mof)
+
+        estimate = OpenMetalSites.estimated_bond_site(atom, other_center, mof)
+        filling_atom = self.non_h_atom_near(estimate, search_radius)
+        if filling_atom is None:
+            if self.angles_allow_adding_atom(atom, estimate):
+                atom.open_metal_site = True
+                return
+        elif filling_atom not in atom.bondedAtoms:
+            atom.bondedAtoms.append(filling_atom)
+            filling_atom.bondedAtoms.append(atom)
+            # do everything OMS-related for this atom again now that it's changed
+            if OpenMetalSites.has_open_metal_site(atom, self.mof):
+                if len(atom.bondedAtoms) == 4 and OpenMetalSites.square_planar_angles(atom, self.mof):
+                    self.attempt_to_fill_antiplanar_sites(atom, self.mof)
+                else:
+                    self.attempt_to_fill_countercenter_site(atom, self.mof)
+
+    def angles_allow_adding_atom(self, atom, estimate):
+        angles = [Angles.mof_angle(neighbor, atom, estimate, self.angles, self.lengths) for neighbor in
+                  atom.bondedAtoms]
+        angles.sort()
+        return len(angles) < 2 or (angles[0] + angles[1]) / 2 > Angles.bond_coexistance_angle
 
     def attempt_to_fill_antiplanar_sites(self, metal, mof):
         x_bucket = floor(metal.a * self.num_x_buckets)

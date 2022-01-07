@@ -34,6 +34,11 @@ class MyTestCase(unittest.TestCase):
         mof = CifReader.get_mof(r'../mofsForTests/acs.inorgchem.6b00894_ic6b00894_si_003_clean.cif')
         self.assertEqual(0, len(mof.open_metal_sites))
 
+    def test_estimate_by_geom_when_geom_center_farther_than_mass_center(self):
+        name = 'FAZPED_clean'
+        mof = CifReader.get_mof(fr'../mofsForTests/{name}.cif')
+        self.assertEqual(6, len(mof.open_metal_sites))
+
 
 if __name__ == '__main__':
     unittest.main()

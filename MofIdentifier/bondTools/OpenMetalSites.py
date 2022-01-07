@@ -18,8 +18,8 @@ def write_estimate(atom, centroids, estimates, name):
     atoms.append(atom)
     atoms.extend([Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
                   for bonded_atom in atom.bondedAtoms])
-    atoms.append(Atom.copy_with_different_type(centroids[0], 'Si'))
-    atoms.append(Atom.copy_with_different_type(centroids[1], 'Sn'))
+    atoms.append(Atom.copy_with_different_type(centroids[0], 'Si'))  # Si is the geometric center
+    atoms.append(Atom.copy_with_different_type(centroids[1], 'Sn'))  # Sn is the weight center
     estimate_symbol = 'He' if atom.open_metal_site else 'Xe'
     for estimate in estimates:
         atoms.append(Atom.copy_with_different_type(estimate, estimate_symbol))
@@ -82,16 +82,18 @@ def centers_of_bonded_atoms(atom, mof):
     #
     bonded_atoms = [Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
                     for bonded_atom in atom.bondedAtoms]
-    # unfiltered_unit_vectors = [unit_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
-    # unit_vectors = [v for v in unfiltered_unit_vectors if v is not None]
-    # assert (all(0.98 < v[0] ** 2 + v[1] ** 2 + v[2] ** 2 < 1.02 for v in unit_vectors))
-    # centeroid_relative_x = sum(v[0] for v in unit_vectors)
-    # centeroid_relative_y = sum(v[1] for v in unit_vectors)
-    # centeroid_relative_z = sum(v[2] for v in unit_vectors)
-    # geometric_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
-    #                                        centeroid_relative_y + atom.y,
-    #                                        centeroid_relative_z + atom.z, mof)
-    unfiltered_mass_vectors = [mass_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
+    unfiltered_unit_vectors = [unit_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
+    unit_vectors = [v for v in unfiltered_unit_vectors if v is not None]
+    assert (all(0.98 < v[0] ** 2 + v[1] ** 2 + v[2] ** 2 < 1.02 for v in unit_vectors))
+    centeroid_relative_x = sum(v[0] for v in unit_vectors)
+    centeroid_relative_y = sum(v[1] for v in unit_vectors)
+    centeroid_relative_z = sum(v[2] for v in unit_vectors)
+    geometric_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
+                                           centeroid_relative_y + atom.y,
+                                           centeroid_relative_z + atom.z, mof)
+
+    average_weight = sum(MassLookup.lookup(bonded_atom.type_symbol) for bonded_atom in bonded_atoms) / len(bonded_atoms)
+    unfiltered_mass_vectors = [mass_vectorize_bond(atom, bonded_atom, average_weight) for bonded_atom in bonded_atoms]
     mass_vectors = [v for v in unfiltered_mass_vectors if v is not None]
     centeroid_relative_x = sum(v[0] for v in mass_vectors)
     centeroid_relative_y = sum(v[1] for v in mass_vectors)
@@ -99,16 +101,16 @@ def centers_of_bonded_atoms(atom, mof):
     mass_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
                                       centeroid_relative_y + atom.y,
                                       centeroid_relative_z + atom.z, mof)
-    # test code
-    unfiltered_mass_vectors = [mass_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
-    mass_vectors = [v for v in unfiltered_mass_vectors if v is not None]
-    centeroid_relative_x = sum(v[0] for v in mass_vectors)
-    centeroid_relative_y = sum(v[1] for v in mass_vectors)
-    centeroid_relative_z = sum(v[2] for v in mass_vectors)
-    geometric_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
-                                      centeroid_relative_y + atom.y,
-                                      centeroid_relative_z + atom.z, mof)
-    # end test code
+    # # test code
+    # unfiltered_mass_vectors = [mass_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
+    # mass_vectors = [v for v in unfiltered_mass_vectors if v is not None]
+    # centeroid_relative_x = sum(v[0] for v in mass_vectors)
+    # centeroid_relative_y = sum(v[1] for v in mass_vectors)
+    # centeroid_relative_z = sum(v[2] for v in mass_vectors)
+    # geometric_center = atom.from_cartesian('Centroid', None, centeroid_relative_x + atom.x,
+    #                                   centeroid_relative_y + atom.y,
+    #                                   centeroid_relative_z + atom.z, mof)
+    # # end test code
     return geometric_center, mass_center
 
 
@@ -146,7 +148,7 @@ def unit_vectorize_bond(atom, bonded_atom):
     return x_vector / norm, y_vector / norm, z_vector / norm
 
 
-def mass_vectorize_bond(atom, bonded_atom):
+def mass_vectorize_bond(atom, bonded_atom, average_weight):
     x_vector = bonded_atom.x - atom.x
     y_vector = bonded_atom.y - atom.y
     z_vector = bonded_atom.z - atom.z
@@ -154,9 +156,10 @@ def mass_vectorize_bond(atom, bonded_atom):
         # The two atoms have the same location (malformed MOF)
         return None
     norm = math.sqrt(x_vector ** 2 + y_vector ** 2 + z_vector ** 2)
-    x = x_vector / norm * MassLookup.lookup(bonded_atom.type_symbol) / MassLookup.lookup(atom.type_symbol)
-    y = y_vector / norm * MassLookup.lookup(bonded_atom.type_symbol) / MassLookup.lookup(atom.type_symbol)
-    z = z_vector / norm * MassLookup.lookup(bonded_atom.type_symbol) / MassLookup.lookup(atom.type_symbol)
+    this_weight = MassLookup.lookup(bonded_atom.type_symbol)
+    x = x_vector / norm * this_weight / average_weight
+    y = y_vector / norm * this_weight / average_weight
+    z = z_vector / norm * this_weight / average_weight
     return x, y, z
 
 
@@ -203,10 +206,15 @@ if __name__ == '__main__':
                         'AFITUF_clean': 'Zn11',
                         'ac403674p_si_001_clean': 'Zn1',
                         'acs.inorgchem.6b00894_ic6b00894_si_003_clean': 'Cd11',
-                        'ACAKUM_clean': 'La3'}.items():
+                        'ACAKUM_clean': 'La3',
+                        'mofs_30-pos-final-O': 'Zr123',
+                        'cg501012e_si_002_clean': 'Zn4',
+                        'DANZAV_charged': 'Cd13',
+                        'ELIYUU_clean': 'Zn7',
+                        'FAZPED_clean': 'Co2'}.items():
         mof = CifReader.get_mof(
             fr"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\{name}.cif")
-        write_atom_in_mof(metal, mof, f'{name}_OMS_calculation')
+        write_atom_in_mof(metal, mof, f'{name}_{metal}_OMS_calculation')
     # print(mof.sbus().clusters)
     # atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance = process(mof, True)
     # print(*atoms_with_open_metal_sites)
