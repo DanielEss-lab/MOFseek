@@ -39,6 +39,11 @@ class MyTestCase(unittest.TestCase):
         mof = CifReader.get_mof(fr'../mofsForTests/{name}.cif')
         self.assertEqual(6, len(mof.open_metal_sites))
 
+    def test_estimate_by_geom_when_geom_center_farther_than_mass_center(self):
+        name = 'RANPAA_clean'
+        mof = CifReader.get_mof(fr'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\{name}.cif')
+        self.assertEqual(2, len(mof.open_metal_sites))
+
 
 if __name__ == '__main__':
     unittest.main()

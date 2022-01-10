@@ -200,18 +200,19 @@ def normalized_radius(covalent_radius):
 
 
 if __name__ == '__main__':
-    for name, metal in {'LOQSOA_clean': 'Tb1',
-                        'AGUTUS_clean': 'Cu1',
-                        'ABAYIO_clean': 'Mn31',
-                        'AFITUF_clean': 'Zn11',
-                        'ac403674p_si_001_clean': 'Zn1',
-                        'acs.inorgchem.6b00894_ic6b00894_si_003_clean': 'Cd11',
-                        'ACAKUM_clean': 'La3',
-                        'mofs_30-pos-final-O': 'Zr123',
-                        'cg501012e_si_002_clean': 'Zn4',
-                        'DANZAV_charged': 'Cd13',
-                        'ELIYUU_clean': 'Zn7',
-                        'FAZPED_clean': 'Co2'}.items():
+    # for name, metal in {'LOQSOA_clean': 'Tb1',
+    #                     'AGUTUS_clean': 'Cu1',
+    #                     'ABAYIO_clean': 'Mn31',
+    #                     'AFITUF_clean': 'Zn11',
+    #                     'ac403674p_si_001_clean': 'Zn1',
+    #                     'acs.inorgchem.6b00894_ic6b00894_si_003_clean': 'Cd11',
+    #                     'ACAKUM_clean': 'La3',
+    #                     'mofs_30-pos-final-O': 'Zr123',
+    #                     'cg501012e_si_002_clean': 'Zn4',
+    #                     'DANZAV_charged': 'Cd13',
+    #                     'ELIYUU_clean': 'Zn7',
+    #                     'FAZPED_clean': 'Co2',
+    for name, metal in {'RANPAA_clean': 'La1'}.items():
         mof = CifReader.get_mof(
             fr"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\{name}.cif")
         write_atom_in_mof(metal, mof, f'{name}_{metal}_OMS_calculation')

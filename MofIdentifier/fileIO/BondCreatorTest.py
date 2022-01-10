@@ -98,6 +98,15 @@ class MyTestCase(unittest.TestCase):
                 self.assertEqual(1, len(atom.bondedAtoms))
         self.assertEqual(104, num_h)
 
+    def test_remake_bond_after_enforcing_hydrogen_single_bond(self):
+            name = 'RANPAA_clean'
+            mof = CifReader.get_mof(fr'../mofsForTests/{name}.cif')
+            for atom in mof.atoms:
+                if atom.type_symbol == 'La':
+                    self.assertEqual(7, len(atom.bondedAtoms))
+                    for neighbor in atom.bondedAtoms:
+                        self.assertEqual("O", neighbor.type_symbol)
+
 
 if __name__ == '__main__':
     unittest.main()

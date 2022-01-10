@@ -189,9 +189,11 @@ class SBUIdentifier:
                     elif tightness < 5:
                         raise InfiniteBandWithTwoStepFindingException
                     else:
+                        # reset this SBUIdentifier
                         self.atom_to_SBU = dict()
                         self.next_group_id = 1
                         self.groups = dict()
+                        # recurse
                         return self.get_clusters(tightness - 1)
                 else:
                     clusters.append(sbu)
@@ -305,7 +307,8 @@ class SBUIdentifier:
                     num_cluster_neighbors += 1
                     cluster_ids.add(cluster.sbu_id)
                 else:
-                    num_noncluster_neighbors += 1  # TODO: clarify in comment when this scenario occurs
+                    num_noncluster_neighbors += 1  # Because non-node atoms are evaluated one at a time,
+                    # it is possible that some linkers have been defined when this line of code executs.
             else:
                 num_noncluster_neighbors += 1
                 noncluster_neighbor = neighbor
@@ -412,10 +415,6 @@ def panes_between_recurse(atom, end, visited, panes_so_far, cluster):
 def split_on_oxygen_bridges(sbu_atoms, tightness):
     split_points = list()
     for atom in sbu_atoms:
-        # if atom.is_metal():
-        #     neighbors = in_sbu_neighbors(atom, sbu_atoms)
-        #     if len(neighbors) == 2 and all(neighbor.type_symbol == 'O' for neighbor in neighbors):
-        #         split_points.extend(neighbors)
         if atom.type_symbol == 'O':
             neighbors = in_sbu_neighbors(atom, sbu_atoms)
             if len(neighbors) == 2 and all(neighbor.is_metal for neighbor in neighbors):

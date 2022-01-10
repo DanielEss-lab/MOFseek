@@ -1,3 +1,4 @@
+import itertools
 from math import floor
 
 from MofIdentifier.bondTools import Distances, OpenMetalSites, CovalentRadiusLookup, Angles
@@ -79,7 +80,7 @@ class MofBondCreator:
             for y in range(self.num_y_buckets):
                 for x in range(self.num_x_buckets):
                     this_space = self.cellSpace[z][y][x]
-                    spaces_to_compare = self.get_spaces_adj_in_one_direction(x, y, z)
+                    spaces_to_compare = self.get_spaces_adj_in_one_direction(z, y, x)
                     self.connect_within_space(this_space)
                     self.connect_within_spaces(this_space, spaces_to_compare)
         # Going back to fix funky areas
@@ -88,7 +89,7 @@ class MofBondCreator:
         open_metal_sites = self.fill_nearly_closed_metal_sites()
         return open_metal_sites
 
-    def get_spaces_adj_in_one_direction(self, x, y, z):
+    def get_spaces_adj_in_one_direction(self, z, y, x):
         # in 2D space, you only need to compare each square with 4 other squares in order for each square
         # to be compared with all 8 adjacent (including diagonals) neighbors. For example, if you compare
         # each square with the square to its right, you don't also need to compare each square with the square to
@@ -136,8 +137,11 @@ class MofBondCreator:
             for atom_b in space_b:
                 self.compare_for_bond(atom_a, atom_b)
 
-    def compare_for_bond(self, atom_a, atom_b):
-        dist = Distances.distance(atom_a, atom_b)
+    def compare_for_bond(self, atom_a, atom_b, known_to_be_adjacent_spaces=True):
+        if atom_b in atom_a.bondedAtoms:
+            return
+        dist = Distances.distance(atom_a, atom_b) if known_to_be_adjacent_spaces \
+            else Distances.distance_across_unit_cells(atom_a, atom_b, self.angles, self.lengths)
         if Distances.is_bond_distance(dist, atom_a, atom_b, self.error_margin):
             if not self.is_blocked_bond(atom_a, atom_b):
                 atom_a.bondedAtoms.append(atom_b)
@@ -184,7 +188,12 @@ class MofBondCreator:
     def enforce_single_hydrogen_bonds(self):
         for atom in self.atoms:
             if atom.type_symbol == 'H' and len(atom.bondedAtoms) > 1:
+                close_atoms = atom.bondedAtoms.copy()
                 self.remove_distant_bonds(atom)
+                # Adding the H to the second molecule might have broken a bond between molecules that should be bonded
+                # now that the H is only bonded to one. Let's check that here:
+                for atom_a, atom_b in itertools.combinations(close_atoms, 2):
+                    self.compare_for_bond(atom_a, atom_b, False)
 
     def remove_distant_bonds(self, atom):
         lowest_distance = float('inf')
