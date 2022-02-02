@@ -8,7 +8,7 @@ from MofIdentifier.Molecules.Ligand import Ligand
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup, MassLookup
 from MofIdentifier.fileIO import CifReader, XyzWriter
 
-ACCEPTABLE_DISTANCE_ERROR = 0.40  # Increasing distance makes it harder for a metal to qualify as having open sites
+ACCEPTABLE_DISTANCE_ERROR = 0.40  # A. Increasing distance makes it harder for a metal to qualify as having open sites
 ACCEPTABLE_ANGLE_ERROR = 20
 TETRAHEDRON_ANGLE = 110
 
@@ -212,10 +212,10 @@ if __name__ == '__main__':
     #                     'DANZAV_charged': 'Cd13',
     #                     'ELIYUU_clean': 'Zn7',
     #                     'FAZPED_clean': 'Co2',
-    for name, metal in {'RANPAA_clean': 'La1'}.items():
-        mof = CifReader.get_mof(
-            fr"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\{name}.cif")
-        write_atom_in_mof(metal, mof, f'{name}_{metal}_OMS_calculation')
+    # for name, metal in {'RANPAA_clean': 'La1'}.items():
+    #     mof = CifReader.get_mof(
+    #         fr"C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\{name}.cif")
+    #     write_atom_in_mof(metal, mof, f'{name}_{metal}_OMS_calculation')
     # print(mof.sbus().clusters)
     # atoms_with_open_metal_sites, example_atom, example_num_bonds, example_distance = process(mof, True)
     # print(*atoms_with_open_metal_sites)
@@ -229,8 +229,8 @@ if __name__ == '__main__':
     #     if len(atom.bondedAtoms) == 0:
     #         print(atom.label)
 
-    # print(CovalentRadiusLookup.greatest_radius())
-    # print(CovalentRadiusLookup.smallest_radius())
+    print(CovalentRadiusLookup.smallest_radius())
+    print(CovalentRadiusLookup.greatest_radius() - CovalentRadiusLookup.smallest_radius())
     # symbol = 'Zr'
     # print(f"{symbol}:\tradius {CovalentRadiusLookup.lookup(symbol)},\tnormalized radius "
     #       f"{normalized_radius(CovalentRadiusLookup.lookup(symbol))},\tcutoff 4 ligands "

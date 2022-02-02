@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from pysmiles import read_smiles
 
 from MofIdentifier.Molecules.Ligand import Ligand
@@ -74,10 +76,10 @@ def mol_from_str(string, mol_name=None):
 
     original_string = string
     manually_specified_h = 'H' in original_string
-    string = processable_smiles(string)
+    string, always_marked_elements = processable_smiles(string)
 
     networkx_mol = networkx_graph_from_smiles(string, not manually_specified_h)
-    molecule = mol_from_networkx_graph(networkx_mol, mol_name, original_string)
+    molecule = mol_from_networkx_graph(networkx_mol, mol_name, original_string, always_marked_elements)
 
     restore_wildcards(molecule)
     molecule.should_use_weak_comparison = not manually_specified_h
@@ -88,20 +90,32 @@ def processable_smiles(string):
     string = string.split('\n')[0]
     string = remove_wildcards(string)
     string = string.replace('H', H_REPLACEMENT)
+    if string[0] == '`':
+        raise RuntimeError('SMILES cannot start with backtick')
+    marked_elements = defaultdict(lambda: 0)
+    for i, char in enumerate(string):
+        if char == '`':
+            marked_elements[string[i - 1]] += 1
+    always_marked_elements = set()
+    for e, freq in marked_elements.items():
+        if string.count('`') == freq:
+            always_marked_elements.add(e)
+    for e in always_marked_elements:
+        string = string.replace(e + '`', e)
     string = string.replace('`', OPEN_MARK_REPLACEMENT)  # The Smiles interpreter doesn't handle ` but does handle z
     for symbol in pysmiles_organic_subset:
         bracket_requiring_symbol = symbol + OPEN_MARK_REPLACEMENT
         string = string.replace(bracket_requiring_symbol, f"[{bracket_requiring_symbol}]")
     string = string.replace('[[', '[')
     string = string.replace(']]', ']')
-    return string
+    return string, always_marked_elements
 
 
 def networkx_graph_from_smiles(smiles_string, should_add_all_h_around_structure):
     return read_smiles(smiles_string, explicit_hydrogen=should_add_all_h_around_structure)
 
 
-def mol_from_networkx_graph(graph, mol_name, file_string):
+def mol_from_networkx_graph(graph, mol_name, file_string, always_marked_elements):
     networkx_nodes = list(graph.nodes(data='element'))
     atoms = {}
     # make atoms
@@ -111,7 +125,7 @@ def mol_from_networkx_graph(graph, mol_name, file_string):
             is_bond_limited = False
         else:
             elem = str(node[1])
-            is_bond_limited = True
+            is_bond_limited = elem not in always_marked_elements
         name = elem + str(node[0])
         atom = Atom.without_location(name, elem)
         atom.is_bond_limited = is_bond_limited
