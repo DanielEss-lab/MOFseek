@@ -8,7 +8,7 @@ from tkinter import ttk
 from GUI import Attributes, Settings
 from GUI.Utility import MultipleAutoCompleteSearch, FrameWithProcess, Tooltips, StyledButton
 from GUI.Pages.Search.SearchTerms import SearchTerms
-from DAO import MOFDAO, SBUDAO, LigandDAO
+from DAOsAndServices import MOFDAO, SBUDAO, LigandDAO
 
 
 ROW_MAXIMUM = 6

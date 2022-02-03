@@ -1,5 +1,5 @@
 from GUI.Views import LigandView, SBUView, MOFView
-from DAO import LigandDatabase, SBUDatabase, MOFDatabase
+from DAOsAndServices import LigandDatabase, SBUDatabase, MOFDatabase
 
 
 def make_view(parent, molecule):

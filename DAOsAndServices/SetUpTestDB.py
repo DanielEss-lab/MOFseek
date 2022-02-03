@@ -1,4 +1,4 @@
-from DAO import DBConnection, MOFDAO
+from DAOsAndServices import DBConnection, MOFDAO
 
 
 def setup():

@@ -2,10 +2,10 @@ import tkinter as tk
 from pathlib import Path
 from tkinter.filedialog import askopenfilenames
 
-from DAO.MOFDatabase import MOFDatabase
+from DAOsAndServices.MOFDatabase import MOFDatabase
 from GUI.Utility import FrameWithProcess, StyledButton
 from GUI.Views import MultiMofView
-from DAO import MOFDAO
+from DAOsAndServices import MOFDAO
 from MofIdentifier.fileIO import CifReader
 
 instruction_text = """Choose one or more .cif files from your computer. The MOFs will be loaded onto the database, and 

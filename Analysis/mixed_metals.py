@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 from collections import defaultdict
 
-from DAO import SBUDAO
+from DAOsAndServices import SBUDAO
 from MofIdentifier.Molecules.Atom import Atom
 
 

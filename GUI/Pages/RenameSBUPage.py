@@ -2,7 +2,7 @@ import tkinter as tk
 
 from GUI.Views import SBUView
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess
-from DAO import SBUDAO, RenameService
+from DAOsAndServices import SBUDAO, RenameService
 
 instruction_text = """Renaming a Secondary Building Unit in the database takes several minutes, so please be patient."""
 

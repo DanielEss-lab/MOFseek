@@ -1,6 +1,6 @@
 import unittest
 
-from DAO import MOFDAO, DBConnection
+from DAOsAndServices import MOFDAO, DBConnection
 from MofIdentifier.fileIO import CifReader
 
 

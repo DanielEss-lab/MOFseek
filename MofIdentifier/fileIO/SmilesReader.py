@@ -95,7 +95,11 @@ def processable_smiles(string):
     marked_elements = defaultdict(lambda: 0)
     for i, char in enumerate(string):
         if char == '`':
-            marked_elements[string[i - 1]] += 1
+            if i > 1 and string[i - 1].islower() and string[i - 2].isupper():
+                element = string[i - 2:i]
+            else:
+                element = string[i - 1]
+            marked_elements[element] += 1
     always_marked_elements = set()
     for e, freq in marked_elements.items():
         if string.count('`') == freq:

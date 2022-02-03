@@ -1,4 +1,4 @@
-from DAO import LigandDAO, MOFDAO, SBUDAO
+from DAOsAndServices import LigandDAO, MOFDAO, SBUDAO
 
 
 def delete_ligand(old_name):

@@ -2,7 +2,7 @@ import itertools
 from collections import defaultdict
 from pathlib import Path
 
-from DAO import MOFDAO
+from DAOsAndServices import MOFDAO
 from MofIdentifier.Molecules import Atom
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import XyzReader, LigandReader

@@ -7,7 +7,7 @@ from MofIdentifier.fileIO.CifReader import get_mof
 
 class SBUIdentifierTest(unittest.TestCase):
     def test_simple_mof(self):
-        mof_abavij = get_mof('../mofsForTests/ABAVIJ_clean.cif')
+        mof_abavij = get_mof('../MofIdentifier/mofsForTests/ABAVIJ_clean.cif')
         sbu_breakdown = mof_abavij.sbus()
 
         assert (len(sbu_breakdown.clusters) == 1)
@@ -23,7 +23,7 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.auxiliaries) == 0)
 
     def test_complex_mof(self):
-        mof_808 = get_mof('../mofsForTests/smod7-pos-1.cif')
+        mof_808 = get_mof('../MofIdentifier/mofsForTests/smod7-pos-1.cif')
         sbu_breakdown = mof_808.sbus()
 
         assert (len(sbu_breakdown.clusters) == 1)
@@ -43,7 +43,7 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.auxiliaries) == 3)
 
     def test_small_mof(self):
-        mof_abetae = get_mof('../mofsForTests/ABETAE_clean.cif')
+        mof_abetae = get_mof('../MofIdentifier/mofsForTests/ABETAE_clean.cif')
         sbu_breakdown = mof_abetae.sbus()
 
         assert (len(sbu_breakdown.clusters) == 1)
@@ -61,7 +61,7 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.connectors[0].atoms) == 5)
 
     def test_notalladjacent_core(self):
-        mof_akoheo = get_mof('../mofsForTests/AKOHEO_clean.cif')
+        mof_akoheo = get_mof('../MofIdentifier/mofsForTests/AKOHEO_clean.cif')
         sbu_breakdown = mof_akoheo.sbus()
 
         assert (len(sbu_breakdown.clusters) == 2)
@@ -103,7 +103,7 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.auxiliaries[0].atoms) == 2)
 
     def test_abnormal_fractional_coordinates(self):
-        mof_ja_007 = get_mof('../mofsForTests/ja500330a_si_007_auto.cif')
+        mof_ja_007 = get_mof('../MofIdentifier/mofsForTests/ja500330a_si_007_auto.cif')
         sbu_breakdown = mof_ja_007.sbus()
 
         self.assertEqual(len(sbu_breakdown.clusters), 1)
@@ -123,7 +123,7 @@ class SBUIdentifierTest(unittest.TestCase):
         self.assertEqual(len(sbu_breakdown.auxiliaries), 1)
 
     def test_single_metal_wide_unit_cell(self):
-        mof_russaa = get_mof('../mofsForTests/RUSSAA_clean.cif')
+        mof_russaa = get_mof('../MofIdentifier/mofsForTests/RUSSAA_clean.cif')
         sbu_breakdown = mof_russaa.sbus()
 
         assert (len(sbu_breakdown.clusters) == 2)
@@ -136,7 +136,7 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (sbu_breakdown.connectors[2].frequency == 4)
 
     def test_infinite_band_connector(self):
-        mof_24205 = get_mof('../mofsForTests/acscombsci.5b00188_24205_clean.cif')
+        mof_24205 = get_mof('../MofIdentifier/mofsForTests/acscombsci.5b00188_24205_clean.cif')
         sbu_breakdown = mof_24205.sbus()
 
         assert (len(sbu_breakdown.clusters) == 1)
@@ -147,7 +147,7 @@ class SBUIdentifierTest(unittest.TestCase):
 
 class BreakLargeClustersTest(unittest.TestCase):
     def test_breaking_up_large_clusters(self):
-        mof_dotyes = get_mof('../mofsForTests/DOTYES_clean.cif')
+        mof_dotyes = get_mof('../MofIdentifier/mofsForTests/DOTYES_clean.cif')
         sbu_breakdown = mof_dotyes.sbus()
         self.assertEqual(2, len(sbu_breakdown.clusters))
         large_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 57][0]

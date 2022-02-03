@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 
-from DAO import MOFDAO
+from DAOsAndServices import MOFDAO
 from MofIdentifier.bondTools import CovalentRadiusLookup
 
 

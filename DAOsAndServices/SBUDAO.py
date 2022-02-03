@@ -1,6 +1,6 @@
 from MofIdentifier.Molecules.SBU import SBU
-from DAO.SBUDatabase import SBUDatabase
-from DAO.DBConnection import sbu_collection
+from DAOsAndServices.SBUDatabase import SBUDatabase
+from DAOsAndServices.DBConnection import sbu_collection
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 
 

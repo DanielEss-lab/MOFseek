@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from DAO import SBUDAO
+from DAOsAndServices import SBUDAO
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import LigandReader, XyzReader
 

@@ -1,6 +1,6 @@
-from DAO.LigandDatabase import LigandDatabase
-from DAO.MOFDatabase import MOFDatabase
-from DAO.DBConnection import mof_collection, ligand_collection
+from DAOsAndServices.LigandDatabase import LigandDatabase
+from DAOsAndServices.MOFDatabase import MOFDatabase
+from DAOsAndServices.DBConnection import mof_collection, ligand_collection
 from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.fileIO import LigandReader
 

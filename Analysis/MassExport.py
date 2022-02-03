@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from DAO import SBUDAO
+from DAOsAndServices import SBUDAO
 from MofIdentifier.fileIO import MoleculeWriter
 
 

@@ -3,8 +3,8 @@ import platform
 import time
 from pathlib import Path
 
-from DAO import MOFDAO, SBUDAO, DBConnection, LigandDAO, DeleteService
-from DAO.MOFDatabase import MOFDatabase
+from DAOsAndServices import MOFDAO, SBUDAO, DBConnection, LigandDAO, DeleteService
+from DAOsAndServices.MOFDatabase import MOFDatabase
 from collections import namedtuple
 from MofIdentifier.Molecules.MOF import NoMetalException
 from MofIdentifier.fileIO import CifReader, LigandReader, MoleculeWriter

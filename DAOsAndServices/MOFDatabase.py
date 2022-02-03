@@ -1,4 +1,4 @@
-from DAO import MOFDAO, LigandDAO
+from DAOsAndServices import MOFDAO, LigandDAO
 from MofIdentifier.fileIO import CifReader
 
 

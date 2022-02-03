@@ -2,10 +2,10 @@ import tkinter as tk
 from pathlib import Path
 from tkinter.filedialog import askopenfilenames
 
-from DAO.LigandDatabase import LigandDatabase
+from DAOsAndServices.LigandDatabase import LigandDatabase
 from GUI.Utility import FrameWithProcess, StyledButton
 from GUI.Views import LigandView, MultiLigandView
-from DAO import LigandDAO
+from DAOsAndServices import LigandDAO
 from MofIdentifier.fileIO import LigandReader
 
 instruction_text = """Choose from your computer a .xyz file or a .smiles file (a plaintext file whose first line is a

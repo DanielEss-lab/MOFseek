@@ -1,8 +1,8 @@
 import csv
 
-from DAO import SBUDAO, LigandDAO
-from DAO.MOFDatabase import MOFDatabase
-from DAO.DBConnection import mof_collection
+from DAOsAndServices import SBUDAO, LigandDAO
+from DAOsAndServices.MOFDatabase import MOFDatabase
+from DAOsAndServices.DBConnection import mof_collection
 
 
 def get_MOF(name):

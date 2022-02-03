@@ -3,7 +3,7 @@ import tkinter.font as tkFont
 
 from GUI import os_specific_settings, Attributes, Settings
 from GUI.Utility import Tooltips
-from DAO import SBUDAO, LigandDAO, MOFDatabase
+from DAOsAndServices import SBUDAO, LigandDAO, MOFDatabase
 from MofIdentifier.fileIO import FileOpen
 
 

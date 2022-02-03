@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.font as tkFont
 
 from GUI import os_specific_settings
-from DAO import MOFDAO, SBUDatabase
+from DAOsAndServices import MOFDAO, SBUDatabase
 from MofIdentifier.fileIO import FileOpen
 
 

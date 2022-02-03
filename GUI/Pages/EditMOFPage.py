@@ -31,7 +31,7 @@ class Page(FrameWithProcess.Frame):
     def edit_mof_in_db(self, new_mof):
         if self.mof is not None:
             if new_mof is not None:
-                # TODO: link to DAO
+                # TODO: link to DAOsAndServices
                 pass
             else:
                 self._show_error('Unable to process edits into valid MOF in order to save to db')

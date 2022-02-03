@@ -6,7 +6,7 @@ from MofIdentifier.fileIO import CifReader
 
 class MyTestCase(unittest.TestCase):
     def test_fill_nearly_closed_metal_sites(self):
-        complex_mof = CifReader.get_mof('../mofsForTests/ABEXEN_clean.cif')
+        complex_mof = CifReader.get_mof('../MofIdentifier/mofsForTests/ABEXEN_clean.cif')
         In1 = None
         for atom in complex_mof.atoms:
             if atom.label == 'In1':
@@ -15,7 +15,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(8, len(In1.bondedAtoms))
 
     def test_breaking_metals_based_on_obvious_angles(self):
-        complex_mof = CifReader.get_mof('../mofsForTests/YOJMAN_clean.cif')
+        complex_mof = CifReader.get_mof('../MofIdentifier/mofsForTests/YOJMAN_clean.cif')
         k4 = None
         w21 = None
         o65 = None
@@ -33,7 +33,7 @@ class MyTestCase(unittest.TestCase):
         self.assertIn(k4, o65.bondedAtoms)
 
     def test_breaking_nonmetal_bonds(self):
-        mof = CifReader.get_mof('../mofsForTests/LOQSOA_clean.cif')
+        mof = CifReader.get_mof('../MofIdentifier/mofsForTests/LOQSOA_clean.cif')
         tb1 = None
         n6 = None
         o12 = None
@@ -73,7 +73,7 @@ class MyTestCase(unittest.TestCase):
         self.assertLess(dist_c, dist_a + dist_b)
 
     def test_OCO_consistent_bonding(self):
-        mof = CifReader.get_mof(r'../mofsForTests/acs.inorgchem.6b00894_ic6b00894_si_003_clean.cif')
+        mof = CifReader.get_mof(r'../MofIdentifier/mofsForTests/acs.inorgchem.6b00894_ic6b00894_si_003_clean.cif')
         num_cd = 0
         for atom in mof.atoms:
             if atom.type_symbol == 'Cd':
@@ -82,7 +82,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(12, num_cd)
 
     def test_hydrogen_only_one_bond(self):
-        mof = CifReader.get_mof(r'../mofsForTests/AWASOI_clean.cif')
+        mof = CifReader.get_mof(r'../MofIdentifier/mofsForTests/AWASOI_clean.cif')
         num_h = 0
         for atom in mof.atoms:
             if atom.type_symbol == 'H':
@@ -90,7 +90,7 @@ class MyTestCase(unittest.TestCase):
                 self.assertEqual(1, len(atom.bondedAtoms))
         self.assertEqual(144, num_h)
 
-        mof = CifReader.get_mof(r'../mofsForTests/TEWGEJ01_clean.cif')
+        mof = CifReader.get_mof(r'../MofIdentifier/mofsForTests/TEWGEJ01_clean.cif')
         num_h = 0
         for atom in mof.atoms:
             if atom.type_symbol == 'H':

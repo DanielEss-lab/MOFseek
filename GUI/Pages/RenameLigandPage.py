@@ -2,7 +2,7 @@ import tkinter as tk
 
 from GUI.Utility import AutoCompleteComboBox, FrameWithProcess, StyledButton
 from GUI.Views import MoleculeView
-from DAO import LigandDAO, RenameService, DeleteService
+from DAOsAndServices import LigandDAO, RenameService, DeleteService
 
 instruction_text = """Renaming a ligand in the database takes a minute, so please be patient.\n
 To delete a ligand, rename it to 'trash' (all lowercase, no punctuation)."""
