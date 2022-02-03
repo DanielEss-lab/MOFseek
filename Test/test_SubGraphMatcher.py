@@ -185,7 +185,7 @@ class ConstrainedAndOpenAtomsTest(unittest.TestCase):
 
     def test_equal_smiles(self):
         example_mof = CifReader.get_mof('../MofIdentifier/mofsForTests/smod7-pos-1.cif')
-        smiles_2 = LigandReader.get_mol_from_file('../ligands/snurr_searchable.smiles')
+        smiles_2 = LigandReader.get_mol_from_file('../MofIdentifier/ligands/snurr_searchable.smiles')
         smiles_1 = LigandReader.get_mol_from_file('../MofIdentifier/ligands/snurr_nonsearchable.smiles')
         self.assertFalse(SubGraphMatcher.find_ligand_in_mof(smiles_1, example_mof))
         self.assertFalse(SubGraphMatcher.find_ligand_in_mof(smiles_2, example_mof))

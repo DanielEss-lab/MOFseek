@@ -157,7 +157,7 @@ class BreakLargeClustersTest(unittest.TestCase):
         self.assertEqual(21, len([atom for atom in large_cluster.atoms if atom.is_metal()]))
 
     def test_breaking_up_large_clusters_in_complex_mof(self):
-        mof_yojman = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\YOJMAN_clean.cif')
+        mof_yojman = get_mof(r'../MofIdentifier/mofsForTests/YOJMAN_clean.cif')
         sbu_breakdown = mof_yojman.sbus()
         self.assertGreater(9, len(sbu_breakdown.clusters))
         self.assertGreater(len(sbu_breakdown.clusters), 3)
@@ -168,7 +168,7 @@ class BreakLargeClustersTest(unittest.TestCase):
         self.assertEqual(18, len([atom for atom in large_cluster.atoms if atom.is_metal()]))
 
     def test_breaking_up_different_clusters_when_they_are_connected_in_multiple_spots(self):
-        mof_ocuvuf = get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\OCUVUF_clean.cif')
+        mof_ocuvuf = get_mof(r'../MofIdentifier/mofsForTests/OCUVUF_clean.cif')
         sbu_breakdown = mof_ocuvuf.sbus()
         self.assertEqual(3, len(sbu_breakdown.clusters))
         large_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 59][0]

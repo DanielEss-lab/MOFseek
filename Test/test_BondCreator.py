@@ -56,7 +56,7 @@ class MyTestCase(unittest.TestCase):
         self.assertIn(tb1, o13.bondedAtoms)
 
     def test_arccos(self):
-        mof = CifReader.get_mof(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143\AKUHOD01_clean.cif')
+        mof = CifReader.get_mof(r'../MofIdentifier/mofsForTests/AKUHOD01_clean.cif')
         Gd2 = None
         Gd4 = None
         O11 = None
@@ -100,7 +100,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_remake_bond_after_enforcing_hydrogen_single_bond(self):
             name = 'RANPAA_clean'
-            mof = CifReader.get_mof(fr'../mofsForTests/{name}.cif')
+            mof = CifReader.get_mof(fr'../MofIdentifier/mofsForTests/{name}.cif')
             for atom in mof.atoms:
                 if atom.type_symbol == 'La':
                     self.assertEqual(7, len(atom.bondedAtoms))
