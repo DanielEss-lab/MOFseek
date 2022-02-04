@@ -202,7 +202,9 @@ class SBUIdentifier:
         if len(clusters) == 0:
             raise Exception(f'Exiting algorithm early because no metal atoms found for mof {self.mof.label}')
         temp_clusters = reduce_duplicates(clusters, lambda x, y: x == y)
-        if any(cluster.frequency == 1 or len(cluster.atoms) > 100 or is_infinite_band(cluster.atoms)
+        if len(clusters) == 1 and not is_infinite_band(clusters[0].atoms):
+            pass
+        elif any(cluster.frequency == 1 or len(cluster.atoms) > 100 or is_infinite_band(cluster.atoms)
                for cluster in temp_clusters):
             if tightness < 5:
                 if self.allow_two_steps:
@@ -237,10 +239,12 @@ class SBUIdentifier:
                 self.check_for_including_distant_metals(neighbor, atoms)
 
     def check_for_including_distant_metals(self, possible_in_node_link, atoms):
+        if possible_in_node_link.type_symbol != 'O' or len(possible_in_node_link.bondedAtoms) < 2:
+            return
         if not self.been_visited(possible_in_node_link):
             # disqualify if the oxygen touches any non-metal atoms
             for second_neighbor in possible_in_node_link.bondedAtoms:
-                if second_neighbor.type_symbol == 'C':
+                if second_neighbor.type_symbol == 'C' or second_neighbor.type_symbol == 'H':
                     if len([atom for atom in possible_in_node_link.bondedAtoms if atom.is_metal()]) < 3:
                         return
                 elif not second_neighbor.is_metal():

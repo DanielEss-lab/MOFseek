@@ -162,7 +162,7 @@ class BreakLargeClustersTest(unittest.TestCase):
         self.assertGreater(9, len(sbu_breakdown.clusters))
         self.assertGreater(len(sbu_breakdown.clusters), 3)
         large_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 54][0]
-        med_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 4][0]
+        med_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 3][0]
         self.assertEqual(4, large_cluster.frequency)
         self.assertEqual(4, med_cluster.frequency)
         self.assertEqual(18, len([atom for atom in large_cluster.atoms if atom.is_metal()]))
