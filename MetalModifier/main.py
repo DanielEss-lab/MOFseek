@@ -163,7 +163,7 @@ def get_relevant_group_1_atoms(cluster, mof):
         add_eligible_oxygens.sort()
         first_pole = add_eligible_oxygens[0]
         others = [(pole, Distances.distance_across_unit_cells(
-            first_pole, pole, mof.angles, mof.fractional_lengths)) for pole in add_eligible_oxygens[1:]]
+            first_pole, pole, mof.angles, mof.fractional_lengths, mof.unit_volume)) for pole in add_eligible_oxygens[1:]]
         others.sort(key=lambda pair: pair[1])
         tetrahedral_oxygens = [other[0] for other in others[3:6]]  # Not the three closest, neither the one farthest
         tetrahedral_oxygens.append(first_pole)
@@ -282,7 +282,7 @@ def get_relevant_group_5_atoms(cluster, mof):
         delete_eligible_hydrogens.sort()
         first_pole = delete_eligible_hydrogens[7]
         others = [(pole, Distances.distance_across_unit_cells(
-            first_pole, pole, mof.angles, mof.fractional_lengths)) for pole in delete_eligible_hydrogens[0:7]]
+            first_pole, pole, mof.angles, mof.fractional_lengths, mof.unit_volume)) for pole in delete_eligible_hydrogens[0:7]]
         others.sort(key=lambda pair: pair[1])
         tetrahedral_hydrogens = [other[0] for other in others[3:6]]  # Not the three closest, neither the one farthest
         tetrahedral_hydrogens.append(first_pole)
@@ -415,7 +415,7 @@ def get_close_numpy_vector(base_atom, neighbor, mof):
     elif neighbor.c - base_atom.c < -0.5:
         dc += 1.0
     neighbor_in_right_place = neighbor.copy_to_relative_position(da, db, dc, mof.angles,
-                                                                 mof.fractional_lengths)
+                                                                 mof.fractional_lengths, mof.unit_volume)
     return np.array([neighbor_in_right_place.x, neighbor_in_right_place.y, neighbor_in_right_place.z])
 
 

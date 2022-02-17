@@ -1,3 +1,4 @@
+import math
 import os
 from io import FileIO, StringIO
 from pathlib import Path
@@ -5,6 +6,7 @@ from pathlib import Path
 import CifFile.StarFile  # PyCifRW (4.4.3 works, but other versions should work also
 from CifFile import ReadCif
 
+from MofIdentifier.Molecules.Coordinates import conversion_to_Cartesian
 from MofIdentifier.Molecules.MOF import MOF
 from MofIdentifier.Molecules.Atom import Atom
 
@@ -29,9 +31,9 @@ def get_all_mofs_in_directory(mofs_path):
                 mofs.append(mof)
             except InterruptedError:
                 raise InterruptedError
-            except Exception:
+            except Exception as e:
                 print("Error reading file: ", file_name)
-                print(Exception)
+                print(e)
     # Return to original directory
     os.chdir(original_path)
     return mofs
@@ -79,6 +81,20 @@ def mof_from_cf(cf, filename, file_str):
     angle_beta = extract_float(cb['_cell_angle_beta'])
     angle_gamma = extract_float(cb['_cell_angle_gamma'])
 
+    alpha = angle_alpha * math.pi / 180
+    beta = angle_beta * math.pi / 180
+    gamma = angle_gamma * math.pi / 180
+    volume = length_a * length_b * length_c * math.sqrt(
+        1 - (math.cos(alpha) ** 2) - (math.cos(beta) ** 2) - (math.cos(gamma) ** 2) + (
+                2 * math.cos(alpha) * math.cos(beta) * math.cos(gamma)))
+
+    (length_x, _, _) = conversion_to_Cartesian(1, 0, 0, (angle_alpha, angle_beta, angle_gamma),
+                                               (length_a, length_b, length_c), volume)
+    (_, length_y, n) = conversion_to_Cartesian(0, 1, 0, (angle_alpha, angle_beta, angle_gamma),
+                                               (length_a, length_b, length_c), volume)
+    (_, _, length_z) = conversion_to_Cartesian(0, 0, 1, (angle_alpha, angle_beta, angle_gamma),
+                                               (length_a, length_b, length_c), volume)
+
     atom_data_loop = cb.GetLoop('_atom_site_label')
     atoms = list(())
     for atomData in atom_data_loop:
@@ -91,9 +107,10 @@ def mof_from_cf(cf, filename, file_str):
         c += 1 if c < 0 else 0
         atom = Atom.from_fractional(atomData._atom_site_label,
                                     atomData._atom_site_type_symbol,
-                                    a, b, c, (angle_alpha, angle_beta, angle_gamma), (length_a, length_b, length_c))
+                                    a, b, c, (angle_alpha, angle_beta, angle_gamma), (length_a, length_b, length_c), volume)
         atoms.append(atom)
-    return MOF(file_path, atoms, symmetry, length_a, length_b, length_c, angle_alpha, angle_beta, angle_gamma, file_str)
+    return MOF(file_path, atoms, symmetry, length_a, length_b, length_c,
+               length_x, length_y, length_z, angle_alpha, angle_beta, angle_gamma, volume, file_str)
 
 
 def extract_float(text):

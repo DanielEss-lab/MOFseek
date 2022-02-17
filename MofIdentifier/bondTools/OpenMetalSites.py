@@ -13,10 +13,10 @@ ACCEPTABLE_ANGLE_ERROR = 20
 TETRAHEDRON_ANGLE = 110
 
 
-def write_estimate(atom, centroids, estimates, name):
+def write_estimate(atom, centroids, estimates, name, mof):
     atoms = list()
     atoms.append(atom)
-    atoms.extend([Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
+    atoms.extend([Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths, mof.unit_volume)
                   for bonded_atom in atom.bondedAtoms])
     atoms.append(Atom.copy_with_different_type(centroids[0], 'Si'))  # Si is the geometric center
     atoms.append(Atom.copy_with_different_type(centroids[1], 'Sn'))  # Sn is the weight center
@@ -31,7 +31,7 @@ def write_atom_in_mof(atom_label, mof, name):
     for atom in mof.atoms:
         if atom.label == atom_label:
             centroids = centers_of_bonded_atoms(atom, mof)
-            write_estimate(atom, centroids, estimated_bond_sites(atom, centroids, mof), name)
+            write_estimate(atom, centroids, estimated_bond_sites(atom, centroids, mof), name, mof)
 
 
 def process(mof, verbose=False):
@@ -42,7 +42,7 @@ def process(mof, verbose=False):
             example_num_bonds = len(example_atom.bondedAtoms)
             centers = centers_of_bonded_atoms(example_atom, mof)
             example_distances = [Distances.distance_across_unit_cells(example_atom, center, mof.angles,
-                                                                     mof.fractional_lengths) for center in centers]
+                                                                     mof.fractional_lengths, mof.unit_volume) for center in centers]
             return atoms_with_open_metal_sites, example_atom, example_num_bonds, max(example_distances)
         else:
             return [], None, None, None
@@ -58,9 +58,9 @@ def has_open_metal_site(atom, mof):
     else:  # 4 or more bonds
         geom_centroid, mass_centroid = centers_of_bonded_atoms(atom, mof)
         metal_to_center_distances = (Distances.distance_across_unit_cells(atom, geom_centroid, mof.angles,
-                                                                          mof.fractional_lengths),
+                                                                          mof.fractional_lengths, mof.unit_volume),
                                      Distances.distance_across_unit_cells(atom, mass_centroid, mof.angles,
-                                                                          mof.fractional_lengths))
+                                                                          mof.fractional_lengths, mof.unit_volume))
         cutoff = distance_cutoff_for(atom.type_symbol, len(atom.bondedAtoms))
         if any(d > cutoff for d in metal_to_center_distances):
             return True
@@ -79,8 +79,7 @@ def square_planar_angles(atom, mof):
 
 
 def centers_of_bonded_atoms(atom, mof):
-    #
-    bonded_atoms = [Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths)
+    bonded_atoms = [Distances.move_neighbor_if_distant(atom, bonded_atom, mof.angles, mof.fractional_lengths, mof.unit_volume)
                     for bonded_atom in atom.bondedAtoms]
     unfiltered_unit_vectors = [unit_vectorize_bond(atom, bonded_atom) for bonded_atom in bonded_atoms]
     unit_vectors = [v for v in unfiltered_unit_vectors if v is not None]
@@ -120,7 +119,7 @@ def estimated_bond_site(atom, centroid, mof):
     centroid_opposite_dz = atom.z - centroid.z
     # length = twice the covalent radius of the atom
     estimated_distance = CovalentRadiusLookup.lookup(atom.type_symbol) * 1.5
-    metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, mof.angles, mof.fractional_lengths)
+    metal_to_center_distance = Distances.distance_across_unit_cells(atom, centroid, mof.angles, mof.fractional_lengths, mof.unit_volume)
     if metal_to_center_distance < 0.05 and len(atom.bondedAtoms) < 4:
         return
     estimated_x = atom.x + centroid_opposite_dx / metal_to_center_distance * estimated_distance
@@ -166,9 +165,9 @@ def mass_vectorize_bond(atom, bonded_atom, average_weight):
 def all_angles_around(atom, mof):
     angles = []
     for a, b in itertools.combinations(atom.bondedAtoms, 2):
-        dist_a = Distances.distance_across_unit_cells(a, atom, mof.angles, mof.fractional_lengths)
-        dist_b = Distances.distance_across_unit_cells(b, atom, mof.angles, mof.fractional_lengths)
-        dist_c = Distances.distance_across_unit_cells(a, b, mof.angles, mof.fractional_lengths)
+        dist_a = Distances.distance_across_unit_cells(a, atom, mof.angles, mof.fractional_lengths, mof.unit_volume)
+        dist_b = Distances.distance_across_unit_cells(b, atom, mof.angles, mof.fractional_lengths, mof.unit_volume)
+        dist_c = Distances.distance_across_unit_cells(a, b, mof.angles, mof.fractional_lengths, mof.unit_volume)
         # Sometimes the distance values just barely don't make a triangle. This happens if a and b are 180 degrees apart
         # or 0 degrees apart. The following if statement checks for these extremes, and changes the input to the arccos
         # function so that it will produce the correct angle.

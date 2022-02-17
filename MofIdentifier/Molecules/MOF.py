@@ -1,5 +1,5 @@
 from MofIdentifier.Molecules import Molecule
-from MofIdentifier.Molecules.Atom import conversion_to_Cartesian, is_metal
+from MofIdentifier.Molecules.Atom import is_metal
 from MofIdentifier.bondTools import SolventTools
 from MofIdentifier.fileIO.MofBondCreator import MofBondCreator
 from MofIdentifier.subbuilding import SBUIdentifier
@@ -11,7 +11,7 @@ class NoMetalException(Exception):
 
 
 class MOF(Molecule.Molecule):
-    def __init__(self, filepath, atoms, symmetry, a, b, c, al, be, ga, file_string):
+    def __init__(self, filepath, atoms, symmetry, a, b, c, x, y, z, al, be, ga, vol, file_string):
         super().__init__(filepath, atoms)
         self.has_metal = any(is_metal(type_symbol) for type_symbol in self.elementsPresent)
         self.is_organic = any(type_symbol == 'C' for type_symbol in self.elementsPresent) and any(
@@ -20,11 +20,8 @@ class MOF(Molecule.Molecule):
         self.fractional_lengths = (a, b, c)
         self.angles = (al, be, ga)  # alpha, beta, gamma
         self.file_content = file_string
-        (length_x, n, n) = conversion_to_Cartesian(1, 0, 0, (al, be, ga), (a, b, c))
-        (n, length_y, n) = conversion_to_Cartesian(0, 1, 0, (al, be, ga), (a, b, c))
-        (n, n, length_z) = conversion_to_Cartesian(0, 0, 1, (al, be, ga), (a, b, c))
-        self.unit_volume = length_x * length_y * length_z
-        self.cartesian_lengths = (length_x, length_y, length_z)
+        self.unit_volume = vol
+        self.cartesian_lengths = (x, y, z)
 
         bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths, self.unit_volume)
         self._sbus = None

@@ -136,7 +136,7 @@ class changeableSBU(Molecule.Molecule):
                     elif neighbor.c - atom.c < -0.5:
                         dc += 1.0
                     neighbor_in_right_place = neighbor.copy_to_relative_position(da, db, dc, mof.angles,
-                                                                                 mof.fractional_lengths)
+                                                                                 mof.fractional_lengths, mof.unit_volume)
                 else:
                     neighbor_in_right_place = neighbor
                 visited.add(neighbor_in_right_place)

@@ -69,7 +69,7 @@ class MofBondCreator:
         else:
             bucket_copy = list(())
             for atom in bucket:
-                bucket_copy.append(atom.copy_to_relative_position(da, db, dc, self.angles, self.lengths))
+                bucket_copy.append(atom.copy_to_relative_position(da, db, dc, self.angles, self.lengths, self.volume))
             return bucket_copy
 
     def connect_atoms(self):
@@ -141,7 +141,7 @@ class MofBondCreator:
         if atom_b in atom_a.bondedAtoms:
             return
         dist = Distances.distance(atom_a, atom_b) if known_to_be_adjacent_spaces \
-            else Distances.distance_across_unit_cells(atom_a, atom_b, self.angles, self.lengths)
+            else Distances.distance_across_unit_cells(atom_a, atom_b, self.angles, self.lengths, self.volume)
         if Distances.is_bond_distance(dist, atom_a, atom_b, self.error_margin):
             if not self.is_blocked_bond(atom_a, atom_b):
                 atom_a.bondedAtoms.append(atom_b)
@@ -151,10 +151,10 @@ class MofBondCreator:
     def is_blocked_bond(self, atom_a, atom_b):
         # Sometimes two atoms are close enough that distance says they should be bonded, but from context they
         # clearly shouldn't be bonded, ie when they're bonded to another atom that's in between them.
-        triangling_atoms = [Distances.move_neighbor_if_distant(atom_a, atom, self.angles, self.lengths)
+        triangling_atoms = [Distances.move_neighbor_if_distant(atom_a, atom, self.angles, self.lengths, self.volume)
                             for atom in atom_a.bondedAtoms if atom in atom_b.bondedAtoms]
-        between_atoms = {atom: Angles.mof_angle(atom_a, atom, atom_b, self.angles, self.lengths) for atom in
-                         triangling_atoms if Angles.mof_angle(atom_a, atom, atom_b, self.angles, self.lengths) >
+        between_atoms = {atom: Angles.mof_angle(atom_a, atom, atom_b, self.angles, self.lengths, self.volume) for atom in
+                         triangling_atoms if Angles.mof_angle(atom_a, atom, atom_b, self.angles, self.lengths, self.volume) >
                          Angles.max_bond_breakup_angle}
         # The wider the angle, the more directly the connector is in between the metals.
         if len(between_atoms) > 0:
@@ -167,7 +167,7 @@ class MofBondCreator:
                 for i in range(1, len(between_atoms)):
                     best_blocks_here = [tup[0] for tup in possible_blocks[0:i + 1]]
                     center = Atom.center_of(best_blocks_here, self.mof)
-                    if Angles.mof_angle(atom_a, center, atom_b, self.angles, self.lengths) > \
+                    if Angles.mof_angle(atom_a, center, atom_b, self.angles, self.lengths, self.volume) > \
                             Angles.bond_breakup_angle:
                         return True
         return False
@@ -175,7 +175,7 @@ class MofBondCreator:
     def break_blocked_bonds(self, atom_a, atom_b):
         # if adding a bond between atom a and atom b has caused a previously established bond to be blocked
         # (as per definition of blocked_bond() above), we need to undo that previous bond.
-        triangling_atoms = [Distances.move_neighbor_if_distant(atom_a, atom, self.angles, self.lengths)
+        triangling_atoms = [Distances.move_neighbor_if_distant(atom_a, atom, self.angles, self.lengths, self.volume)
                             for atom in atom_a.bondedAtoms if atom in atom_b.bondedAtoms]
         for atom in triangling_atoms:
             if self.is_blocked_bond(atom_a, atom):
@@ -199,7 +199,7 @@ class MofBondCreator:
         lowest_distance = float('inf')
         closest_atom = None
         for neighbor in atom.bondedAtoms:
-            distance = Distances.distance_across_unit_cells(atom, neighbor, self.angles, self.lengths)
+            distance = Distances.distance_across_unit_cells(atom, neighbor, self.angles, self.lengths, self.volume)
             if distance < lowest_distance:
                 lowest_distance = distance
                 closest_atom = neighbor
@@ -227,7 +227,7 @@ class MofBondCreator:
                 else:
                     continue
                 if metal not in oxygen.bondedAtoms and oxygen not in metal.bondedAtoms:
-                    distance = Distances.distance_across_unit_cells(metal, oxygen, self.angles, self.lengths)
+                    distance = Distances.distance_across_unit_cells(metal, oxygen, self.angles, self.lengths, self.volume)
                     required_distance = Distances.bond_distance(metal, oxygen, self.error_margin + 0.2)
                     if distance <= required_distance:
                         oxygen.bondedAtoms.append(metal)
@@ -258,12 +258,12 @@ class MofBondCreator:
         # length = twice the covalent radius of the atom
         search_radius = CovalentRadiusLookup.lookup(atom.type_symbol) * 3 / 8
         geom_center, mass_center = OpenMetalSites.centers_of_bonded_atoms(atom, self.mof)
-        metal_to_center_distance = Distances.distance_across_unit_cells(atom, geom_center, self.angles, self.lengths)
+        metal_to_center_distance = Distances.distance_across_unit_cells(atom, geom_center, self.angles, self.lengths, self.volume)
         if metal_to_center_distance < 0.05 and len(atom.bondedAtoms) < 4:
             atom.open_metal_site = True
             return  # If there's only 3 atoms bonded, and they're rather symmetric, then don't stretch to find a 4th
         farthest_center, other_center = (geom_center, mass_center) \
-                if metal_to_center_distance > Distances.distance_across_unit_cells(atom, mass_center, self.angles, self.lengths) \
+                if metal_to_center_distance > Distances.distance_across_unit_cells(atom, mass_center, self.angles, self.lengths, self.volume) \
                 else (mass_center, geom_center)
 
         estimate = OpenMetalSites.estimated_bond_site(atom, farthest_center, mof)
@@ -299,7 +299,7 @@ class MofBondCreator:
                     self.attempt_to_fill_countercenter_site(atom, self.mof)
 
     def angles_allow_adding_atom(self, atom, estimate):
-        angles = [Angles.mof_angle(neighbor, atom, estimate, self.angles, self.lengths) for neighbor in
+        angles = [Angles.mof_angle(neighbor, atom, estimate, self.angles, self.lengths, self.volume) for neighbor in
                   atom.bondedAtoms]
         angles.sort()
         return len(angles) < 2 or (angles[0] + angles[1]) / 2 > Angles.bond_coexistance_angle
@@ -314,10 +314,10 @@ class MofBondCreator:
             if possible_atom.type_symbol == 'H':
                 continue
             if all(80 < Angles.degrees(
-                    Angles.mof_angle(neighbor, metal, possible_atom, mof.angles, mof.fractional_lengths))
+                    Angles.mof_angle(neighbor, metal, possible_atom, mof.angles, mof.fractional_lengths, self.volume))
                    < 100 for neighbor in metal.bondedAtoms):
                 distance_from_metal = Distances.distance_across_unit_cells(metal, possible_atom,
-                                                                           self.angles, self.lengths)
+                                                                           self.angles, self.lengths, self.volume)
                 if distance_from_metal < CovalentRadiusLookup.lookup(metal.type_symbol) * 2.1:
                     atoms_to_add.add(possible_atom)
         if len(atoms_to_add) < 2:
@@ -337,7 +337,7 @@ class MofBondCreator:
             if possible_atom.type_symbol == 'H':
                 continue
             dist_from_estimate = Distances.distance_across_unit_cells(spot, possible_atom, self.angles,
-                                                                      self.lengths)
+                                                                      self.lengths, self.volume)
             if dist_from_estimate < best_dist:
                 best_dist = dist_from_estimate
                 best_atom = possible_atom

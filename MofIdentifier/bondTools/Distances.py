@@ -12,17 +12,14 @@ def distance(a, b):
     return math.sqrt((bx - ax) ** 2 + (by - ay) ** 2 + (bz - az) ** 2)
 
 
-def distance_across_unit_cells(base_atom, neighbor, angles, lengths):
-    possible_neighbor_locations = [move_neighbor_if_distant(base_atom, neighbor, angles, lengths, 0.40),
-                                   # move_neighbor_if_distant(base_atom, neighbor, angles, lengths, 0.45),
-                                   # move_neighbor_if_distant(base_atom, neighbor, angles, lengths, 0.50),
-                                   # move_neighbor_if_distant(base_atom, neighbor, angles, lengths, 0.55),
-                                   move_neighbor_if_distant(base_atom, neighbor, angles, lengths, 0.60)]
+def distance_across_unit_cells(base_atom, neighbor, angles, lengths, volume):
+    possible_neighbor_locations = [move_neighbor_if_distant(base_atom, neighbor, angles, lengths, volume, 0.40),
+                                   move_neighbor_if_distant(base_atom, neighbor, angles, lengths, volume, 0.60)]
     distances = (distance(base_atom, neighbor_copy) for neighbor_copy in possible_neighbor_locations)
     return min(distances)
 
 
-def move_neighbor_if_distant(base_atom, neighbor, angles, lengths, fractional_distance_required=0.48):
+def move_neighbor_if_distant(base_atom, neighbor, angles, lengths, volume, fractional_distance_required=0.48):
     da = db = dc = 0
     if neighbor.a - base_atom.a > fractional_distance_required:
         da -= 1.0
@@ -39,32 +36,36 @@ def move_neighbor_if_distant(base_atom, neighbor, angles, lengths, fractional_di
 
     # The next (lengthy) section will try to change each dimension greedily to see if there's a better adj solution
     new_da, new_db, new_dc = da, db, dc
-    best_dist = distance(base_atom, neighbor.copy_to_relative_position(da, db, dc, angles, lengths))
+    variation = neighbor.copy_to_relative_position(da, db, dc, angles, lengths, volume)
+    best_dist = distance(base_atom, variation)
+
+    if is_bond_distance(best_dist, base_atom, variation):
+        return variation
 
     while True:
-        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da + 1, db, dc, angles, lengths))
+        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da + 1, db, dc, angles, lengths, volume))
         if variation_dist < best_dist - 0.001:
             new_da, new_db, new_dc = da + 1, db, dc
             best_dist = variation_dist
-        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da - 1, db, dc, angles, lengths))
+        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da - 1, db, dc, angles, lengths, volume))
         if variation_dist < best_dist - 0.001:
             new_da, new_db, new_dc = da - 1, db, dc
             best_dist = variation_dist
 
-        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da, db + 1, dc, angles, lengths))
+        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da, db + 1, dc, angles, lengths, volume))
         if variation_dist < best_dist - 0.001:
             new_da, new_db, new_dc = da, db + 1, dc
             best_dist = variation_dist
-        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da, db - 1, dc, angles, lengths))
+        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da, db - 1, dc, angles, lengths, volume))
         if variation_dist < best_dist - 0.001:
             new_da, new_db, new_dc = da, db - 1, dc
             best_dist = variation_dist
 
-        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da, db, dc + 1, angles, lengths))
+        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da, db, dc + 1, angles, lengths, volume))
         if variation_dist < best_dist - 0.001:
             new_da, new_db, new_dc = da, db, dc + 1
             best_dist = variation_dist
-        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da, db, dc - 1, angles, lengths))
+        variation_dist = distance(base_atom, neighbor.copy_to_relative_position(da, db, dc - 1, angles, lengths, volume))
         if variation_dist < best_dist - 0.001:
             new_da, new_db, new_dc = da, db, dc - 1
             best_dist = variation_dist
@@ -74,7 +75,7 @@ def move_neighbor_if_distant(base_atom, neighbor, angles, lengths, fractional_di
         else:
             (da, db, dc) = (new_da, new_db, new_dc)  # Set start parameters so that now it's varying the new best
 
-    return neighbor.copy_to_relative_position(new_da, new_db, new_dc, angles, lengths)
+    return neighbor.copy_to_relative_position(new_da, new_db, new_dc, angles, lengths, volume)
 
 
 def is_bond_distance(d, a, b, error_margin=bond_length_multiplicative_error_margin):

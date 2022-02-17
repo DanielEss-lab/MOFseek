@@ -24,7 +24,7 @@ class WriteAtomTest(unittest.TestCase):
         mof = CifReader.get_mof(r'../MofIdentifier/mofsForTests/smod7-pos-1.cif')
         original_atom = mof.atoms[0]
         fractional_atom = Atom.from_fractional(original_atom.label, original_atom.type_symbol, original_atom.a,
-                                               original_atom.b, original_atom.c, mof.angles, mof.fractional_lengths)
+                                               original_atom.b, original_atom.c, mof.angles, mof.fractional_lengths, mof.unit_volume)
         cartesian_atom = Atom.from_cartesian(original_atom.label, original_atom.type_symbol, original_atom.x,
                                              original_atom.y, original_atom.z, mof)
         self.assertAlmostEqual(original_atom.x, fractional_atom.x)

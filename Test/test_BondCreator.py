@@ -67,9 +67,9 @@ class MyTestCase(unittest.TestCase):
                 Gd4 = atom
             if atom.label == 'O11':
                 O11 = atom
-        dist_a = Distances.distance_across_unit_cells(Gd2, O11, mof.angles, mof.fractional_lengths)
-        dist_b = Distances.distance_across_unit_cells(Gd4, O11, mof.angles, mof.fractional_lengths)
-        dist_c = Distances.distance_across_unit_cells(Gd2, Gd4, mof.angles, mof.fractional_lengths)
+        dist_a = Distances.distance_across_unit_cells(Gd2, O11, mof.angles, mof.fractional_lengths, mof.unit_volume)
+        dist_b = Distances.distance_across_unit_cells(Gd4, O11, mof.angles, mof.fractional_lengths, mof.unit_volume)
+        dist_c = Distances.distance_across_unit_cells(Gd2, Gd4, mof.angles, mof.fractional_lengths, mof.unit_volume)
         self.assertLess(dist_c, dist_a + dist_b)
 
     def test_OCO_consistent_bonding(self):
