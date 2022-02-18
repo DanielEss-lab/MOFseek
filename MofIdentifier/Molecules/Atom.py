@@ -41,8 +41,7 @@ class Atom:
 
     @classmethod
     def from_fractional(cls, label, type_symbol, a, b, c, angles, lengths, volume):
-        (x, y, z) = Coordinates.conversion_to_Cartesian(a, b, c, angles, lengths, volume)
-        return cls(label, type_symbol, x, y, z, a, b, c)
+        return cls(label, type_symbol, *Coordinates.conversion_to_Cartesian(a, b, c, angles, lengths, volume), a, b, c)
 
     @classmethod
     def without_location(cls, label, type_symbol):

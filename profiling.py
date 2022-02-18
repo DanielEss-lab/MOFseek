@@ -3,7 +3,8 @@ from MofIdentifier.fileIO import CifReader
 
 
 def read_mofs():
-    CifReader.get_all_mofs_in_directory(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\mofsForTests')
+    mofs = CifReader.get_all_mofs_in_directory(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\mofsForTests')
+    sbus = [mof.sbus() for mof in mofs]
 
 
 if __name__ == '__main__':

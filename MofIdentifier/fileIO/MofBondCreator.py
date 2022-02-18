@@ -240,7 +240,7 @@ class MofBondCreator:
     # Sometimes a particular bond is larger than I can stretch my algorithms to allow, but is clearly there. The main
     # indicator of this is asymmetry in a metal's bonds, where it may see that there is an open metal site but really
     # there's simply an atom that the metal is bonding but the algorithm didn't catch.
-    def fill_nearly_closed_metal_sites(self):
+    def fill_nearly_closed_metal_sites(self):  # 27
         open_metal_sites = list()
         open_site_metals = (atom for atom in self.atoms if OpenMetalSites.has_open_metal_site(atom, self.mof))
         for atom in open_site_metals:
@@ -254,7 +254,7 @@ class MofBondCreator:
                 open_metal_sites.append(atom)
         return open_metal_sites
 
-    def attempt_to_fill_countercenter_site(self, atom, mof):
+    def attempt_to_fill_countercenter_site(self, atom, mof):  # 23
         # length = twice the covalent radius of the atom
         search_radius = CovalentRadiusLookup.lookup(atom.type_symbol) * 3 / 8
         geom_center, mass_center = OpenMetalSites.centers_of_bonded_atoms(atom, self.mof)
@@ -326,7 +326,7 @@ class MofBondCreator:
             metal.bondedAtoms.append(atom)
             atom.bondedAtoms.append(metal)
 
-    def non_h_atom_near(self, spot: Atom, search_width):
+    def non_h_atom_near(self, spot: Atom, search_width):  # 22
         x_bucket = floor(spot.a * self.num_x_buckets)
         y_bucket = floor(spot.b * self.num_y_buckets)
         z_bucket = floor(spot.c * self.num_z_buckets)

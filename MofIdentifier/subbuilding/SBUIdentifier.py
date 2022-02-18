@@ -2,6 +2,7 @@ import collections
 
 import MofIdentifier
 import copy
+from collections import deque
 from MofIdentifier.Molecules import Atom
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import XyzWriter
@@ -153,7 +154,6 @@ class SBUIdentifier:
         max_steps_used_to_separate_clusters = 12
         clusters = self.get_clusters(12)
 
-
         # define connectors and auxiliaries
         for atom in self.atoms:
             if not self.been_visited(atom):
@@ -205,7 +205,7 @@ class SBUIdentifier:
         if len(clusters) == 1 and not is_infinite_band(clusters[0].atoms):
             pass
         elif any(cluster.frequency == 1 or len(cluster.atoms) > 100 or is_infinite_band(cluster.atoms)
-               for cluster in temp_clusters):
+                 for cluster in temp_clusters):
             if tightness < 5:
                 if self.allow_two_steps:
                     raise InfiniteBandWithTwoStepFindingException
@@ -430,7 +430,7 @@ def split_on_oxygen_bridges(sbu_atoms, tightness):
                 penalty = 0 if neighbors[0].type_symbol == neighbors[1].type_symbol else 1
                 if penalty:
                     penalty *= abs(CovalentRadiusLookup.lookup(neighbors[0].type_symbol) - CovalentRadiusLookup.lookup(
-                        neighbors[1].type_symbol))/40
+                        neighbors[1].type_symbol)) / 40
                 if not exists_route_with_constraints(neighbors[0], neighbors[1], forbidden_atoms=[atom],
                                                      max_steps=tightness - penalty, max_successive_nonmetal_steps=3):
                     split_points.append(atom)
@@ -460,18 +460,22 @@ def split_on_oxygen_bridges(sbu_atoms, tightness):
 
 
 def exists_route_with_constraints(start, end, forbidden_atoms, max_steps,
-                                  max_successive_nonmetal_steps, successive_nonmetal_steps=0):
-    if max_steps < 1:
-        return False
-    if successive_nonmetal_steps == max_successive_nonmetal_steps:
-        return False
-    for neighbor in start.bondedAtoms:
-        if neighbor == end:
-            return True
-        if neighbor in forbidden_atoms:
+                                  max_successive_nonmetal_steps):
+    # This could be phrased as a recursive algorithm, but it is slower that way.
+    branches = deque()
+    # Start, forbidden atoms, steps_left, successive_nonmetal_steps)
+    branches.append((start, forbidden_atoms, max_steps, 0))
+    while len(branches) > 0:
+        (atom, f, steps_left, successive_nonmetal_steps) = branches.popleft()
+        if steps_left < 1:
             continue
-        if exists_route_with_constraints(neighbor, end, forbidden_atoms + [start], max_steps - 1,
-                                         max_successive_nonmetal_steps, 0 if neighbor.is_metal()
-                                         else successive_nonmetal_steps + 1):
-            return True
+        if successive_nonmetal_steps == max_successive_nonmetal_steps:
+            continue
+        for neighbor in atom.bondedAtoms:
+            if neighbor == end:
+                return True
+            if neighbor in f:
+                continue
+            branches.append((neighbor, f + [atom], steps_left - 1,
+                             0 if neighbor.is_metal() else successive_nonmetal_steps + 1))
     return False
