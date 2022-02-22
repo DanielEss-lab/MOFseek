@@ -1,4 +1,4 @@
-from DAOsAndServices import MOFDAO, LigandDAO
+from DAOsAndServices import simpleMOFDAO, LigandDAO
 from MofIdentifier.fileIO import CifReader
 
 
@@ -182,7 +182,7 @@ class MOFDatabase:
             if self.get_mof() is not None:
                 # use cif content to make MOF object, get attribute from that
                 value = getattr(self.get_mof(), attribute_name)
-                MOFDAO.store_value(self.filename, attribute_name, value)
+                simpleMOFDAO.store_value(self.filename, attribute_name, value)
                 setattr(self, attribute_name, value)
             else:
                 setattr(self, attribute_name, None)
@@ -195,7 +195,7 @@ class MOFDatabase:
             if self.get_mof() is not None:
                 # use cif content to make MOF object, calculate attribute from that
                 value = calculator(self.get_mof())
-                MOFDAO.store_value(self.filename, attribute_name, value)
+                simpleMOFDAO.store_value(self.filename, attribute_name, value)
                 return value
             else:
                 return None

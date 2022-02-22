@@ -59,10 +59,6 @@ def add_mof(mof):
     LigandDAO.scan_all_for_mof(mof)
 
 
-def store_value(mof_name, attribute_name, value):
-    mof_collection.update_one({"filename": mof_name}, {"$set": {attribute_name: value}})
-
-
 def _add_mof_to_collection(mof):
     mof_name = mof.label
     if mof_name.endswith('.cif'):
