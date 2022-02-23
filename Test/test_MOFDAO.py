@@ -1,6 +1,6 @@
 import unittest
 
-from DAOsAndServices import MOFDAO, DBConnection
+from DAOsAndServices import MOFDAO, DBConnection, simpleMOFDAO
 from MofIdentifier.fileIO import CifReader
 
 
@@ -20,10 +20,10 @@ class MOFDAOTest(unittest.TestCase):
         retrieved_mof = MOFDAO.get_MOF('smod7-pos-1.cif')
         self.assertIsNotNone(retrieved_mof)
         unit_volume = retrieved_mof.unit_volume
-        MOFDAO.store_value(retrieved_mof.filename, 'unit_volume', -13)
+        simpleMOFDAO.store_value(retrieved_mof.filename, 'unit_volume', -13)
         retrieved_mof = MOFDAO.get_MOF('smod7-pos-1.cif')
         self.assertEqual(-13, retrieved_mof.unit_volume)
-        MOFDAO.store_value(retrieved_mof.filename, 'unit_volume', unit_volume)
+        simpleMOFDAO.store_value(retrieved_mof.filename, 'unit_volume', unit_volume)
         retrieved_mof = MOFDAO.get_MOF('smod7-pos-1.cif')
         self.assertEqual(unit_volume, retrieved_mof.unit_volume)
 

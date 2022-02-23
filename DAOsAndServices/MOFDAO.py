@@ -64,6 +64,7 @@ def _add_mof_to_collection(mof):
     if mof_name.endswith('.cif'):
         mof_name = mof_name[:-4]
     mof_collection.update_one({"filename": mof_name}, {"$set": {'cif_content': mof.file_content,
+                                                                'calculated_info': mof.get_calculated_info_string(),
                                                                 "sbu_node_info": [],
                                                                 "sbu_conn_info": [],
                                                                 "sbu_aux_info": []}}, upsert=True)

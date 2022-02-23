@@ -52,22 +52,26 @@ def read_cif(filename):
                 return read_string(file_str, filename)
         with open(filename) as file:
             file_str = file.read()
-    return mof_from_cf(cf, filename, file_str)
+    return _mof_from_data(_data_from_cf(cf, filename, file_str))
 
 
 def read_string(cif_content, filename):
+    return _mof_from_data(_data_from_cf(_cf_from_string(cif_content), filename, cif_content))
+
+
+def _cf_from_string(cif_content):
     with StringIO(cif_content) as io:
         try:
             cf = ReadCif(io)
         except CifFile.StarFile.StarError:
             cif_content = cif_content.replace("_symmetry_space_group_name_H-M    P 1",
-                                        "_symmetry_space_group_name_H-M    'P1'")
+                                              "_symmetry_space_group_name_H-M    'P1'")
             print('Please ignore the message saying "Trying to find one of LBLOCK..." Sorry about that')
-            return read_string(cif_content, filename)
-    return mof_from_cf(cf, filename, cif_content)
+            cf = _cf_from_string(cif_content)
+    return cf
 
 
-def mof_from_cf(cf, filename, file_str):
+def _data_from_cf(cf, filename, file_str):
     cb = cf.first_block()
     file_path = filename
     try:
@@ -107,10 +111,20 @@ def mof_from_cf(cf, filename, file_str):
         c += 1 if c < 0 else 0
         atom = Atom.from_fractional(atomData._atom_site_label,
                                     atomData._atom_site_type_symbol,
-                                    a, b, c, (angle_alpha, angle_beta, angle_gamma), (length_a, length_b, length_c), volume)
+                                    a, b, c, (angle_alpha, angle_beta, angle_gamma), (length_a, length_b, length_c),
+                                    volume)
         atoms.append(atom)
-    return MOF(file_path, atoms, symmetry, length_a, length_b, length_c,
-               length_x, length_y, length_z, angle_alpha, angle_beta, angle_gamma, volume, file_str)
+    return (file_path, atoms, symmetry, length_a, length_b, length_c,
+            length_x, length_y, length_z, angle_alpha, angle_beta, angle_gamma, volume, file_str)
+
+
+def _mof_from_data(data):
+    return MOF(*data)
+
+
+def read_string_and_calculated_info(file_content, filename, calculated_info):
+    data = _data_from_cf(_cf_from_string(file_content), filename, file_content)
+    return MOF(*data, calculated_info)
 
 
 def extract_float(text):

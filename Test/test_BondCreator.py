@@ -107,6 +107,29 @@ class MyTestCase(unittest.TestCase):
                     for neighbor in atom.bondedAtoms:
                         self.assertEqual("O", neighbor.type_symbol)
 
+    def test_exact_equals(self):
+        name = 'TUGSOE_charged'
+        mof = CifReader.get_mof(fr'../MofIdentifier/mofsForTests/{name}.cif')
+        self.assertTrue(mof._exact_equals(mof))
+        name = 'smod7-pos-1'
+        mof = CifReader.get_mof(fr'../MofIdentifier/mofsForTests/{name}.cif')
+        self.assertTrue(mof._exact_equals(mof))
+
+    def test_create_and_use_calculated_info_string(self):
+        name = 'TUGSOE_charged'
+        filepath = fr'../MofIdentifier/mofsForTests/{name}.cif'
+        mof = CifReader.get_mof(filepath)
+        calculated_info = mof.get_calculated_info_string()
+        fast_mof = CifReader.read_string_and_calculated_info(mof.file_content, filepath, calculated_info)
+        self.assertTrue(mof._exact_equals(fast_mof))
+
+        name = 'smod7-pos-1'
+        filepath = fr'../MofIdentifier/mofsForTests/{name}.cif'
+        mof = CifReader.get_mof(filepath)
+        calculated_info = mof.get_calculated_info_string()
+        fast_mof = CifReader.read_string_and_calculated_info(mof.file_content, filepath, calculated_info)
+        self.assertTrue(mof._exact_equals(fast_mof))
+
 
 if __name__ == '__main__':
     unittest.main()

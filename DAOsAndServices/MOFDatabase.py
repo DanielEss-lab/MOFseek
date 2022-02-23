@@ -25,6 +25,7 @@ class MOFDatabase:
 
     def simple_initialize(self, dictionary):
         self.file_content = dictionary['cif_content']
+        self.calculated_info = dictionary['calculated_info']
         self.symmetry = dictionary['symmetry']
         self.fractional_lengths = dictionary['fractional_lengths']
         self.angles = dictionary['angles']
@@ -90,6 +91,9 @@ class MOFDatabase:
             self.file_content = dictionary['cif_content']
         except KeyError:
             self.file_content = None
+
+        self.calculated_info = self.get_or_calculate('calculated_info',
+                                                     lambda mof: mof.get_calculated_info_string(), dictionary)
 
         self.set_from_dictionary_or_mof('symmetry', dictionary)
         self.set_from_dictionary_or_mof('fractional_lengths', dictionary)
@@ -170,7 +174,11 @@ class MOFDatabase:
     def get_mof(self):
         if self._mof is None:
             if self.file_content is not None:
-                self._mof = CifReader.read_string(self.file_content, self.filename + '.cif')
+                if self.calculated_info is not None:
+                    self._mof = CifReader.read_string_and_calculated_info(self.file_content, self.filename + '.cif',
+                                                                          self.calculated_info)
+                else:
+                    self._mof = CifReader.read_string(self.file_content, self.filename + '.cif')
             else:
                 return None
         return self._mof
@@ -204,6 +212,7 @@ class MOFDatabase:
     def from_mof(cls, mof):
         initializer = dict()
         initializer['filename'] = mof.label
+        initializer['bonds'] = mof.get_bond_string()
         initializer['cif_content'] = mof.file_content
         initializer['sbu_node_info'] = []
         initializer['sbu_conn_info'] = []
