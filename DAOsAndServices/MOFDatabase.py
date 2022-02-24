@@ -18,6 +18,7 @@ class MOFDatabase:
     def __init__(self, dictionary):
         self.filename = dictionary['filename']
         self._mof = None
+        self.calculated_info = None
         try:
             self.simple_initialize(dictionary)
         except (KeyError, ValueError):
