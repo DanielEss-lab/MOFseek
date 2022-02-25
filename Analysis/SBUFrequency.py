@@ -29,4 +29,5 @@ def chart_type(type_name):
 if __name__ == '__main__':
     chart_type('cluster')
     chart_type('connector')
+    chart_type('auxiliary')
     # plt.show()

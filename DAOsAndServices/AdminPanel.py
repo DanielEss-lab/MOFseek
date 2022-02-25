@@ -145,7 +145,7 @@ if __name__ == '__main__':
     # fill_db()
     # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
     # speed_measure()
-    refresh_active_collections_to_full()
+    # refresh_active_collections_to_full()
     retrieve_all_mofs()
     # add_certain_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')),
     #                    ['sulfonate.smiles', 'phosphonate.smiles', 'carboxyl.smiles'])

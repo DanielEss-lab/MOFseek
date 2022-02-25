@@ -24,11 +24,11 @@ class MOF(Molecule.Molecule):
         self.file_content = file_string
         self.unit_volume = vol
         self.cartesian_lengths = (x, y, z)
+        self._sbus = None
 
         if calculated_info is None:
             bond_creator = MofBondCreator(self.atoms, self.angles, self.fractional_lengths, self.cartesian_lengths,
                                           self.unit_volume)
-            self._sbus = None
 
             for x in range(1, 5):  # try 4 times
                 self.open_metal_sites = bond_creator.connect_atoms()
