@@ -9,8 +9,8 @@ from MofIdentifier.fileIO import XyzReader, LigandReader
 
 
 def modify_MOM(MOM_string, first_metal, second_metal, metal_string):
-    ligand = LigandReader.get_mol_from_string(MOM_string.replace('%', first_metal, 1).replace(
-                    '%', second_metal, 1), metal_string)
+    ligand = LigandReader.get_mol_from_string(MOM_string.replace('&', first_metal, 1).replace(
+                    '&', second_metal, 1), metal_string)
     for atom in ligand.atoms:
         if atom.is_metal():
             for neighbor in atom.bondedAtoms:

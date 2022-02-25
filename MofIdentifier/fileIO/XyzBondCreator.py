@@ -3,7 +3,7 @@ from MofIdentifier.bondTools import Distances, Angles
 
 
 def is_bond_numbered_wca(element):\
-    return (element[0] == '*' or element[0] == '%' or element[0] == '#') and len(element) > 1
+    return (element[0] == '*' or element[0] == '&' or element[0] == '~') and len(element) > 1
 
 
 def make_numbered_bonds(i, atoms):

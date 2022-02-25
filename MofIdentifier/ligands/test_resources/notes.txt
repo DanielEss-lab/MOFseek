@@ -9,9 +9,9 @@ anything: 1.8
 known metal: 1.8
 
 
-# = 1.1 (Carbon or Hydrogen only)
+~ = 1.1 (Carbon or Hydrogen only)
 * = 1.9 (metal or nonmetal)
-% = 2.4 (only matches metals)
+& = 2.4 (only matches metals)
 
 
 MainWindow::loadFile:

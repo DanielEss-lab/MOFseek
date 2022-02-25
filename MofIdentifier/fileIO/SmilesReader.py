@@ -9,8 +9,8 @@ from MofIdentifier.SubGraphMatching import CustomWildcard
 OPEN_MARK_REPLACEMENT = 'z'
 H_REPLACEMENT = 'Hh'
 WILD_REPLACEMENTS = {'*': 'Aa',
-                     '%': 'Pq',
-                     '#': 'Py',
+                     '&': 'Pq',
+                     '~': 'Py',
                      'Wc': 'J'}
 WILD_RESTORES = {v: k for k, v in WILD_REPLACEMENTS.items()}
 

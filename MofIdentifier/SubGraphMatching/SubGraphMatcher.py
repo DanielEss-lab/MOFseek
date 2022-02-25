@@ -9,16 +9,16 @@ import time
 #     elem_2 = elem_2[0] if len(elem_2) > 1 and elem_2[1].isnumeric() else elem_2
 #     result = elem_1 == elem_2 \
 #              or elem_1 == '*' or elem_2 == '*' \
-#              or (elem_1 == '%' and atom.is_metal(elem_2)) or (elem_2 == '%' and atom.is_metal(elem_1)) \
-#              or (elem_1 == '#' and (elem_2 == 'H' or elem_2 == 'C')) or (
-#                      elem_2 == '#' and (elem_1 == 'H' or elem_1 == 'C'))
+#              or (elem_1 == '&' and atom.is_metal(elem_2)) or (elem_2 == '&' and atom.is_metal(elem_1)) \
+#              or (elem_1 == '~' and (elem_2 == 'H' or elem_2 == 'C')) or (
+#                      elem_2 == '~' and (elem_1 == 'H' or elem_1 == 'C'))
 #     return result
 def elements_are_compatible(elem_1, elem_2, additional_wildcards):
     return elem_1 == elem_2 \
            or elem_1 == '*' or elem_2 == '*' \
-           or (elem_1 == '%' and Atom.is_metal(elem_2)) or (elem_2 == '%' and Atom.is_metal(elem_1)) \
-           or (elem_1 == '#' and (elem_2 == 'H' or elem_2 == 'C')) \
-           or (elem_2 == '#' and (elem_1 == 'H' or elem_1 == 'C')) \
+           or (elem_1 == '&' and Atom.is_metal(elem_2)) or (elem_2 == '&' and Atom.is_metal(elem_1)) \
+           or (elem_1 == '~' and (elem_2 == 'H' or elem_2 == 'C')) \
+           or (elem_2 == '~' and (elem_1 == 'H' or elem_1 == 'C')) \
            or (elem_1 in additional_wildcards and additional_wildcards[elem_1].matches(elem_2)) \
            or (elem_2 in additional_wildcards and additional_wildcards[elem_2].matches(elem_1))
 
@@ -67,9 +67,9 @@ def find_ligand_in_mof(ligand, mof):
 def element_in_mof(element, mof):
     if element[0] == '*':
         return True
-    elif element[0] == '#':
+    elif element[0] == '~':
         return any(elem == 'H' or elem == 'C' for elem in mof.elementsPresent)
-    elif element[0] == '%':
+    elif element[0] == '&':
         return any(Atom.is_metal(elem) for elem in mof.elementsPresent)
     else:
         return element in mof.elementsPresent
