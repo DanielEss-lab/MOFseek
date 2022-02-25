@@ -70,8 +70,11 @@ class AddLigandPage(FrameWithProcess.Frame):
             for filename in filenames:
                 try:
                     ligand = LigandReader.get_mol_from_file(str(Path(filename)))
-                    self.ligands.append(ligand)
-                    ligands_for_display.append(LigandDatabase(ligand.label, ligand.file_content, []))
+                    if any(not atom.is_bond_limited for atom in ligand.atoms):
+                        self.ligands.append(ligand)
+                        ligands_for_display.append(LigandDatabase(ligand.label, ligand.file_content, []))
+                    else:
+                        self._show_error(f'Ligand {filename} has no backticks and therefore will not match any MOFs.')
                 except:
                     self._show_error('Unable to extract molecule from ' + filename)
 
