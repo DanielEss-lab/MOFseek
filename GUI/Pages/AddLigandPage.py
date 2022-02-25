@@ -19,7 +19,7 @@ such do not have more bonds; see other ligand files for examples. The calculatio
 ligand, will take some time (expect 40-80 minutes per ligand), so please be patient."""
 
 instructions_text_2 = """To allow some flexibility in defining ligands, wildcards are allowed. We provide three 
-wildcards (* to match anything, % to match metals, and # to match C and H only), and you can use the following format 
+wildcards (* to match anything, & to match metals, and ~ to match C and H only), and you can use the following format 
 in the second line of the file in order to define custom wildcards for your own use:<br><t>Wca = <comma separated 
 list of atomic symbols><br>Or, if it should match most elements with certain exceptions:<br><t>Wca = not <comma 
 separated list of atomic symbols><br>You can define multiple wildcards separated by semicolons, using Wca, Wcb, Wcc, 
