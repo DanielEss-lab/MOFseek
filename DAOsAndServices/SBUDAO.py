@@ -51,8 +51,8 @@ def process_sbu(input_sbu, mof_name):
         existing_sbu = existing_sbu.get_sbu()
         if SubGraphMatcher.match(input_sbu, existing_sbu):
             update_sbu(existing_sbu, mof_name)
-            return existing_sbu.label
-        # Same type sbus, but different structures:
+            return existing_sbu.label[:-4] if existing_sbu.label.endswith('.xyz') else existing_sbu.label
+        # Same type sbus, but different structures, then we get the index on name, so that we can make a new name:
         if existing_sbu.label.startswith(generic_name_prefix):
             existing_sbu_index = existing_sbu.label[len(generic_name_prefix) + 1:]
             if existing_sbu_index.endswith('.xyz'):
@@ -72,7 +72,12 @@ def process_sbus(sbus, mof_name):
 
 
 def update_sbu(sbu: SBU, mof_name):
-    sbu_collection.update_one({"sbu_name": sbu.label},
+    label: str = sbu.label
+    if label.lower().endswith('.xyz'):
+        label = sbu.label[:-4]
+    else:
+        label = sbu.label
+    sbu_collection.update_one({"sbu_name": label},
                               {"$inc": {"frequency": 1},
                                "$addToSet": {"MOFs": mof_name}})
 

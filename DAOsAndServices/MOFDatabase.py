@@ -213,7 +213,7 @@ class MOFDatabase:
     def from_mof(cls, mof):
         initializer = dict()
         initializer['filename'] = mof.label
-        initializer['bonds'] = mof.get_bond_string()
+        initializer['bonds'] = mof.get_calculated_info_string()
         initializer['cif_content'] = mof.file_content
         initializer['sbu_node_info'] = []
         initializer['sbu_conn_info'] = []

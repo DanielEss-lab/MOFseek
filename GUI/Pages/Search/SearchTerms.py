@@ -44,7 +44,7 @@ class SearchTerms:
         self.attr = attr
         self.label_substring = label
 
-    def passes(self, MOF):
+    def passes(self, MOF):  # MOF is of type MOFDatabase
         if MOF is None:
             return False
         if MOF.DISORDER and not Settings.allow_disorder:

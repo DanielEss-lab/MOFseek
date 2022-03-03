@@ -1,6 +1,7 @@
 import unittest
 
-from DAOsAndServices import SBUDAO, DBConnection
+from DAOsAndServices import SBUDAO, DBConnection, MOFDAO
+from GUI.Pages.Search.SearchTerms import SearchTerms
 from MofIdentifier.fileIO import CifReader
 
 
@@ -19,6 +20,15 @@ class SBUDAOTest(unittest.TestCase):
         sbu = SBUDAO.get_sbu("cluster_0")
         self.assertIsNotNone(sbu)
         print(sbu)
+
+    def test_search_sbu(self):
+        sbu = SBUDAO.get_sbu("auxiliary_2")
+        search = SearchTerms(sbus=[sbu.name])
+        # mof1 = MOFDAO.get_MOF("acscombsci.5b00188_3001288_clean")
+        mof2 = MOFDAO.get_MOF("ac403674p_si_001_clean")
+        mof1 = MOFDAO.get_MOF("ACOGAB_clean")
+        self.assertTrue(search.passes(mof2))
+        self.assertTrue(search.passes(mof1))
 
 
 if __name__ == '__main__':
