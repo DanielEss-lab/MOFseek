@@ -26,6 +26,7 @@ class MOFDatabase:
 
     def simple_initialize(self, dictionary):
         self.file_content = dictionary['cif_content']
+        self.source_name = dictionary['source_name']
         self.calculated_info = dictionary['calculated_info']
         self.symmetry = dictionary['symmetry']
         self.fractional_lengths = dictionary['fractional_lengths']
@@ -96,6 +97,7 @@ class MOFDatabase:
         self.calculated_info = self.get_or_calculate('calculated_info',
                                                      lambda mof: mof.get_calculated_info_string(), dictionary)
 
+        self.source_name = dictionary.get("source_name")
         self.set_from_dictionary_or_mof('symmetry', dictionary)
         self.set_from_dictionary_or_mof('fractional_lengths', dictionary)
         self.set_from_dictionary_or_mof('angles', dictionary)

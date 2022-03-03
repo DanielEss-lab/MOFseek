@@ -24,6 +24,12 @@ class Page(FrameWithProcess.Frame):
         self.mofs = []
         self.mof_preview = MultiMofView.View(self)
         self.mof_preview.pack(fill=tk.X)
+        row1 = tk.Frame(self)
+        source_name_instructions = tk.Label(row1, text="Source Database: ", justify=tk.LEFT)
+        source_name_instructions.pack(side=tk.LEFT)
+        self.source_name_ent = tk.Entry(row1)
+        self.source_name_ent.pack(side=tk.LEFT)
+        row1.pack()
         self.add_btn = StyledButton.make(self, text='Upload to DB', command=lambda: self.start_process(self.mofs))
         self.add_btn['state'] = "disabled"
         self.add_btn.pack()
@@ -45,10 +51,11 @@ class Page(FrameWithProcess.Frame):
             self.add_btn['state'] = "normal"
 
     def add_mofs_to_db(self, mofs):
+        source_name = self.source_name_ent.get()
         self.add_btn['state'] = "disabled"
         self.mof_preview.display_results([])
         for mof in mofs:
-            MOFDAO.add_mof(mof)
+            MOFDAO.add_mof(mof, source_name)
         self.winfo_toplevel().forget_history()
         self.mofs = []
 

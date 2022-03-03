@@ -21,8 +21,14 @@ class View(tk.Frame):
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
 
-        name = tk.Label(self, text=mof.filename, width=48, anchor=tk.W)
-        name.grid(sticky=tk.W, row=0, column=0)
+        identifier = tk.Frame(master=self)
+        name = tk.Label(identifier, text=mof.filename, width=48, anchor=tk.W)
+        name.pack(side='left')
+        source = tk.Label(identifier, text=mof.source_name, width=48, anchor=tk.W)
+        source.pack(side='right')
+        identifier.grid(sticky=tk.W, row=0, column=0)
+
+
         self.elements = tk.Label(self, text=mof.atoms_string_with_solvents if Settings.keep_solvent
                             else mof.atoms_string_without_solvents)
         self.elements.grid(row=0, column=1)

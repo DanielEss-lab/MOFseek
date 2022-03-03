@@ -1,6 +1,7 @@
 import platform
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import messagebox
 
 from GUI import Attributes, Settings
 from GUI.Utility import StyledButton
@@ -53,6 +54,9 @@ class Page(ScrollFrame):
                                                       '(ie COFs) (Only affects future searches)',
                      Settings.allow_no_metal, allow_no_metal_action).grid(sticky=tk.W, pady=(2, 20))
 
+        for source_name, is_enabled in Settings.sources_enabled.keys():
+            Page.SourceSetting(self.frame, source_name, is_enabled).grid(sticky=tk.W)
+
         self.download_filepath_option_row = self.make_download_filepath_option_row()
         self.download_filepath_option_row.grid(sticky=tk.W, pady=(0, 2))
 
@@ -85,6 +89,35 @@ class Page(ScrollFrame):
 
             super().__init__(parent, attribute_name, Attributes.attributes[attribute_name].description,
                              1 if Settings.attribute_is_enabled[attribute_name] else 0, change_attribute)
+
+    class SourceSetting(tk.Frame):
+        def __init__(self, parent, source_name, is_enabled):
+            self.parent = parent
+            self.name = source_name
+            super().__init__(self.parent)
+            self.is_enabled = tk.IntVar(value=1 if is_enabled else 0)
+
+            btn = ttk.Checkbutton(self, variable=self.is_enabled, onvalue=1, offvalue=0,
+                                  command=self.change_setting)
+            lbl = tk.Label(self, text=self.name + ': ' + f"Show results tagged with the source name {source_name}")
+            delete = StyledButton.make(self, text=f"Delete", command=self.delete_source)
+            btn.pack(side=tk.LEFT)
+            lbl.pack(side=tk.LEFT)
+            delete.pack(side=tk.LEFT)
+
+        def change_setting(self):
+            now_enabled = self.is_enabled.get()
+            Settings.toggle_source(self.name, now_enabled)
+            # TODO: update ALL the things to match that it is now enabled or disabled (current search results, SBUviews and Ligandviews)
+
+        def delete_source(self):
+            if messagebox.askquestion("Confirm source deletion", "Deleting this source will also delete from the "
+                                                                 "database all MOFs that are associated with this "
+                                                                 "source name. This cannot be automatically undone."
+                                                                 " Are you sure you want to proceed?"):
+                Settings.delete_source_name(self.name)
+                if self.is_enabled.get():
+                    pass  # TODO: update ALL the things to match that it is now gone (current search results, SBUviews and Ligandviews)
 
     def make_download_filepath_option_row(self):
         row = tk.Frame(self.frame)

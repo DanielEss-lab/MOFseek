@@ -36,8 +36,8 @@ def get_passing_MOFs(search):
     return results
 
 
-def add_mof(mof):
-    mof_name = _add_mof_to_collection(mof)
+def add_mof(mof, source_name):
+    mof_name = _add_mof_to_collection(mof, source_name)
     for sbu in mof.sbus().clusters:
         sbu_name = SBUDAO.process_sbu(sbu, mof_name)
         sbu_freq = sbu.frequency
@@ -59,7 +59,7 @@ def add_mof(mof):
     LigandDAO.scan_all_for_mof(mof)
 
 
-def _add_mof_to_collection(mof):
+def _add_mof_to_collection(mof, source_name):
     mof_name = mof.label
     if mof_name.endswith('.cif'):
         mof_name = mof_name[:-4]
@@ -67,7 +67,8 @@ def _add_mof_to_collection(mof):
                                                                 'calculated_info': mof.get_calculated_info_string(),
                                                                 "sbu_node_info": [],
                                                                 "sbu_conn_info": [],
-                                                                "sbu_aux_info": []}}, upsert=True)
+                                                                "sbu_aux_info": [],
+                                                                "source_name": source_name}}, upsert=True)
     return mof_name
 
 
