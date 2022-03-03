@@ -97,11 +97,11 @@ class View(FrameWithProcess.Frame):
         self.ent_sbus.clear()
         self.ent_excl_sbus.clear()
 
-    def force_search_ligand(self, ligand):
+    def force_search_ligand(self, ligand: str):
         search = SearchTerms(ligands=[ligand])
         self.start_process(search)
 
-    def force_search_sbu(self, sbu):
+    def force_search_sbu(self, sbu: str):
         search = SearchTerms(sbus=[sbu])
         self.start_process(search)
 
