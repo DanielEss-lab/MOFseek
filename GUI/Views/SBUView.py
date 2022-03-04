@@ -1,8 +1,9 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
-from GUI import os_specific_settings
+from GUI import os_specific_settings, Settings
 from DAOsAndServices import MOFDAO, SBUDatabase
+from GUI.SourceCheck import mof_source_is_enabled
 from MofIdentifier.fileIO import FileOpen
 
 
@@ -14,7 +15,7 @@ class View(tk.Frame):
     def __init__(self, parent, sbu: SBUDatabase.SBUDatabase):
         self.parent = parent
         tk.Frame.__init__(self, self.parent, height=40, width=120, bd=1, relief=tk.SOLID)
-        self.sbu = sbu
+        self.mol = sbu
         self.top_page = parent.winfo_toplevel()
         row1 = tk.Frame(master=self)
         name = tk.Label(row1, text=sbu.name)
@@ -56,12 +57,15 @@ class View(tk.Frame):
         self.generate_mof_row().pack(side='left')
 
 
-
     def generate_mof_row(self):
         mof_row = tk.Frame(master=self, height=20)
-        mof_label = tk.Label(mof_row, text=f"In {len(self.sbu.mofs)} MOFs: ")
+        if all(Settings.sources_enabled.values()):
+            mofs = self.mol.mofs
+        else:
+            mofs = (name for name in self.mol.mofs if mof_source_is_enabled(name))
+        mof_label = tk.Label(mof_row, text=f"In {len(mofs)} MOFs: ")
         mof_label.pack(side='left')
-        for name in self.sbu.mofs:
+        for name in mofs:
             self.display_mof_name(mof_row, name)
         return mof_row
 

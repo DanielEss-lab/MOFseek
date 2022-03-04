@@ -94,3 +94,9 @@ class Root(tk.Tk):
 
     def reload_sbus(self):
         self.search_page.reload_sbus()
+
+    def refesh_mol_views(self):
+        self.search_page.refesh_mol_views()
+
+    def clear_search(self):
+        self.search_page.search_results_v.display_results([])

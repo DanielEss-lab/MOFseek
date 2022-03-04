@@ -36,6 +36,7 @@ class Page(ScrollFrame):
         def disorder_button_action(enabled):
             Settings.toggle_disorder(enabled)
             self.winfo_toplevel().forget_history()
+            self.winfo_toplevel().clear_search()
         Page.Setting(self.frame, 'Allow Disorder', 'Include in results MOFs that have been marked DISORDER for '
                                                    'containing illogical structures (Only affects future searches)',
                      Settings.allow_disorder, disorder_button_action).grid(sticky=tk.W, pady=(20, 2))
@@ -43,6 +44,7 @@ class Page(ScrollFrame):
         def allow_not_organic_action(enabled):
             Settings.toggle_allow_not_organic(enabled)
             self.winfo_toplevel().forget_history()
+            self.winfo_toplevel().clear_search()
         Page.Setting(self.frame, 'Allow Inorganic', 'Include in search results "MOFs" that do not contain carbon '
                                                     'and/or hydrogen (Only affects future searches)',
                      Settings.allow_not_organic, allow_not_organic_action).grid(sticky=tk.W, pady=(2, 0))
@@ -50,6 +52,7 @@ class Page(ScrollFrame):
         def allow_no_metal_action(enabled):
             Settings.toggle_allow_no_metal(enabled)
             self.winfo_toplevel().forget_history()
+            self.winfo_toplevel().clear_search()
         Page.Setting(self.frame, 'Allow Nonmetallic', 'Include in search results MOFs that do not contain metal nodes '
                                                       '(ie COFs) (Only affects future searches)',
                      Settings.allow_no_metal, allow_no_metal_action).grid(sticky=tk.W, pady=(2, 20))
@@ -108,7 +111,7 @@ class Page(ScrollFrame):
         def change_setting(self):
             now_enabled = self.is_enabled.get()
             Settings.toggle_source(self.name, now_enabled)
-            # TODO: update ALL the things to match that it is now enabled or disabled (current search results, SBUviews and Ligandviews)
+            self.toggle_sources_in_views(now_enabled)
 
         def delete_source(self):
             if messagebox.askquestion("Confirm source deletion", "Deleting this source will also delete from the "
@@ -117,7 +120,13 @@ class Page(ScrollFrame):
                                                                  " Are you sure you want to proceed?"):
                 Settings.delete_source_name(self.name)
                 if self.is_enabled.get():
-                    pass  # TODO: update ALL the things to match that it is now gone (current search results, SBUviews and Ligandviews)
+                    self.toggle_sources_in_views(False)
+
+        def toggle_sources_in_views(self, now_enabled):
+            self.winfo_toplevel().reload_sbus()
+            self.winfo_toplevel().refresh_mol_views()
+            self.winfo_toplevel().clear_search()
+
 
     def make_download_filepath_option_row(self):
         row = tk.Frame(self.frame)

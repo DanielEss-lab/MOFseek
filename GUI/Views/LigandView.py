@@ -15,7 +15,7 @@ class View(tk.Frame):
     def __init__(self, parent, ligand: LigandDatabase):
         self.parent = parent
         tk.Frame.__init__(self, self.parent, height=40, width=120, bd=1, relief=tk.SOLID)
-        self.ligand = ligand
+        self.mol = ligand
         self.top_page = parent.winfo_toplevel()
 
         row1 = tk.Frame(master=self)
@@ -52,9 +52,9 @@ class View(tk.Frame):
 
     def generate_mof_row(self):
         mof_row = tk.Frame(master=self, height=20)
-        mof_label = tk.Label(mof_row, text=f"{len(self.ligand.Mofs)} MOFs: ")
+        mof_label = tk.Label(mof_row, text=f"{len(self.mol.Mofs)} MOFs: ")
         mof_label.pack(side='left')
-        for name in self.ligand.Mofs:
+        for name in self.mol.Mofs:
             self.display_mof_name(mof_row, name)
         return mof_row
 

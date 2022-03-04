@@ -20,12 +20,14 @@ class SearchPage(tk.Frame):
         self.molecule_v = None
 
     def highlight_molecule(self, mol):
-        # Splitting this into two methods (one for sbus, one for ligands)
-        # shouldn't be necessary once the DB is hooked up, so I won't do it now
         if self.molecule_v is not None:
             self.molecule_v.destroy()
         self.molecule_v = MoleculeView.make_view(self, mol)
         self.molecule_v.pack(side=tk.BOTTOM)
+
+    def refesh_mol_views(self):
+        if self.molecule_v is not None:
+            self.highlight_molecule(self.molecule_v.mol)
 
     def display_search_results(self, results):
         self.search_results_v.start_process(results)
