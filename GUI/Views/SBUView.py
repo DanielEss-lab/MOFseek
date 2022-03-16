@@ -55,8 +55,6 @@ class View(tk.Frame):
 
         self.generate_mof_row().pack(side='left')
 
-
-
     def generate_mof_row(self):
         mof_row = tk.Frame(master=self, height=20)
         mof_label = tk.Label(mof_row, text=f"In {len(self.sbu.mofs)} MOFs: ")

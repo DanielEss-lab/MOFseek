@@ -4,6 +4,7 @@ import MofIdentifier
 import copy
 from collections import deque
 from MofIdentifier.Molecules import Atom
+from MofIdentifier.SubGraphMatching import SubGraphMatcher
 from MofIdentifier.bondTools import Distances, CovalentRadiusLookup
 from MofIdentifier.fileIO import XyzWriter
 from MofIdentifier.subbuilding.SBUTools import SBUCollection, changeableSBU, UnitType
@@ -13,8 +14,8 @@ class InfiniteBandWithTwoStepFindingException(Exception):
     pass
 
 
-def split(mof, show_duplicates=False, aux_as_part_of_node=False):
-    identifier = SBUIdentifier(mof, show_duplicates)
+def split(mof, show_duplicates=False, check_to_modify_bonds=False):
+    identifier = SBUIdentifier(mof, show_duplicates, check_to_modify_bonds)
     try:
         return identifier.run_algorithm()
     except InfiniteBandWithTwoStepFindingException:
@@ -129,7 +130,7 @@ class PanesCrossed:
 
 
 class SBUIdentifier:
-    def __init__(self, mof, show_duplicates):
+    def __init__(self, mof, show_duplicates, check_to_modify_bonds):
         self.atoms = mof.atoms
         self.mof = mof
         self.atom_to_SBU = dict()
@@ -137,6 +138,7 @@ class SBUIdentifier:
         self.groups = dict()
         self.allow_two_steps = True
         self.show_duplicates = show_duplicates
+        self.check_to_modify_bonds = check_to_modify_bonds
 
     def been_visited(self, atom):
         return atom.label in self.atom_to_SBU
@@ -152,7 +154,7 @@ class SBUIdentifier:
         auxiliaries = list(())
         # Define clusters
         max_steps_used_to_separate_clusters = 12
-        clusters = self.get_clusters(12)
+        clusters = self.get_clusters(max_steps_used_to_separate_clusters)
 
         # define connectors and auxiliaries
         for atom in self.atoms:
@@ -168,9 +170,14 @@ class SBUIdentifier:
                 self.next_group_id += 1
         for cluster in clusters:
             self.set_adj_ids(cluster)
-        if not self.show_duplicates:
+        if self.show_duplicates and self.check_to_modify_bonds:
+            self.check_auxiliaries_for_connectors(auxiliaries, connectors)  # This function can change bonds
+        else:
             clusters = reduce_duplicates(clusters, lambda x, y: x == y)
             connectors = reduce_duplicates(connectors, lambda x, y: x == y)
+            if self.check_to_modify_bonds:
+                self.check_auxiliaries_for_connectors(auxiliaries, connectors)  # This function can change bonds
+                connectors = reduce_duplicates(connectors, lambda x, y: x == y)
             auxiliaries = reduce_duplicates(auxiliaries, lambda x, y: x == y)
         for sbu in clusters + connectors + auxiliaries:
             sbu.normalize_atoms(self.mof)
@@ -394,7 +401,56 @@ class SBUIdentifier:
 
     @classmethod
     def copy_from(cls, other):
-        return SBUIdentifier(other.mof, other.show_duplicates)
+        return SBUIdentifier(other.mof, other.show_duplicates, other.check_to_modify_bonds)
+
+    def check_auxiliaries_for_connectors(self, auxiliaries, connectors):
+        aux_to_become_conn = list()
+        for aux in auxiliaries:
+            for conn in connectors:
+                if self.make_bonds_to_match_conn(aux, conn):  # This function can change bonds
+                    aux_to_become_conn.append(aux)
+                    break
+        for sbu in aux_to_become_conn:
+            auxiliaries.remove(sbu)
+            connectors.append(sbu)
+
+    def make_bonds_to_match_conn(self, aux, conn):
+        is_match, aux_label_to_conn_label, = SubGraphMatcher.mapping_function(aux, conn)
+
+        def aux_to_conn(atom):
+            match_label = aux_label_to_conn_label(atom.label)
+            return next(a for a in conn.atoms if a.label == match_label)
+
+        if not is_match:
+            return False
+
+        has_added_bonds = False
+        for atom in aux.atoms:
+            try:
+                match = aux_to_conn(atom)
+                if len(match.bondedAtoms) > len(atom.bondedAtoms):
+                    excess_freq_of_element = collections.defaultdict(lambda: 0)
+                    for a in match.bondedAtoms:
+                        excess_freq_of_element[a.type_symbol] += 1
+                    for a in atom.bondedAtoms:
+                        excess_freq_of_element[a.type_symbol] -= 1
+                    for elem in (elem for elem, freq in excess_freq_of_element.items() if freq > 0):
+                        has_added_bonds = has_added_bonds or try_to_bond(atom, elem, self.mof)
+            except StopIteration:
+                pass
+        return has_added_bonds
+
+
+def try_to_bond(atom, elem, mof):
+    candidates = ((a, Distances.distance_across_unit_cells(atom, a, mof.angles, mof.fractional_lengths, mof.unit_volume))
+                  for a in mof.atoms if a.type_symbol == elem and a not in atom.bondedAtoms)
+    (candidate, dist) = min(candidates, key=lambda x: x[1])
+    if dist < Distances.bond_distance(atom, candidate, Distances.bond_length_multiplicative_error_margin + 0.07):
+        candidate.bondedAtoms.append(atom)
+        atom.bondedAtoms.append(candidate)
+        return True
+    else:
+        return False
 
 
 def panes_between(start, end, cluster):

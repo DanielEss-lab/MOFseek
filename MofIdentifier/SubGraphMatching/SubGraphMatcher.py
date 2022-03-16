@@ -120,6 +120,22 @@ def mol_are_isomorphic(mol_1, mol_2):
     return match
 
 
+def mapping_function(mol_1, mol_2):
+    graph_a = mol_1.get_graph()
+    graph_b = mol_2.get_graph()
+    (is_match, mapping_12, _) = graph_a.isomorphic_vf2(graph_b,
+                                                       node_compat_fn=timed_vertices_are_equal(time.time(), list()),
+                                                       return_mapping_12=True)
+
+    def mol2atomlabel_from_mol1atomlabel(atom_label):
+        a_vertex = graph_a.vs.find(atom_label)
+        match_index = mapping_12[a_vertex.index]
+        b_vertex = graph_b.vs.find(match_index)
+        return b_vertex['name']
+
+    return is_match, mol2atomlabel_from_mol1atomlabel
+
+
 def vertices_near_equal(g1, g2, i1, i2):
     elem_1 = g1.vs[i1]['element']
     elem_1 = elem_1[0] if len(elem_1) > 1 and elem_1[-1].isnumeric() else elem_1
