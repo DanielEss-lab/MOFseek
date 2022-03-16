@@ -5,6 +5,7 @@ venv/
 MofIdentifier/subbuilding/connector/
 MofIdentifier/subbuilding/auxiliary/
 MofIdentifier/subbuilding/cluster/
+Analysis/output
 build/
 dist/
 main.spec
