@@ -95,8 +95,12 @@ class Root(tk.Tk):
     def reload_sbus(self):
         self.search_page.reload_sbus()
 
-    def refesh_mol_views(self):
+    def refresh_mol_views(self):
         self.search_page.refesh_mol_views()
 
     def clear_search(self):
         self.search_page.search_results_v.display_results([])
+
+    def update_sources_settings(self):
+        self.settings_page.remake_sources_frame_children()
+        self.add_MOFs_page.set_source_name_suggestions()

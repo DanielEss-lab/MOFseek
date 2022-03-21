@@ -16,7 +16,7 @@ Some code snippets from stackoverflow.com/questions/58428545/clarify-functionali
 
 class Box(ttk.Combobox):
 
-    def __init__(self, master, my_font, on_select=None):
+    def __init__(self, master, my_font=("Arial", 10), on_select=None):
         super().__init__(master, font=my_font)
         self.on_select = on_select
         if on_select is not None:

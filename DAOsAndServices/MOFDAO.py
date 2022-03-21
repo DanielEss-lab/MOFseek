@@ -131,4 +131,4 @@ def get_num_mofs():
 
 
 def _delete_mof(name):
-    mof_collection.delete_one({"ligand_names": name})
+    mof_collection.delete_one({"filename": name})

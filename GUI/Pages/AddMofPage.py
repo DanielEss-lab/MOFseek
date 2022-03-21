@@ -4,7 +4,7 @@ from tkinter.filedialog import askopenfilenames
 
 from DAOsAndServices.MOFDatabase import MOFDatabase
 from GUI import Settings
-from GUI.Utility import FrameWithProcess, StyledButton
+from GUI.Utility import FrameWithProcess, StyledButton, MultipleAutoCompleteSearch, AutoCompleteComboBox
 from GUI.Views import MultiMofView
 from DAOsAndServices import MOFDAO
 from MofIdentifier.fileIO import CifReader
@@ -28,7 +28,8 @@ class Page(FrameWithProcess.Frame):
         row1 = tk.Frame(self)
         source_name_instructions = tk.Label(row1, text="Source Database: ", justify=tk.LEFT)
         source_name_instructions.pack(side=tk.LEFT)
-        self.source_name_ent = tk.Entry(row1)
+        self.source_name_ent = AutoCompleteComboBox.Box(row1)
+        self.set_source_name_suggestions()
         self.source_name_ent.pack(side=tk.LEFT)
         row1.pack()
         self.add_btn = StyledButton.make(self, text='Upload to DB', command=lambda: self.start_process(self.mofs))
@@ -53,13 +54,22 @@ class Page(FrameWithProcess.Frame):
 
     def add_mofs_to_db(self, mofs):
         source_name = self.source_name_ent.get()
+        if source_name == "":
+            self._show_error("Must input a name for the source database")
+            return
+        else:
+            self.source_name_ent.delete(0, tk.END)
         Settings.add_source_name(source_name)
+        self.parent.winfo_toplevel().update_sources_settings()
         self.add_btn['state'] = "disabled"
         self.mof_preview.display_results([])
         for mof in mofs:
             MOFDAO.add_mof(mof, source_name)
-        self.winfo_toplevel().forget_history()
+        self.parent.winfo_toplevel().forget_history()
         self.mofs = []
 
     def refresh_attributes_shown(self):
         self.mof_preview.display_results(self.mofs)
+
+    def set_source_name_suggestions(self):
+        self.source_name_ent.set_completion_list(Settings.current_source_states().keys())

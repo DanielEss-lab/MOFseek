@@ -3,6 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
 
+from DAOsAndServices import DeleteService
 from GUI import Attributes, Settings
 from GUI.Utility import StyledButton
 from GUI.Utility.ScrollFrame import ScrollFrame
@@ -58,8 +59,8 @@ class Page(ScrollFrame):
                      Settings.allow_no_metal, allow_no_metal_action).grid(sticky=tk.W, pady=(2, 20))
         instructions = tk.Label(self.frame, text="Choose which databases to enable", justify=tk.LEFT)
         instructions.grid()
-        for source_name, is_enabled in Settings.current_source_states().keys():
-            Page.SourceSetting(self.frame, source_name, is_enabled).grid(sticky=tk.W)
+        self.sources_frame = tk.Frame(self.frame)
+        self.remake_sources_frame_children()
 
         self.download_filepath_option_row = self.make_download_filepath_option_row()
         self.download_filepath_option_row.grid(sticky=tk.W, pady=(0, 2))
@@ -103,7 +104,7 @@ class Page(ScrollFrame):
 
             btn = ttk.Checkbutton(self, variable=self.is_enabled, onvalue=1, offvalue=0,
                                   command=self.change_setting)
-            lbl = tk.Label(self, text=self.name + ': ' + f"Show results tagged with the source name {source_name}")
+            lbl = tk.Label(self, text=self.name + ': ' + f"Show results tagged with this source name.")
             delete = StyledButton.make(self, text=f"Delete", command=self.delete_source)
             btn.pack(side=tk.LEFT)
             lbl.pack(side=tk.LEFT)
@@ -120,13 +121,16 @@ class Page(ScrollFrame):
                                                                  "source name. This cannot be automatically undone."
                                                                  " Are you sure you want to proceed?"):
                 Settings.delete_source_name(self.name)
+                DeleteService.delete_source(self.name)
                 if self.is_enabled.get():
                     self.toggle_sources_in_views(False)
+                self.parent.winfo_toplevel().update_sources_settings()
 
         def toggle_sources_in_views(self, now_enabled):
             self.winfo_toplevel().reload_sbus()
             self.winfo_toplevel().refresh_mol_views()
             self.winfo_toplevel().clear_search()
+            self.winfo_toplevel().forget_history()
 
 
     def make_download_filepath_option_row(self):
@@ -142,6 +146,14 @@ class Page(ScrollFrame):
         btn.pack(side=tk.LEFT)
         lbl.pack(side=tk.LEFT)
         return row
+
+    def remake_sources_frame_children(self):
+        for child in self.sources_frame.winfo_children():
+            child.destroy()
+        for source_name, is_enabled in Settings.current_source_states().items():
+            Page.SourceSetting(self.sources_frame, source_name, is_enabled).grid(sticky=tk.W)
+        self.sources_frame.grid(sticky=tk.W, pady=(2, 20))
+        return self.sources_frame
 
     def make_app_select_option_row(self, file_extension):
         row = tk.Frame(self.frame)
@@ -175,4 +187,4 @@ class Page(ScrollFrame):
     def refresh_download_filepath_row(self):
         self.download_filepath_option_row.grid_forget()
         self.download_filepath_option_row = self.make_download_filepath_option_row()
-        self.download_filepath_option_row.grid(sticky=tk.W)
+        self.download_filepath_option_row.grid(sticky=tk.W, pady=(0,2))

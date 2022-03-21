@@ -19,3 +19,4 @@
 'Has_OMS', (9216, 5)
 'OMS', (9728, 5)
 'allow_disorder', (10240, 5)
+'sources_enabled', (10752, 34)
