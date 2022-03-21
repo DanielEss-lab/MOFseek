@@ -52,6 +52,9 @@ class MOF(Molecule.Molecule):
                 components = SolventTools.get_connected_components(self.atoms)
                 self.assign_components(components, atoms, True)
                 # If it never broke out from good_connection being True, then it never found a metal
+            # Because splitting it into SBUs might result in noticing and fixing problem spots, we need to split() this
+            # mof immediately in order to generate good calculated_info when needed
+            self._sbus = SBUIdentifier.split(self, check_to_modify_bonds=True)
         else:
             atoms_by_name = {atom.label: atom for atom in self.atoms}
             (bond_information, oms_information, solvent_information, s_c_information) = calculated_info.split(';')

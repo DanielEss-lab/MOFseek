@@ -1,7 +1,5 @@
 import unittest
 
-from MofIdentifier.SubGraphMatching import SubGraphMatcher
-from MofIdentifier.fileIO import XyzReader, XyzWriter
 from MofIdentifier.fileIO.CifReader import get_mof
 
 
@@ -173,6 +171,11 @@ class BreakLargeClustersTest(unittest.TestCase):
         self.assertEqual(3, len(sbu_breakdown.clusters))
         large_cluster = [c for c in sbu_breakdown.clusters if len(c.atoms) == 59][0]
         self.assertEqual(8, large_cluster.frequency)
+
+    def test_comparing_auxiliaries_with_connectors_to_add_bonds(self):
+        mof_nopjuz = get_mof(r'../MofIdentifier/mofsForTests/NOPJUZ_clean.cif')
+        sbu_breakdown = mof_nopjuz.sbus()
+        self.assertEqual(0, len(sbu_breakdown.auxiliaries))
 
 
 if __name__ == '__main__':
