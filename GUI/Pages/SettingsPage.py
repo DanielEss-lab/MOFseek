@@ -56,8 +56,9 @@ class Page(ScrollFrame):
         Page.Setting(self.frame, 'Allow Nonmetallic', 'Include in search results MOFs that do not contain metal nodes '
                                                       '(ie COFs) (Only affects future searches)',
                      Settings.allow_no_metal, allow_no_metal_action).grid(sticky=tk.W, pady=(2, 20))
-
-        for source_name, is_enabled in Settings.sources_enabled.keys():
+        instructions = tk.Label(self.frame, text="Choose which databases to enable", justify=tk.LEFT)
+        instructions.grid()
+        for source_name, is_enabled in Settings.current_source_states().keys():
             Page.SourceSetting(self.frame, source_name, is_enabled).grid(sticky=tk.W)
 
         self.download_filepath_option_row = self.make_download_filepath_option_row()

@@ -1,9 +1,10 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
-from GUI import os_specific_settings
+from GUI import os_specific_settings, Settings
 from DAOsAndServices import MOFDAO
 from DAOsAndServices.LigandDatabase import LigandDatabase
+from GUI.SourceCheck import mof_source_is_enabled
 from MofIdentifier.fileIO import FileOpen
 
 
@@ -52,9 +53,13 @@ class View(tk.Frame):
 
     def generate_mof_row(self):
         mof_row = tk.Frame(master=self, height=20)
-        mof_label = tk.Label(mof_row, text=f"{len(self.mol.Mofs)} MOFs: ")
+        if all(Settings.current_source_states().values()):
+            mofs = self.mol.Mofs
+        else:
+            mofs = (name for name in self.mol.Mofs if mof_source_is_enabled(name))
+        mof_label = tk.Label(mof_row, text=f"{len(mofs)} MOFs: ")
         mof_label.pack(side='left')
-        for name in self.mol.Mofs:
+        for name in mofs:
             self.display_mof_name(mof_row, name)
         return mof_row
 

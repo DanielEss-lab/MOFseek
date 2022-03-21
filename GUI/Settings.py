@@ -18,7 +18,11 @@ with shelve.open("MOFseek_settings") as s:
     attribute_is_enabled = dict()
     for name, attr in Attributes.attributes.items():
         attribute_is_enabled[name] = s.get(name, attr.enabled)
-    sources_enabled = {src.split()[0]: 'T' == src.split()[1] for src in [src for src in s.get("sources_enabled", "").split(';')]}
+    src_string = s.get("sources_enabled")
+    if src_string is None:
+        sources_enabled = dict()
+    else:
+        sources_enabled = {src.split()[0]: 'T' == src.split()[1] for src in [src for src in src_string.split(';')]}
 
 
 def change_download_filepath():
@@ -98,9 +102,10 @@ def toggle_sbu(enabled):
 
 def add_source_name(source_name):
     global sources_enabled
-    sources_enabled[source_name] = True
-    with shelve.open("MOFseek_settings", 'w') as shelf:
-        shelf["sources_enabled"] = ';'.join(f"{key} {'T' if value else 'F'}" for key, value in sources_enabled)
+    if source_name not in sources_enabled:
+        sources_enabled[source_name] = True
+        with shelve.open("MOFseek_settings", 'w') as shelf:
+            shelf["sources_enabled"] = ';'.join(f"{key} {'T' if value else 'F'}" for key, value in sources_enabled)
 
 
 def delete_source_name(source_name):
@@ -115,3 +120,8 @@ def toggle_source(source_name, enabled):
     sources_enabled[source_name] = enabled
     with shelve.open("MOFseek_settings", 'w') as shelf:
         shelf["sources_enabled"] = ';'.join(f"{key} {'T' if value else 'F'}" for key, value in sources_enabled)
+
+
+def current_source_states():
+    global sources_enabled
+    return sources_enabled

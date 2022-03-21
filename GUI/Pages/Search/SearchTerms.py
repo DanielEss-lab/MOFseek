@@ -20,7 +20,7 @@ def condense_t(tup):
 
 class SearchTerms:
     def __init__(self, ligands=None, excl_ligands=None, elements=None, excl_elements=None, sbus=None,
-                 excl_sbus=None, attr=None, label=''):
+                 excl_sbus=None, attr=None, label='', sources=None):
         if excl_sbus is None:
             excl_sbus = []
         if sbus is None:
@@ -35,6 +35,8 @@ class SearchTerms:
             elements = []
         if attr is None:
             attr = dict()
+        if sources is None:
+            sources = []
         self.ligand_names = ligands
         self.element_symbols = elements
         self.excl_ligand_names = excl_ligands
@@ -43,6 +45,7 @@ class SearchTerms:
         self.excl_sbu_names = excl_sbus
         self.attr = attr
         self.label_substring = label
+        self.sources = sources
 
     def passes(self, MOF):  # MOF is of type MOFDatabase
         if MOF is None:
@@ -52,6 +55,8 @@ class SearchTerms:
         if not MOF.has_metal and not Settings.allow_no_metal:
             return False
         if not MOF.is_organic and not Settings.allow_not_organic:
+            return False
+        if not self.sources[MOF.source_name]:
             return False
         for element in self.element_symbols:
             if element not in MOF.elements_present:

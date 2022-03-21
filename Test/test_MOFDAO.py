@@ -8,7 +8,7 @@ class MOFDAOTest(unittest.TestCase):
     def test_put_and_get(self):
         DBConnection.use_test_connections()
         mof = CifReader.get_mof("../MofIdentifier/mofsForTests/smod7-pos-1.cif")
-        MOFDAO.add_mof(mof)
+        MOFDAO.add_mof(mof, "TEST 2019-11-01-ASR-public_12020")
         retrieved_mof = MOFDAO.get_MOF(mof.label)
         self.assertIsNotNone(retrieved_mof)
         self.assertEqual(1, len(retrieved_mof.sbu_nodes))
@@ -16,7 +16,7 @@ class MOFDAOTest(unittest.TestCase):
     def test_get_and_store_value(self):
         DBConnection.use_test_connections()
         mof = CifReader.get_mof("../MofIdentifier/mofsForTests/smod7-pos-1.cif")
-        MOFDAO.add_mof(mof)
+        MOFDAO.add_mof(mof, "TEST 2019-11-01-ASR-public_12020")
         retrieved_mof = MOFDAO.get_MOF('smod7-pos-1.cif')
         self.assertIsNotNone(retrieved_mof)
         unit_volume = retrieved_mof.unit_volume

@@ -129,7 +129,7 @@ class View(FrameWithProcess.Frame):
             attributes = self.get_attribute_parameters()
             label_substring = self.ent_label.get()
             search = SearchTerms(ligands, forbidden_ligands, element_symbols, forbidden_element_symbols,
-                                 sbus, forbidden_sbus, attributes, label_substring)
+                                 sbus, forbidden_sbus, attributes, label_substring, sources=Settings.current_source_states())
         # Shortcut evaluation if possible
         if search in self.search_to_results and self.search_to_results[search] is not None \
                 and self.search_to_results[search] != 'ongoing':

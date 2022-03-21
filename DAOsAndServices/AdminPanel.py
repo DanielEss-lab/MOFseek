@@ -17,11 +17,11 @@ def delete_all():
     MOFDAO.delete_all_mofs()
 
 
-def add_test_mofs(directory):
+def add_test_mofs(directory, sourceName):
     mofs = CifReader.get_all_mofs_in_directory(directory)
     # C:\Users\mdavid4\Desktop\Esslab-P66\GUI\mofsForGui_temp
     for mof in mofs:
-        MOFDAO.add_mof(mof)
+        MOFDAO.add_mof(mof, sourceName)
 
 
 def add_certain_ligands(directory, ligands_to_add):
@@ -45,7 +45,7 @@ def create_indices():
     DBConnection.sbu_collection.create_index("sbu_name", unique=True)
 
 
-def add_all_mofs(mofs_path):
+def add_all_mofs(mofs_path, sourceName):
     i = 0
     # Change the directory
     original_path = os.getcwd()
@@ -64,7 +64,7 @@ def add_all_mofs(mofs_path):
                 filepath = str(filepath)
                 # print(f"\n{filepath} will be read now...")
                 mof = get_mof(filepath)
-                MOFDAO.add_mof(mof)
+                MOFDAO.add_mof(mof, sourceName)
                 i += 1
                 if i % 100 == 0:
                     print(f"{i} mofs uploaded")
@@ -83,12 +83,12 @@ def refresh_active_collections_to_test():
     delete_all()
     create_indices()
     if platform.system() == 'Windows':  # Windows
-        add_certain_ligands(str(Path(r'/MofIdentifier/ligands')))
-        add_all_mofs(str(Path(r'/GUI/mofsForGui_temp')))
+        add_certain_ligands(str(Path(r'/MofIdentifier/ligands')), list())
+        add_all_mofs(str(Path(r'/GUI/mofsForGui_temp')), "mofsForGui test")
         MOFDAO.add_csv_info('')
     elif platform.system() == 'Darwin':  # macOS
-        add_certain_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
-        add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/test_mol')))
+        add_certain_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')), list())
+        add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/test_mol')), "TEST test_mol")
         MOFDAO.add_csv_info('/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020_short.csv')
     print_summary()
 
@@ -114,11 +114,13 @@ def print_summary():
 def fill_db():
     if platform.system() == 'Windows':  # Windows
         add_all_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
-        add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')))
+        add_all_mofs(str(Path(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020\structure_10143')),
+                     "TEST 2019-11-01-ASR-public_12020")
         MOFDAO.add_csv_info(r'C:\Users\mdavid4\Desktop\2019-11-01-ASR-public_12020.csv')
     elif platform.system() == 'Darwin':  # macOS
         add_all_ligands(str(Path(r'/Users/davidl/Desktop/Work/Esslab-P66/MofIdentifier/ligands')))
-        add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')))
+        add_all_mofs(str(Path(r'/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020/structure_10143')),
+                     "TEST 2019-11-01-ASR-public_12020")
         MOFDAO.add_csv_info('/Users/davidl/Desktop/Work/2019-11-01-ASR-public_12020.csv')
 
 

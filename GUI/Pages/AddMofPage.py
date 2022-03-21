@@ -3,6 +3,7 @@ from pathlib import Path
 from tkinter.filedialog import askopenfilenames
 
 from DAOsAndServices.MOFDatabase import MOFDatabase
+from GUI import Settings
 from GUI.Utility import FrameWithProcess, StyledButton
 from GUI.Views import MultiMofView
 from DAOsAndServices import MOFDAO
@@ -52,6 +53,7 @@ class Page(FrameWithProcess.Frame):
 
     def add_mofs_to_db(self, mofs):
         source_name = self.source_name_ent.get()
+        Settings.add_source_name(source_name)
         self.add_btn['state'] = "disabled"
         self.mof_preview.display_results([])
         for mof in mofs:
