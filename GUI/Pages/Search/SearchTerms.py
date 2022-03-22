@@ -36,7 +36,7 @@ class SearchTerms:
         if attr is None:
             attr = dict()
         if sources is None:
-            sources = []
+            sources = dict()
         self.ligand_names = ligands
         self.element_symbols = elements
         self.excl_ligand_names = excl_ligands

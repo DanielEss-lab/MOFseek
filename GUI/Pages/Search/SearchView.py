@@ -88,8 +88,7 @@ class View(FrameWithProcess.Frame):
 
     def clear(self):
         for entry in self.attribute_entries:
-            entry.max.delete(0, tk.END)
-            entry.min.delete(0, tk.END)
+            entry.clear()
         self.ent_ligand.clear()
         self.ent_excl_ligand.clear()
         self.ent_elements.delete(0, tk.END)
@@ -98,11 +97,11 @@ class View(FrameWithProcess.Frame):
         self.ent_excl_sbus.clear()
 
     def force_search_ligand(self, ligand: str):
-        search = SearchTerms(ligands=[ligand])
+        search = SearchTerms(ligands=[ligand], sources=Settings.current_source_states())
         self.start_process(search)
 
     def force_search_sbu(self, sbu: str):
-        search = SearchTerms(sbus=[sbu])
+        search = SearchTerms(sbus=[sbu], sources=Settings.current_source_states())
         self.start_process(search)
 
     def redo_search(self):
@@ -266,6 +265,10 @@ class NumericAttributeEntry(tk.Frame):
             min = float(self.min.get())
         return min, max
 
+    def clear(self):
+        self.max.delete(0, tk.END)
+        self.min.delete(0, tk.END)
+
 
 class StringAttributeEntry(tk.Frame):
     def __init__(self, parent, name, attr):
@@ -291,6 +294,10 @@ class StringAttributeEntry(tk.Frame):
             exclude = self.exclude.get()
         return exclude, include
 
+    def clear(self):
+        self.include.delete(0, tk.END)
+        self.exclude.delete(0, tk.END)
+
 
 class BooleanAttributeEntry(tk.Frame):
     def __init__(self, parent, name, attr):
@@ -313,3 +320,6 @@ class BooleanAttributeEntry(tk.Frame):
             return True
         else:
             return False
+
+    def clear(self):
+        self.value.set('-')

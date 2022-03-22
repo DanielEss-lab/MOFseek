@@ -20,7 +20,7 @@ with shelve.open("MOFseek_settings") as s:
         attribute_is_enabled[name] = s.get(name, attr.enabled)
     src_string = s.get("sources_enabled")
     if src_string is None:
-        sources_enabled = {"2019-11-01-ASR-public_12020 Structure": True}
+        sources_enabled = {"2019-11-01-ASR-public_12020/structure_10143": True}
     else:
         sources_enabled = {" ".join(src.split()[:-1]): 'T' == src.split()[-1] for src in [src for src in src_string.split(';')
                                                                              if " " in src.strip()]}
@@ -126,3 +126,11 @@ def toggle_source(source_name, enabled):
 def current_source_states():
     global sources_enabled
     return sources_enabled
+
+
+def force_add_source():
+    add_source_name("2019-11-01-ASR-public_12020/structure_10143")
+
+
+if __name__ == "__main__":
+    force_add_source()
