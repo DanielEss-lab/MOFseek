@@ -10,7 +10,7 @@ def get_MOF(name):
         name = name[:-4]
     mof = mof_collection.find_one({"filename": name})
 
-    return MOFDatabase(mof)
+    return None if mof is None else MOFDatabase(mof)
 
 
 def get_all_names():

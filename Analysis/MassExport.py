@@ -7,12 +7,13 @@ from MofIdentifier.fileIO import MoleculeWriter
 def export_all_sbus():
     MoleculeLike = namedtuple('MoleculeLike', ['label', 'file_content'])
     for sbu in SBUDAO.get_sbu_iterator():
+        date = "3_22_2022"
         if sbu.type == 'cluster':
-            path = r'C:\Users\mdavid4\Downloads\sbus\nodes'
+            path = fr'C:\Users\mdavid4\Downloads\{date}_sbus\nodes'
         elif sbu.type == 'connector':
-            path = r'C:\Users\mdavid4\Downloads\sbus\connectors'
+            path = fr'C:\Users\mdavid4\Downloads\{date}_sbus\connectors'
         elif sbu.type == 'auxiliary':
-            path = r'C:\Users\mdavid4\Downloads\sbus\auxiliaries'
+            path = fr'C:\Users\mdavid4\Downloads\{date}_sbus\auxiliaries'
         else:
             raise ValueError('SBU type must be one of: cluster, connector, auxiliary')
         MoleculeWriter.write_one(MoleculeLike(sbu.name + '.xyz', sbu.file_content), path)
