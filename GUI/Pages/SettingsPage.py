@@ -117,7 +117,7 @@ class Page(ScrollFrame):
 
         def delete_source(self):
             if messagebox.askquestion("Confirm source deletion", "Deleting this source will also delete from the "
-                                                                 "database all MOFs that are associated with this "
+                                                                 "database all MOFs that are associated with only this "
                                                                  "source name. This cannot be automatically undone."
                                                                  " Are you sure you want to proceed?"):
                 Settings.delete_source_name(self.name)
@@ -131,7 +131,6 @@ class Page(ScrollFrame):
             self.winfo_toplevel().refresh_mol_views()
             self.winfo_toplevel().clear_search()
             self.winfo_toplevel().forget_history()
-
 
     def make_download_filepath_option_row(self):
         row = tk.Frame(self.frame)

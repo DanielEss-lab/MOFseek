@@ -56,7 +56,7 @@ class SearchTerms:
             return False
         if not MOF.is_organic and not Settings.allow_not_organic:
             return False
-        if not self.sources[MOF.source_name]:
+        if not any(self.sources[source_name] for source_name in MOF.source_names):
             return False
         for element in self.element_symbols:
             if element not in MOF.elements_present:

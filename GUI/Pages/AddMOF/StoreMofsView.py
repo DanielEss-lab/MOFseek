@@ -1,10 +1,10 @@
 import tkinter as tk
 from GUI import Settings
 from GUI.Utility import FrameWithProcess, StyledButton, AutoCompleteComboBox
-from DAOsAndServices import MOFDAO
+from DAOsAndServices import MOFDAO, AddService
 
 instruction_text = """The selected MOFs will be loaded onto the database, and the rest of their properties will be 
-calculated. The calculations will take some time (expect 2-5 minutes per MOF for this step), so please be patient."""
+calculated. The calculations will take some time (expect 1-2 minutes per MOF for this step), so please be patient."""
 
 
 class Page(FrameWithProcess.Frame):
@@ -29,14 +29,16 @@ class Page(FrameWithProcess.Frame):
         if source_name == "":
             self._show_error("Must input a name for the source database")
             return
+        elif ',' in source_name:
+            self._show_error("No commas allowed in the name for the source database")
+            return
         else:
             self.source_name_ent.delete(0, tk.END)
         Settings.add_source_name(source_name)
         self.parent.winfo_toplevel().update_sources_settings()
         self.add_btn['state'] = "disabled"
         self.parent.empty_selected_mofs_display()
-        for mof in mofs:
-            MOFDAO.add_mof(mof, source_name)
+        AddService.add_mofs(mofs, source_name)
         self.parent.winfo_toplevel().forget_history()
         self.parent.mofs = []
 

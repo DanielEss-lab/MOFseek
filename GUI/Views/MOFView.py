@@ -24,10 +24,9 @@ class View(tk.Frame):
         identifier = tk.Frame(master=self)
         name = tk.Label(identifier, text=mof.filename, width=48, anchor=tk.W)
         name.pack(side='left')
-        source = tk.Label(identifier, text=mof.source_name, width=48, anchor=tk.W)
-        source.pack(side='right')
+        sources = tk.Label(identifier, text=", ".join(mof.source_names), width=48, anchor=tk.W)
+        sources.pack(side='right')
         identifier.grid(sticky=tk.W, row=0, column=0)
-
 
         self.elements = tk.Label(self, text=mof.atoms_string_with_solvents if Settings.keep_solvent
                             else mof.atoms_string_without_solvents)

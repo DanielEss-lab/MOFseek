@@ -4,8 +4,7 @@ from GUI import Settings
 
 
 def mof_source_is_enabled(name: str):
-    source = MOFDAO.get_MOF(name).source_name
-    return Settings.current_source_states()[source]
+    return any(Settings.current_source_states()[source] for source in MOFDAO.get_MOF(name).source_names)
 
 
 def enabled_mofs_of_sbu(sbu: SBUDatabase):

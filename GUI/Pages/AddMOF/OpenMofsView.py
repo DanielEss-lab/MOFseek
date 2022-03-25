@@ -34,11 +34,6 @@ class Page(FrameWithProcess.Frame):
                 except:
                     self._show_error('Unable to extract MOF from ' + filename)
                     return
-        for mof in mofs:
-            if MOFDAO.get_MOF(mof.label) is not None:
-                self._show_error(f'A mof by the name of {mof.label} already exists in the database, and we are unable '
-                                 f'to add it again (for now)')
-                return
         self.parent.mofs = mofs
         mofs_for_display = [MOFDatabase.from_mof(mof) for mof in mofs]
         self.mof_preview.display_results(mofs_for_display)

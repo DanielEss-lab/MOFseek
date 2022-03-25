@@ -1,3 +1,4 @@
+from collections import defaultdict
 from itertools import chain
 
 from MofIdentifier.Molecules import Molecule
@@ -126,6 +127,20 @@ class MOF(Molecule.Molecule):
                         break
                 if not exists_match:
                     return False
+        return True
+
+    def near_equals(self, o) -> bool:
+        if not (isinstance(o, MOF) and self.symmetry == o.symmetry and self.fractional_lengths == o.fractional_lengths
+                and self.angles == o.angles):
+            return False
+        element_and_num_bonds_frequency_imbalance = defaultdict(lambda: 0)
+        for a in self.atoms:
+            element_and_num_bonds_frequency_imbalance[f"{a.type_symbol}{len(a.bondedAtoms)}"] += 1
+        for a in o.atoms:
+            element_and_num_bonds_frequency_imbalance[f"{a.type_symbol}{len(a.bondedAtoms)}"] -= 1
+        for freq in element_and_num_bonds_frequency_imbalance.values():
+            if freq != 0:
+                return False
         return True
 
     def atoms_string_with_solvents(self):

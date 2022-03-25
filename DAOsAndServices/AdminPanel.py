@@ -142,14 +142,22 @@ def speed_measure():
     print(f'100 objects created in {round(start - end, 2)} seconds')
 
 
+def set_source_for_all_mofs(source_name):
+    for mof_name in MOFDAO.get_all_names():
+        MOFDAO._change_field(mof_name)
+    for mof_name in MOFDAO.get_all_names():
+        MOFDAO.add_source_to_mof(mof_name, source_name)
+
+
 if __name__ == '__main__':
     # refresh_active_collections_to_test()
     # fill_db()
     # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
     # speed_measure()
 
-    refresh_active_collections_to_full()
-    retrieve_all_mofs()
+    # refresh_active_collections_to_full()
+    # retrieve_all_mofs()
+    set_source_for_all_mofs("2019-11-01-ASR-public_12020/structure_10143")
 
     # LigandDAO.delete_all_ligands()
     # add_all_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))

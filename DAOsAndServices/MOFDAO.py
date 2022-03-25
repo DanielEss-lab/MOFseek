@@ -68,7 +68,8 @@ def _add_mof_to_collection(mof, source_name):
                                                                 "sbu_node_info": [],
                                                                 "sbu_conn_info": [],
                                                                 "sbu_aux_info": [],
-                                                                "source_name": source_name}}, upsert=True)
+                                                                "source_names": []}}, upsert=True)
+    add_source_to_mof(mof_name, source_name)
     return mof_name
 
 
@@ -132,3 +133,15 @@ def get_num_mofs():
 
 def _delete_mof(name):
     mof_collection.delete_one({"filename": name})
+
+
+def remove_source(mof_name, source_name):
+    mof_collection.update_one({"filename": mof_name}, {"$pull": {'source_names': source_name}})
+
+
+def add_source_to_mof(mof_name, source_name):
+    mof_collection.update_one({"filename": mof_name}, {"$addToSet": {'source_names': source_name}})
+
+
+if __name__ == "__main__":
+    mof_collection.update_one({"filename": "ABAVIJ_clean"}, {"$addToSet": {'source_names': "first one"}})
