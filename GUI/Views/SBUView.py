@@ -48,7 +48,7 @@ class View(tk.Frame):
         row2.pack(fill=tk.X)
 
         row3 = tk.Frame(master=self, height=10)
-        sbu_label = tk.Label(row3, text=f"{sbu.frequency} occurrences in DB")
+        sbu_label = tk.Label(row3, text=f"{sbu.get_enabled_frequency()} occurrences in enabled sources")
         sbu_label.pack(side='left')
         type = tk.Label(row3, text=str(sbu.type))
         type.pack(side='right')

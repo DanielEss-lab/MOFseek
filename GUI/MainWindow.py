@@ -2,7 +2,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 from GUI import os_specific_settings
-from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage, EditMOFPage, SettingsPage
+from GUI.Pages import SearchPage, AddLigandPage, AddMofPage, RenameSBUPage, RenameLigandPage, EditMOFPage, SettingsPage, \
+    SBUFrequencyPage
 
 
 class Root(tk.Tk):
@@ -24,6 +25,7 @@ class Root(tk.Tk):
         self.rename_sbu_page = RenameSBUPage.Page(self.tabControl)
         self.add_MOFs_page = AddMofPage.Page(self.tabControl)
         self.edit_MOF_page = EditMOFPage.Page(self.tabControl)
+        self.SBUFrequencyPage = SBUFrequencyPage.Page(self.tabControl)
         self.settings_page = SettingsPage.Page(self.tabControl)
 
         self.tabControl.add(self.search_page, text='Search')
@@ -32,6 +34,7 @@ class Root(tk.Tk):
         self.tabControl.add(self.rename_sbu_page, text='Rename SBU')
         self.tabControl.add(self.add_MOFs_page, text='Add MOFs')
         # self.tabControl.add(self.edit_MOF_page, text='Edit MOF')
+        self.tabControl.add(self.SBUFrequencyPage, text='SBU Frequencies')
         self.tabControl.add(self.settings_page, text='Settings')
         self.tabControl.pack(expand=1, fill="both")
 

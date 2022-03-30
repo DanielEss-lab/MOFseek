@@ -9,7 +9,8 @@ def get_MOF(name):
     if name.endswith('.cif'):
         name = name[:-4]
     mof = mof_collection.find_one({"filename": name})
-
+    if mof is None:
+        print(name)
     return None if mof is None else MOFDatabase(mof)
 
 
@@ -40,7 +41,7 @@ def add_mof(mof, source_name):
     mof_name = _add_mof_to_collection(mof, source_name)
     for sbu in mof.sbus().clusters:
         sbu_name = SBUDAO.process_sbu(sbu, mof_name)
-        sbu_freq = sbu.frequency
+        sbu_freq = sbu.frequency # How many times the SBU appears in that MOF
         sbu_connectivity = sbu.connections()
         sbu_info = str(sbu_freq) + ' ' + str(sbu_connectivity) + ' ' + sbu_name
         mof_collection.update_one({"filename": mof_name}, {"$addToSet": {"sbu_node_info": sbu_info}})

@@ -17,8 +17,9 @@ def chart_type(type_name):
     num_sbus_by_freq = defaultdict(lambda: 0)
     for sbu in SBUDAO.get_sbu_iterator():
         if sbu.type == type_name:
-            num_sbus_by_freq[sbu.frequency] += 1
-            output_lines.append(f'{sbu.name}, {sbu.frequency}')
+            freq = sbu.get_enabled_frequency()
+            num_sbus_by_freq[freq] += 1
+            output_lines.append(f'{sbu.name}, {freq}')
     x_values = num_sbus_by_freq.keys()
     y_values = num_sbus_by_freq.values()
     create_scatter_plot(x_values, y_values, type_name)

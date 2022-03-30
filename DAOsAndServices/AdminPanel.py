@@ -149,6 +149,10 @@ def set_source_for_all_mofs(source_name):
         MOFDAO.add_source_to_mof(mof_name, source_name)
 
 
+def delete_p_55_mof():
+    SBUDAO._delete_mof("Periodic_55_00 (27.771)", SBUDAO.get_all_names())
+
+
 if __name__ == '__main__':
     # refresh_active_collections_to_test()
     # fill_db()
@@ -157,8 +161,8 @@ if __name__ == '__main__':
 
     # refresh_active_collections_to_full()
     # retrieve_all_mofs()
-    set_source_for_all_mofs("2019-11-01-ASR-public_12020/structure_10143")
-
+    # set_source_for_all_mofs("2019-11-01-ASR-public_12020/structure_10143")
+    delete_p_55_mof()
     # LigandDAO.delete_all_ligands()
     # add_all_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
 

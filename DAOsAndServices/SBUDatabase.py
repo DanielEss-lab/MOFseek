@@ -1,3 +1,4 @@
+from GUI import SourceCheck
 from MofIdentifier.fileIO import XyzReader
 
 
@@ -6,7 +7,7 @@ class SBUDatabase:
         self.name = sbu_name
         self.file_content = file_content
         self.mofs = MOFs
-        self.frequency = len(MOFs)
+        self.total_frequency = len(MOFs)
         self.type = sbu_type
         self._sbu = None
 
@@ -18,7 +19,7 @@ class SBUDatabase:
 
     def set_mofs(self, mofs):
         self.mofs = mofs
-        self.frequency = len(mofs)
+        self.total_frequency = len(mofs)
 
     def get_sbu(self):
         if self._sbu is None:
@@ -33,3 +34,6 @@ class SBUDatabase:
         atom_lines = [line.strip() for line in self.file_content.split('\n')[2:]]
         return sum(1 if len(line) > 2 else 0 for line in atom_lines)
 
+    def get_enabled_frequency(self):
+        return len([mof_name for mof_name in SourceCheck.enabled_mofs_of_sbu(self)
+             if SourceCheck.mof_source_is_enabled(mof_name)])
