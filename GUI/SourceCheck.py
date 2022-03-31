@@ -7,8 +7,4 @@ def mof_source_is_enabled(name: str):
 
 
 def enabled_mofs_of_sbu(sbu):  # SBUDatabase
-    names = (name for name in sbu.mofs if mof_source_is_enabled(name))
-    names = list(names)
-    if None in names:
-        print(sbu.label)
-    return names
+    return (name for name in sbu.mofs if mof_source_is_enabled(name))

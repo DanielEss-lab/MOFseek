@@ -5,4 +5,7 @@ if __name__ == '__main__':
 
     if DB_util.assert_mongod_running():
         window = MainWindow.Root()
-        window.mainloop()
+        try:
+            window.mainloop()
+        except KeyboardInterrupt:
+            pass

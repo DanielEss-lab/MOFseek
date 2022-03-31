@@ -9,8 +9,6 @@ def get_MOF(name):
     if name.endswith('.cif'):
         name = name[:-4]
     mof = mof_collection.find_one({"filename": name})
-    if mof is None:
-        print(name)
     return None if mof is None else MOFDatabase(mof)
 
 
@@ -80,7 +78,7 @@ def _rename_ligand(old_name, new_name):
 
 
 def _delete_ligand(old_name):
-    mof_collection.update({}, {"$pull": {"ligand_names": old_name}})
+    mof_collection.update_many({}, {"$pull": {"ligand_names": old_name}})
     # TODO: test that this actually works
 
 

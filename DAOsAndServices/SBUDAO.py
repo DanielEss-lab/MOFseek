@@ -102,7 +102,7 @@ def get_num_sbus():
 
 
 def _delete_mof(mof_name, sbu_names):
-    sbu_collection.update({}, {"$pull": {"MOFs": mof_name}})
+    sbu_collection.update_many({}, {"$pull": {"MOFs": mof_name}})
     for sbu_name in sbu_names:
         if len(get_sbu(sbu_name).mofs) == 0:
             sbu_collection.delete_one({"sbu_name": sbu_name})
