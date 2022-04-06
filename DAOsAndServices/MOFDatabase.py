@@ -96,7 +96,7 @@ class MOFDatabase:
 
         self.calculated_info = self.get_or_calculate('calculated_info',
                                                      lambda mof: mof.get_calculated_info_string(), dictionary)
-        self.source_names = dictionary.get("source_names")
+        self.source_names = dictionary.get("source_names", list())
         self.set_from_dictionary_or_mof('symmetry', dictionary)
         self.set_from_dictionary_or_mof('fractional_lengths', dictionary)
         self.set_from_dictionary_or_mof('angles', dictionary)
