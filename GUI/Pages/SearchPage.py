@@ -23,7 +23,7 @@ class SearchPage(tk.Frame):
         if self.molecule_v is not None:
             self.molecule_v.destroy()
         self.molecule_v = MoleculeView.make_view(self, mol)
-        self.molecule_v.pack(side=tk.BOTTOM)
+        self.molecule_v.pack(side=tk.BOTTOM, expand=False)
 
     def refesh_mol_views(self):
         if self.molecule_v is not None:

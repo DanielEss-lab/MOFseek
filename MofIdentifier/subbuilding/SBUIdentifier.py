@@ -14,6 +14,10 @@ class InfiniteBandWithTwoStepFindingException(Exception):
     pass
 
 
+class NoMetalsException(Exception):
+    pass
+
+
 def split(mof, show_duplicates=False, check_to_modify_bonds=False):
     identifier = SBUIdentifier(mof, show_duplicates, check_to_modify_bonds)
     try:
@@ -207,7 +211,7 @@ class SBUIdentifier:
                     self.groups[self.next_group_id] = sbu
                     self.next_group_id += 1
         if len(clusters) == 0:
-            raise Exception(f'Exiting algorithm early because no metal atoms found for mof {self.mof.label}')
+            raise NoMetalsException(f'Exiting algorithm early because no metal atoms found for mof {self.mof.label}')
         temp_clusters = reduce_duplicates(clusters, lambda x, y: x == y)
         if len(clusters) == 1 and not is_infinite_band(clusters[0].atoms):
             pass

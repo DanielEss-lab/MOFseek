@@ -1,5 +1,6 @@
 import unittest
 
+from MofIdentifier.fileIO import XyzReader
 from MofIdentifier.fileIO.CifReader import get_mof
 
 
@@ -141,6 +142,12 @@ class SBUIdentifierTest(unittest.TestCase):
         assert (len(sbu_breakdown.auxiliaries) == 0)
         assert (len(sbu_breakdown.connectors) == 3)
         infinite_connector = [c for c in sbu_breakdown.connectors if len(c.atoms) == 23][0]
+
+    def test_h_connections_in_xyz(self):
+        mof_maxhoj = get_mof('../MofIdentifier/mofsForTests/MAXHOJ01_clean.cif')
+        cif_connector = mof_maxhoj.sbus().connectors[0]
+        xyz_connector = XyzReader.get_molecule('../MofIdentifier/ligands/test_resources/connector_1826.xyz')
+        self.assertEqual(cif_connector, xyz_connector)
 
 
 class BreakLargeClustersTest(unittest.TestCase):

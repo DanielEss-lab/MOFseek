@@ -1,5 +1,6 @@
 import math
 import os
+import traceback
 from io import FileIO, StringIO
 from pathlib import Path
 
@@ -34,6 +35,7 @@ def get_all_mofs_in_directory(mofs_path):
             except Exception as e:
                 print("Error reading file: ", file_name)
                 print(e)
+                print(traceback.format_exc())
     # Return to original directory
     os.chdir(original_path)
     return mofs

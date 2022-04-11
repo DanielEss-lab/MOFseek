@@ -1,6 +1,7 @@
 import os
 import platform
 import time
+import traceback
 from pathlib import Path
 
 from DAOsAndServices import MOFDAO, SBUDAO, DBConnection, LigandDAO, DeleteService
@@ -71,9 +72,9 @@ def add_all_mofs(mofs_path, sourceName):
             except NoMetalException:
                 print(f"No metal found in {file_name}. This may happen "
                       f"if the metal is too far away from its neighbors.")
-            except Exception as ex:
+            except Exception:
                 print("Error reading file: ", file_name)
-                print(ex)
+                print(traceback.format_exc())
     print(i, "mofs uploaded. Finished!")
     # Return to original directory
     os.chdir(original_path)
@@ -159,10 +160,10 @@ if __name__ == '__main__':
     # MOFDatabase(MOFDAO.get_MOF('ZUTBUN_clean'))
     # speed_measure()
 
-    # refresh_active_collections_to_full()
-    # retrieve_all_mofs()
+    refresh_active_collections_to_full()
+    retrieve_all_mofs()
     # set_source_for_all_mofs("2019-11-01-ASR-public_12020/structure_10143")
-    delete_p_55_mof()
+    # delete_p_55_mof()
     # LigandDAO.delete_all_ligands()
     # add_all_ligands(str(Path(r'C:\Users\mdavid4\Desktop\Esslab-P66\MofIdentifier\ligands')))
 

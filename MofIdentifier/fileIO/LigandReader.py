@@ -1,4 +1,5 @@
 import os
+import traceback
 from pathlib import Path
 
 from MofIdentifier.fileIO import XyzReader, SmilesReader
@@ -36,6 +37,7 @@ def get_all_mols_from_directory(filepath):
             except Exception:
                 print("Error reading file: ", file)
                 print(Exception)
+                print(traceback.format_exc())
     # Return to original directory
     os.chdir(original_path)
     return mols

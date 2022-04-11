@@ -3,6 +3,7 @@ import csv
 from DAOsAndServices import SBUDAO, LigandDAO
 from DAOsAndServices.MOFDatabase import MOFDatabase
 from DAOsAndServices.DBConnection import mof_collection
+from MofIdentifier.subbuilding.SBUIdentifier import NoMetalsException
 
 
 def get_MOF(name):
@@ -37,24 +38,27 @@ def get_passing_MOFs(search):
 
 def add_mof(mof, source_name):
     mof_name = _add_mof_to_collection(mof, source_name)
-    for sbu in mof.sbus().clusters:
-        sbu_name = SBUDAO.process_sbu(sbu, mof_name)
-        sbu_freq = sbu.frequency # How many times the SBU appears in that MOF
-        sbu_connectivity = sbu.connections()
-        sbu_info = str(sbu_freq) + ' ' + str(sbu_connectivity) + ' ' + sbu_name
-        mof_collection.update_one({"filename": mof_name}, {"$addToSet": {"sbu_node_info": sbu_info}})
-    for sbu in mof.sbus().connectors:
-        sbu_name = SBUDAO.process_sbu(sbu, mof_name)
-        sbu_freq = sbu.frequency
-        sbu_connectivity = sbu.connections()
-        sbu_info = str(sbu_freq) + ' ' + str(sbu_connectivity) + ' ' + sbu_name
-        mof_collection.update_one({"filename": mof_name}, {"$addToSet": {"sbu_conn_info": sbu_info}})
-    for sbu in mof.sbus().auxiliaries:
-        sbu_name = SBUDAO.process_sbu(sbu, mof_name)
-        sbu_freq = sbu.frequency
-        sbu_connectivity = sbu.connections()
-        sbu_info = str(sbu_freq) + ' ' + str(sbu_connectivity) + ' ' + sbu_name
-        mof_collection.update_one({"filename": mof_name}, {"$addToSet": {"sbu_aux_info": sbu_info}})
+    try:
+        for sbu in mof.sbus().clusters:
+            sbu_name = SBUDAO.process_sbu(sbu, mof_name)
+            sbu_freq = sbu.frequency # How many times the SBU appears in that MOF
+            sbu_connectivity = sbu.connections()
+            sbu_info = str(sbu_freq) + ' ' + str(sbu_connectivity) + ' ' + sbu_name
+            mof_collection.update_one({"filename": mof_name}, {"$addToSet": {"sbu_node_info": sbu_info}})
+        for sbu in mof.sbus().connectors:
+            sbu_name = SBUDAO.process_sbu(sbu, mof_name)
+            sbu_freq = sbu.frequency
+            sbu_connectivity = sbu.connections()
+            sbu_info = str(sbu_freq) + ' ' + str(sbu_connectivity) + ' ' + sbu_name
+            mof_collection.update_one({"filename": mof_name}, {"$addToSet": {"sbu_conn_info": sbu_info}})
+        for sbu in mof.sbus().auxiliaries:
+            sbu_name = SBUDAO.process_sbu(sbu, mof_name)
+            sbu_freq = sbu.frequency
+            sbu_connectivity = sbu.connections()
+            sbu_info = str(sbu_freq) + ' ' + str(sbu_connectivity) + ' ' + sbu_name
+            mof_collection.update_one({"filename": mof_name}, {"$addToSet": {"sbu_aux_info": sbu_info}})
+    except NoMetalsException:
+        pass
     LigandDAO.scan_all_for_mof(mof)
 
 

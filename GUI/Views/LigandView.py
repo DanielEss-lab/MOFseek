@@ -5,6 +5,7 @@ from GUI import os_specific_settings, Settings
 from DAOsAndServices import MOFDAO
 from DAOsAndServices.LigandDatabase import LigandDatabase
 from GUI.SourceCheck import mof_source_is_enabled
+from GUI.Utility.HorizontalScrollFrame import HorizontalScrollFrame
 from MofIdentifier.fileIO import FileOpen
 
 
@@ -12,14 +13,15 @@ def select_for_edit(parent, ligand):
     parent.winfo_toplevel().select_ligand_for_edit(ligand)
 
 
-class View(tk.Frame):
+class View(HorizontalScrollFrame):
     def __init__(self, parent, ligand: LigandDatabase):
         self.parent = parent
-        tk.Frame.__init__(self, self.parent, height=40, width=120, bd=1, relief=tk.SOLID)
         self.mol = ligand
         self.top_page = parent.winfo_toplevel()
+        super().__init__(self.parent, height=40, bd=1, relief=tk.SOLID)
+        self.frame = self.get_frame()
 
-        row1 = tk.Frame(master=self)
+        row1 = tk.Frame(master=self.frame)
         name = tk.Label(row1, text=ligand.name)
         name.pack(side='left')
         open = tk.Label(row1, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
@@ -41,7 +43,7 @@ class View(tk.Frame):
         search.pack(side='right')
         row1.pack(fill=tk.X)
 
-        row2 = tk.Frame(master=self)
+        row2 = tk.Frame(master=self.frame)
         file_first_line = ligand.file_content.partition('\n')[0]
         first_line_label = tk.Label(row2, text=file_first_line)
         first_line_label.pack(side=tk.RIGHT)
@@ -52,7 +54,7 @@ class View(tk.Frame):
         self.generate_mof_row().pack(fill=tk.X)
 
     def generate_mof_row(self):
-        mof_row = tk.Frame(master=self, height=20)
+        mof_row = tk.Frame(master=self.frame, height=10)
         if all(Settings.current_source_states().values()):
             mofs = self.mol.Mofs
         else:

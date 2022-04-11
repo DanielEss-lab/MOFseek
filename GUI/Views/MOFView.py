@@ -4,6 +4,7 @@ import tkinter.font as tkFont
 from GUI import os_specific_settings, Attributes, Settings
 from GUI.Utility import Tooltips
 from DAOsAndServices import SBUDAO, LigandDAO, MOFDatabase
+from GUI.Utility.HorizontalScrollFrame import HorizontalScrollFrame
 from MofIdentifier.fileIO import FileOpen
 
 
@@ -11,27 +12,28 @@ def select_for_edit(parent, mof):
     parent.winfo_toplevel().select_mof_for_edit(mof)
 
 
-class View(tk.Frame):
+class View(HorizontalScrollFrame):
     def __init__(self, parent, mof: MOFDatabase.MOFDatabase):
         self.parent = parent
         self.mof = mof
         self.top_page = parent.winfo_toplevel()
-        tk.Frame.__init__(self, self.parent, height=40, bd=1, relief=tk.SOLID)
+        super().__init__(self.parent, height=40, bd=1, relief=tk.SOLID)
+        self.frame = self.get_frame()
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
 
-        identifier = tk.Frame(master=self)
+        identifier = tk.Frame(master=self.frame)
         name = tk.Label(identifier, text=mof.filename, width=48, anchor=tk.W)
         name.pack(side='left')
         sources = tk.Label(identifier, text=", ".join(mof.source_names), width=48, anchor=tk.W)
         sources.pack(side='right')
         identifier.grid(sticky=tk.W, row=0, column=0)
 
-        self.elements = tk.Label(self, text=mof.atoms_string_with_solvents if Settings.keep_solvent
+        self.elements = tk.Label(self.frame, text=mof.atoms_string_with_solvents if Settings.keep_solvent
                             else mof.atoms_string_without_solvents)
         self.elements.grid(row=0, column=1)
-        row_icon_btns = tk.Frame(master=self)
+        row_icon_btns = tk.Frame(master=self.frame)
         open = tk.Label(row_icon_btns, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR,
                         padx=2, font=("Arial", 16), height=0)
         open.bind('<Button-1>', lambda e: FileOpen.make_and_open(mof.get_mof()))
@@ -55,7 +57,7 @@ class View(tk.Frame):
         self.generate_ligand_row().grid(sticky=tk.EW, columnspan=3)
 
     def generate_sbu_row(self):
-        sbu_row = tk.Frame(master=self, height=20)
+        sbu_row = tk.Frame(master=self.frame, height=20)
         sbu_label = tk.Label(sbu_row, text=f"{len(self.mof.sbu_names)} SBUs:")
         sbu_label.pack(side='left')
         for node in self.mof.sbu_nodes:
@@ -84,7 +86,7 @@ class View(tk.Frame):
         return fun
 
     def generate_ligand_row(self):
-        ligand_row = tk.Frame(master=self, height=20)
+        ligand_row = tk.Frame(master=self.frame, height=20)
         ligand_label = tk.Label(ligand_row, text=f"{len(self.mof.ligand_names)} ligands:")
         ligand_label.pack(side='left')
         for name in self.mof.ligand_names:
@@ -115,12 +117,12 @@ class View(tk.Frame):
     def refresh_elements(self):
         if self.elements is not None:
             self.elements.grid_forget()
-        self.elements = tk.Label(self, text=self.mof.atoms_string_with_solvents if Settings.keep_solvent
+        self.elements = tk.Label(self.frame, text=self.mof.atoms_string_with_solvents if Settings.keep_solvent
                                  else self.mof.atoms_string_without_solvents)
         self.elements.grid(row=0, column=1)
 
     def generate_attribute_row(self):
-        row = tk.Frame(master=self, height=20)
+        row = tk.Frame(master=self.frame, height=20)
         i = 0
         for text, attr in Attributes.attributes.items():
             if Settings.attribute_is_enabled[text]:

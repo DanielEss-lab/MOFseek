@@ -1,3 +1,5 @@
+import itertools
+
 from MofIdentifier.Molecules.Atom import Atom
 from MofIdentifier.bondTools import Distances, Angles
 
@@ -35,7 +37,12 @@ def remove_distant_bonds(atom):
 def enforce_single_hydrogen_bonds(atoms):
     for atom in atoms:
         if atom.type_symbol == 'H' and len(atom.bondedAtoms) > 1:
+            close_atoms = atom.bondedAtoms.copy()
             remove_distant_bonds(atom)
+            # Adding the H to the second molecule might have broken a bond between molecules that should be bonded
+            # now that the H is only bonded to one. Let's check that here:
+            for atom_a, atom_b in itertools.combinations(close_atoms, 2):
+                compare_for_bond(atom_a, atom_b)
 
 
 def compare_for_bond(atom_a, atom_b):
