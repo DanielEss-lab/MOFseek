@@ -4,19 +4,32 @@ from DAOsAndServices import SBUDAO
 from GUI import Settings
 from MofIdentifier.fileIO import SmilesWriter
 import pandas as pd
+import xlsxwriter  # PandasTools.SaveXlsxFromFrame() requires xlsxwriter
 from rdkit import Chem
 from rdkit.Chem import PandasTools
+
+
+def bad_image(data):
+    # Image could not be generated OR SMILES is tiny but molecule is big
+    return data['Mol Image'].isnull() or (
+                len(data['approximate smiles representation'].replace('[', '').replace(']', ''))
+                <= 1 and data['size (number of atoms)'] > 4)
 
 
 def write_lists(name, name_endings, print_lists):
     for name_ending, print_list in zip(name_endings, print_lists):
         with open(f"{name}{name_ending}.csv", "w") as f:
             f.write('\n'.join(f'{tup[0]}, {tup[1]}, {tup[2]}, {tup[3]}' for tup in print_list))
-        data = pd.read_csv("freq_connector.csv")
-        data['Mol Image'] = [Chem.MolFromSmiles(s) for s in data[' smiles representation']]  # this is to generate image using SMILES
-        PandasTools.SaveXlsxFromFrame(data[data['Mol Image'].notnull()], f'{name}{name_ending}_w_images.xlsx',
+        data = pd.DataFrame(print_list[1:], columns=["name", "freq", "size", "smiles"])
+        data['Mol Image'] = [Chem.MolFromSmiles(s) for s in data['smiles']]  # this is to generate image using SMILES
+        PandasTools.SaveXlsxFromFrame(data[(~data['Mol Image'].isnull()) &
+                                           (~((data['size'] > 4) & (data['smiles'].str.startswith('[')) &
+                                              (data['smiles'].str.len() < 4)))],
+                                      f'{name}{name_ending}_w_images.xlsx',
                                       molCol='Mol Image', size=(100, 100))  # this saves the image to Excel sheet
-        data[data['Mol Image'].isnull()].to_csv(f"{name}{name_ending}_w_issues.csv", index=False)  # this saves the problematic ones
+        data[(data['Mol Image'].isnull()) | (((data['size'] > 4) &
+                                              (data['smiles'].str.startswith('[')) & (data['smiles'].str.len() < 4)))].to_csv(
+            f"{name}{name_ending}_w_issues.csv", index=False)  # this saves the problematic ones
 
 
 def get_frequencies():
@@ -43,4 +56,5 @@ def export_sbus():
     try:
         write_lists(os.path.join(Settings.get_download_filepath(), "freq_"), name_endings, print_lists)
     except PermissionError:
-        raise RuntimeError("PermissionError when writing to file; make sure the file isn't open in any application")
+        raise RuntimeError("PermissionError when writing to file; make sure a file by that name isn't open in any "
+                           "application")

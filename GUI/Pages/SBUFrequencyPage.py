@@ -3,11 +3,14 @@ import tkinter as tk
 from DAOsAndServices import SBUFrequencyService
 from GUI.Utility import FrameWithProcess, StyledButton
 
-instruction_text = """Export three CSV files which contain the frequencies, sizes, and SMILES representations of SBUs 
-of MOFs whose sources are currently enabled. The files (one for nodes, one for connectors, and one for auxiliary 
-ligands) are output to your downloads path (see the settings page) as freq_node.csv, freq_connector.csv, and 
-freq_auxiliary.csv. You can change which sources are enabled on the Settings page in order to affect the data 
-output in the CSV files."""
+instruction_text = """Create nine files with information about the SBUs 
+of MOFs whose sources are currently enabled. The files (three for nodes, three for connectors, and three for auxiliary 
+ligands) are output to your downloads path (see the settings page) as freq_{node, connector, or auxiliary}.csv, 
+freq_{node, connector, or auxiliary}_w_images.xlsx, and freq_{node, connector, or auxiliary}_w_issues.csv. Each type of
+SBU has three files. One file contains the frequencies, sizes, and SMILES representations of each unit; one file contains
+that and their images, but only for atoms whose images can be generated from the SMILES; one file contains only those units for which 
+the image could not be generated. You can change which sources are enabled on the 
+Settings page in order to affect the data output in the CSV files."""
 
 
 class Page(FrameWithProcess.Frame):

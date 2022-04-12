@@ -1,6 +1,6 @@
 import unittest
 
-from DAOsAndServices import MOFDAO, DBConnection, simpleMOFDAO
+from DAOsAndServices import MOFDAO, DBConnection, simpleMOFDAO, DeleteService
 from MofIdentifier.fileIO import CifReader
 
 
@@ -12,6 +12,7 @@ class MOFDAOTest(unittest.TestCase):
         retrieved_mof = MOFDAO.get_MOF(mof.label)
         self.assertIsNotNone(retrieved_mof)
         self.assertEqual(1, len(retrieved_mof.sbu_nodes))
+        DeleteService.delete_source("TEST 2019-11-01-ASR-public_12020")
 
     def test_get_and_store_value(self):
         DBConnection.use_test_connections()
@@ -26,6 +27,7 @@ class MOFDAOTest(unittest.TestCase):
         simpleMOFDAO.store_value(retrieved_mof.filename, 'unit_volume', unit_volume)
         retrieved_mof = MOFDAO.get_MOF('smod7-pos-1.cif')
         self.assertEqual(unit_volume, retrieved_mof.unit_volume)
+        DeleteService.delete_source("TEST 2019-11-01-ASR-public_12020")
 
 
 if __name__ == '__main__':

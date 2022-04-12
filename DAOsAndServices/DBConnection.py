@@ -19,7 +19,7 @@ sbu_collection = database["sbu"]
 
 
 def use_test_connections():
-    global mof_collection, ligand_collection, sbu_collection
+    global database, mof_collection, ligand_collection, sbu_collection
     database = cluster["TestDatabase"]
     mof_collection = database["mof"]
     ligand_collection = database["ligand"]
