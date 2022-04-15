@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.font as tkFont
 
+from DAOsAndServices.AtomSBUMapping import atom_sbu_mapping
 from GUI import os_specific_settings, Attributes, Settings
 from GUI.Utility import Tooltips
 from DAOsAndServices import SBUDAO, LigandDAO, MOFDatabase
@@ -63,6 +64,7 @@ class View(HorizontalScrollFrame):
         sbu_row = tk.Frame(master=self.frame, height=20)
         sbu_label = tk.Label(sbu_row, text=f"{len(self.mof.sbu_names)} SBUs:")
         sbu_label.pack(side='left')
+        self.display_sbu_mapping(sbu_row)
         for node in self.mof.sbu_nodes:
             self.display_sbu_name(sbu_row, node, '#0000a0')
         for conn in self.mof.sbu_connectors:
@@ -79,6 +81,15 @@ class View(HorizontalScrollFrame):
         sbu_label.configure(font=f)
         event_function = self.have_page_highlight_sbu(sbu.name)
         sbu_label.bind('<Button-1>', event_function)
+        sbu_label.pack(side='left')
+
+    def display_sbu_mapping(self, parent):
+        text = "(view atom-sbu mapping)"
+        sbu_label = tk.Label(parent, text=text, cursor=os_specific_settings.LINK_CURSOR, padx=3)
+        f = tkFont.Font(sbu_label, sbu_label["font"])
+        f.configure(underline=True)
+        sbu_label.configure(font=f)
+        sbu_label.bind('<Button-1>', lambda _: self.export_and_view_mapping())
         sbu_label.pack(side='left')
 
     def have_page_highlight_sbu(self, clicked_name):
@@ -137,6 +148,9 @@ class View(HorizontalScrollFrame):
                 i += 1
         row.grid(sticky=tk.EW, row=1, columnspan=4)
         return row
+
+    def export_and_view_mapping(self):
+        FileOpen.make_and_see_text(atom_sbu_mapping(self.mof), f"{self.mof.filename}_atom_sbu_mapping.csv")
 
 
 def _attribute_view(parent, name, value, description):

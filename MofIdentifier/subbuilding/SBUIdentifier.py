@@ -174,8 +174,9 @@ class SBUIdentifier:
                 self.next_group_id += 1
         for cluster in clusters:
             self.set_adj_ids(cluster)
-        if self.show_duplicates and self.check_to_modify_bonds:
-            self.check_auxiliaries_for_connectors(auxiliaries, connectors)  # This function can change bonds
+        if self.show_duplicates:
+            if self.check_to_modify_bonds:
+                self.check_auxiliaries_for_connectors(auxiliaries, connectors)  # This function can change bonds
         else:
             clusters = reduce_duplicates(clusters, lambda x, y: x == y)
             connectors = reduce_duplicates(connectors, lambda x, y: x == y)

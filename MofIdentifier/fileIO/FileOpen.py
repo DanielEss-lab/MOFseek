@@ -23,6 +23,13 @@ def make_and_see(molecule):
     see_file(str(Path(os.path.join(path, molecule.label))))
 
 
+def make_and_see_text(text, name):
+    path = str(Path(os.path.join(Settings.get_download_filepath(), name)))
+    with open(path, 'w') as f:
+        f.write(text)
+    see_file(path)
+
+
 def make_file(molecule):
     path = Settings.get_download_filepath()
     if not Settings.keep_solvent and isinstance(molecule, MOF.MOF):
