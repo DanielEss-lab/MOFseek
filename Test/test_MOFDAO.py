@@ -29,6 +29,10 @@ class MOFDAOTest(unittest.TestCase):
         self.assertEqual(unit_volume, retrieved_mof.unit_volume)
         DeleteService.delete_source("TEST 2019-11-01-ASR-public_12020")
 
+    def test_any_mofs_have_source(self):
+        self.assertTrue(MOFDAO.any_mofs_have_source("2019-11-01-ASR-public_12020/structure_10143"))
+        self.assertFalse(MOFDAO.any_mofs_have_source("source name that will almost never be used"))
+
 
 if __name__ == '__main__':
     unittest.main()

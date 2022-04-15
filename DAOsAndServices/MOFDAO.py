@@ -148,3 +148,7 @@ def add_source_to_mof(mof_name, source_name):
 
 if __name__ == "__main__":
     mof_collection.update_one({"filename": "ABAVIJ_clean"}, {"$addToSet": {'source_names': "first one"}})
+
+
+def any_mofs_have_source(source_name):
+    return mof_collection.count_documents({"source_names": source_name}, limit=1) > 0

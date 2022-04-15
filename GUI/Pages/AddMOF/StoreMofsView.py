@@ -35,11 +35,10 @@ class Page(FrameWithProcess.Frame):
         else:
             self.source_name_ent.delete(0, tk.END)
         Settings.add_source_name(source_name)
-        self.parent.winfo_toplevel().update_sources_settings()
         self.add_btn['state'] = "disabled"
         self.parent.empty_selected_mofs_display()
         AddService.add_mofs(mofs, source_name)
-        self.parent.winfo_toplevel().forget_history()
+        self.parent.winfo_toplevel().mofs_added_or_removed()
         self.parent.mofs = []
 
     def set_source_name_suggestions(self):
