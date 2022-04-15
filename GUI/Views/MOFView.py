@@ -22,39 +22,42 @@ class View(HorizontalScrollFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
+        self.grid_columnconfigure(3, weight=1)
 
-        identifier = tk.Frame(master=self.frame)
-        name = tk.Label(identifier, text=mof.filename, width=48, anchor=tk.W)
-        name.pack(side='left')
-        sources = tk.Label(identifier, text=", ".join(mof.source_names), width=48, anchor=tk.W)
-        sources.pack(side='right')
-        identifier.grid(sticky=tk.W, row=0, column=0)
-
+        name = tk.Label(self.frame, text=mof.filename, width=48, anchor=tk.W)
+        name.grid(sticky=tk.W, row=0, column=0)
         self.elements = tk.Label(self.frame, text=mof.atoms_string_with_solvents if Settings.keep_solvent
                             else mof.atoms_string_without_solvents)
         self.elements.grid(row=0, column=1)
         row_icon_btns = tk.Frame(master=self.frame)
-        open = tk.Label(row_icon_btns, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR,
-                        padx=2, font=("Arial", 16), height=0)
-        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(mof.get_mof()))
-        open.pack(side='right')
-        tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
-        see = tk.Label(row_icon_btns, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR,
-                       padx=2, font=("Arial", 16), height=0)
-        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(mof.get_mof()))
-        see.pack(side='right')
-        tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='right')
+
+        tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='left')
         edit = tk.Label(row_icon_btns, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR,
                         padx=2, font=("Arial", 16), height=0)
         edit.bind('<Button-1>', lambda e: select_for_edit(parent, mof))
-        # edit.pack(side='right')
+        edit.pack(side='left')
+
+        tk.Label(row_icon_btns, text="  ", font=("Arial", 16)).pack(side='left')
+        see = tk.Label(row_icon_btns, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR,
+                       padx=2, font=("Arial", 16), height=0)
+        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(mof.get_mof()))
+        see.pack(side='left')
+
+        open = tk.Label(row_icon_btns, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR,
+                        padx=2, font=("Arial", 16), height=0)
+        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(mof.get_mof()))
+        open.pack(side='left')
+
         row_icon_btns.grid(sticky=tk.E, row=0, column=2)
+
+        sources = tk.Label(self.frame, text="Sources: " + ", ".join(mof.source_names), width=48, anchor=tk.W)
+        sources.grid(sticky=tk.W, row=0, column=3)
 
         self.attribute_row = self.generate_attribute_row()
 
-        self.generate_sbu_row().grid(sticky=tk.EW, columnspan=3)
+        self.generate_sbu_row().grid(sticky=tk.EW, columnspan=4)
 
-        self.generate_ligand_row().grid(sticky=tk.EW, columnspan=3)
+        self.generate_ligand_row().grid(sticky=tk.EW, columnspan=4)
 
     def generate_sbu_row(self):
         sbu_row = tk.Frame(master=self.frame, height=20)
@@ -132,7 +135,7 @@ class View(HorizontalScrollFrame):
                 _attribute_view(row, text, val, attr.description).grid(column=i, row=0, sticky=tk.EW)
                 row.grid_columnconfigure(i, weight=1)
                 i += 1
-        row.grid(sticky=tk.EW, row=1, columnspan=3)
+        row.grid(sticky=tk.EW, row=1, columnspan=4)
         return row
 
 

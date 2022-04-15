@@ -57,7 +57,7 @@ class Page(FrameWithProcess.Frame):
 
     def select_sbu(self, sbu):
         self.set_mol_in_view(sbu)
-        self.combobox.set(sbu.sbu_name)
+        self.combobox.set(sbu.name)
 
     def set_mol_in_view(self, mol):
         self.mol = mol

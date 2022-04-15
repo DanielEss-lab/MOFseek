@@ -3,7 +3,6 @@ import tkinter.font as tkFont
 
 from GUI import os_specific_settings, Settings, SourceCheck
 from DAOsAndServices import MOFDAO, SBUDatabase
-from GUI.SourceCheck import mof_source_is_enabled
 from GUI.Utility.HorizontalScrollFrame import HorizontalScrollFrame
 from MofIdentifier.fileIO import FileOpen
 
@@ -23,29 +22,36 @@ class View(HorizontalScrollFrame):
         row1 = tk.Frame(master=self.frame)
         name = tk.Label(row1, text=sbu.name)
         name.pack(side='left')
-        open = tk.Label(row1, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
-        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(sbu.get_sbu()))
-        open.pack(side='right')
-        tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-        see = tk.Label(row1, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
-        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(sbu.get_sbu()))
-        see.pack(side='right')
-        tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='right')
-        edit = tk.Label(row1, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 16), height=0)
-        edit.bind('<Button-1>', lambda e: select_for_edit(parent, sbu))
-        edit.pack(side='right')
+
         search = tk.Label(row1, text="Search", cursor=os_specific_settings.LINK_CURSOR, padx=8)
         f = tkFont.Font(search, search["font"])
         f.configure(underline=True)
         search.configure(font=f)
         search.bind('<Button-1>', lambda e: parent.winfo_toplevel().force_search_sbu(sbu.name))
-        search.pack(side='right')
+        search.pack(side='left')
+
+        tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='left')
+        edit = tk.Label(row1, text=os_specific_settings.EDIT_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2,
+                        font=("Arial", 16), height=0)
+        edit.bind('<Button-1>', lambda e: select_for_edit(parent, sbu))
+        edit.pack(side='left')
+
+        tk.Label(row1, text="  ", font=("Arial", 16)).pack(side='left')
+        see = tk.Label(row1, text=os_specific_settings.SEE_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2,
+                       font=("Arial", 14), height=0)
+        see.bind('<Button-1>', lambda e: FileOpen.make_and_see(sbu.get_sbu()))
+        see.pack(side='left')
+
+        open = tk.Label(row1, text=os_specific_settings.OPEN_ICON, cursor=os_specific_settings.LINK_CURSOR, padx=2, font=("Arial", 14), height=0)
+        open.bind('<Button-1>', lambda e: FileOpen.make_and_open(sbu.get_sbu()))
+        open.pack(side='left')
+
         row1.pack(fill=tk.X)
 
         row2 = tk.Frame(master=self.frame)
         file_first_line = sbu.file_content.partition('\n')[0]
-        first_line_label = tk.Label(row2, text=file_first_line)
-        first_line_label.pack(side=tk.RIGHT)
+        first_line_label = tk.Label(row2, text=f"({file_first_line} atoms total:) ")
+        first_line_label.pack(side=tk.LEFT)
         elements = tk.Label(row2, text=sbu.get_sbu().atoms_string())
         elements.pack(side=tk.LEFT)
         row2.pack(fill=tk.X)

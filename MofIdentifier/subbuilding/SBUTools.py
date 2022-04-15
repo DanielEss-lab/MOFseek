@@ -148,6 +148,7 @@ class changeableSBU(Molecule.Molecule):
                 self.elementsPresent[atom.type_symbol] += 1
             else:
                 self.elementsPresent[atom.type_symbol] = 1
+        self.file_content = XyzWriter.atoms_to_xyz_string(self.atoms, '')
 
     def __str__(self):
         unit = str(self.type)

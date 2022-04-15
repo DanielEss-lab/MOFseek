@@ -149,6 +149,11 @@ class SBUIdentifierTest(unittest.TestCase):
         xyz_connector = XyzReader.get_molecule('../MofIdentifier/ligands/test_resources/connector_1826.xyz')
         self.assertEqual(cif_connector, xyz_connector)
 
+    def test_connector_across_unit_cell(self):
+        mof_amoyor = get_mof('../MofIdentifier/mofsForTests/AMOYOR_clean.cif')
+        for sbu in mof_amoyor:
+            pass
+
 
 class BreakLargeClustersTest(unittest.TestCase):
     def test_breaking_up_large_clusters(self):
