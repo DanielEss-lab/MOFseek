@@ -1,4 +1,4 @@
-# Esslab-P66
+# MOFseek program
 The MOFseek program was developed at Brigham Young University through funding by Phillips 66
 
 David Hawley is the main developer.
