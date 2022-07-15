@@ -8,7 +8,7 @@ USE_ONLINE_SERVER = False
 
 if USE_ONLINE_SERVER:
     cluster = MongoClient(
-        "mongodb+srv://db_admin:EHfbvgmVEJ9g0Mgk@cluster0.r0otj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+        "mongodb+srv:/* insert db link here */retryWrites=true&w=majority",
     )  # tlsCAFile=certifi.where())
 else:
     cluster = MongoClient('mongodb://localhost:27017/')
